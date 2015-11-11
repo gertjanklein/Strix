@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Tests.QuickSort">
+<Super>Strix.Testing.TestCase</Super>
+<TimeCreated>63863,51706.130408</TimeCreated>
+
+<Parameter name="TestClassName">
+<Default>Strix.Tests.Temp.SortTest</Default>
+</Parameter>
+
+<Method name="Setup">
+<Description>
+Code to run before any test in this class is executed.</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Create a persistent class with a property of type String.
+	
+	#dim ClassDef As %Dictionary.ClassDefinition
+	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject", .ClassDef)
+	If 'Status Quit Status
+	Do ##class(Strix.Testing.Support).AddProperty(ClassDef, "Prop1", "%String")
+	Set Status = ##class(Strix.Testing.Support).SaveAndCompile(ClassDef)
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="TearDown">
+<Description>
+Code to run after all tests in this class have been executed.</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="TestBasic">
+<Description>
+Test basic sort</Description>
+<Implementation><![CDATA[
+	Set Count = 2
+	Set List = ##class(%ListOfObjects).%New()
+	For i = 1:1:Count {
+		Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
+		Set Obj.Prop1 = "Value "_$Justify(i, $Length(Count) + 1)
+		Do List.Insert(Obj)
+	}
+	
+	Set Status = ##class(Strix.Lib.QuickSort).SortListOfObjects(List, "Prop1:D")
+	Do ..AssertStatusOk(Status, "Sorting code should not return an error.")
+	Do ..AssertEqual(List.Count(), Count, "List should have the same number of objects")
+	
+	Do ..AssertEqual(List.GetAt(1).Prop1, "Value "_$Justify(Count, $Length(Count) + 1), "Largest value should come first.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestLargeDescending">
+<Description>
+Test descending sort with large number of objects</Description>
+<Implementation><![CDATA[
+	Set Count = 1000
+	Set List = ##class(%ListOfObjects).%New()
+	For i = 1:1:Count {
+		Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
+		Set Obj.Prop1 = "Value "_$Justify(i, $Length(Count) + 1)
+		Do List.Insert(Obj)
+	}
+	
+	Set Status = ##class(Strix.Lib.QuickSort).SortListOfObjects(List, "Prop1:D")
+	Do ..AssertStatusOk(Status, "Sorting code should not return an error.")
+	Do ..AssertEqual(List.Count(), Count, "List should have the same number of objects")
+	
+	Set Sorted = 1
+	For i = 1:1:List.Count() {
+		If i = 1 Set Prev = List.GetAt(i).Prop1 Continue
+		Set Value = List.GetAt(i).Prop1
+		If Prev ] Value Set Prev = Value Continue
+		Set Sorted = 0
+		Break
+		Quit
+	}
+	Do ..AssertEqual(Sorted, 1, "List should be sorted.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestLargeAscending">
+<Description>
+Test ascending sort with large number of objects</Description>
+<Implementation><![CDATA[
+	Set Count = 1000
+	Set List = ##class(%ListOfObjects).%New()
+	For i = Count:-1:1 {
+		Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
+		Set Obj.Prop1 = "Value "_$Justify(i, $Length(Count) + 1)
+		Do List.Insert(Obj)
+	}
+	
+	Set Status = ##class(Strix.Lib.QuickSort).SortListOfObjects(List, "Prop1:A")
+	Do ..AssertStatusOk(Status, "Sorting code should not return an error.")
+	Do ..AssertEqual(List.Count(), Count, "List should have the same number of objects")
+	
+	Set Sorted = 1
+	For i = 1:1:List.Count() {
+		If i = 1 Set Prev = List.GetAt(i).Prop1 Continue
+		Set Value = List.GetAt(i).Prop1
+		If Value ] Prev Set Prev = Value Continue
+		Set Sorted = 0
+		Break
+		Quit
+	}
+	Do ..AssertEqual(Sorted, 1, "List should be sorted.")
+	
+	Quit
+]]></Implementation>
+</Method>
+</Class>
+</Export>

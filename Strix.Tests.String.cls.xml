@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Tests.String">
+<Description>
+Test code for class Strix.Lib.Template</Description>
+<Super>Strix.Testing.TestCase</Super>
+<TimeCreated>63863,82042.977252</TimeCreated>
+
+<Method name="TestBasic">
+<Implementation><![CDATA[
+	Set Template = "{}{}{}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, "a", "b", "c")
+	Do ..AssertEqual(Result, "abc", "Basic sequential replacement.")
+	
+	Set Template = "{3}{2}{1}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, "a", "b", "c")
+	Do ..AssertEqual(Result, "cba", "Basic reversed replacement.")
+	
+	Quit
+
+]]></Implementation>
+</Method>
+</Class>
+</Export>

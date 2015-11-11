@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Resultset.Request">
+<Description>
+Information for requesting a page from a resultset</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63664,36770.178622</TimeCreated>
+
+<Property name="ResultsetId">
+<Description>
+The id of the resultset containing all results.</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PageSize">
+<Description>
+The number of items to return for one page of results</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="PageNumber">
+<Description>
+The (one-based) number of the page to return</Description>
+<Type>%Integer</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Property name="SessionKey">
+<Description>
+The session key (normaly: login id) for this request. Only used server-side.</Description>
+<Type>%String</Type>
+<Parameter name="XMLPROJECTION" value="NONE"/>
+</Property>
+</Class>
+</Export>

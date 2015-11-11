@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Testing.TestCase">
+<Description>
+Superclass for tests to be run by Strix.Test.Runner.</Description>
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63861,43205.846095</TimeCreated>
+
+<Property name="Runner">
+<Description>
+The test runner</Description>
+<Type>Strix.Testing.Runner</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="Setup">
+<Description>
+Code to run before any test in this class is executed.</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="TearDown">
+<Description>
+Code to run after all tests in this class have been executed.</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="AssertTrue">
+<FormalSpec>Result,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Result {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertFalse">
+<FormalSpec>Result,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If 'Result {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ==
+
+]]></Content>
+</UDLText>
+
+<Method name="AssertEqual">
+<FormalSpec>Result,Expected,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Expected = Result {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertNotEqual">
+<FormalSpec>Result,Expected,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Expected '= Result {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ==
+
+]]></Content>
+</UDLText>
+
+<Method name="AssertContains">
+<Description>
+Asserts that string InValue contains string Expected.</Description>
+<FormalSpec>Container,Value,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Container [ Value {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Value, Container, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ==
+
+]]></Content>
+</UDLText>
+
+<Method name="AssertListEqual">
+<FormalSpec>Result:%List,Expected:%List,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If $ListSame(Expected, Result) {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertListNotEqual">
+<FormalSpec>Result:%List,Expected:%List,Description:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If '$ListSame(Expected, Result) {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ==
+
+]]></Content>
+</UDLText>
+
+<Method name="AssertStatusOk">
+<FormalSpec>Status:%Status,Description:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	If Status = $$$OK {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Set StatusText = $System.Status.GetErrorText(Status)
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, $$$OK, StatusText, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertStatusEqual">
+<FormalSpec>Status1:%Status,Status2:%Status,Description:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	If Status1 = Status2 {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	
+	Set Text1 = $System.Status.GetErrorText(Status1)
+	Set Text2 = $System.Status.GetErrorText(Status2)
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Text1, Text2, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertErrorStatus">
+<FormalSpec>Status:%Status,Description:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	Set Codes = $System.Status.GetErrorCodes(Status)
+	If Status '= "", Codes '= "", Codes '= $$$InvalidStatusCodeStruct {
+		;A valid error %Status
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Set Got = $Select(Status = $$$OK: "[ok status]", Status = "": "[empty status]", Codes = $$$InvalidStatusCodeStruct: "[invalid status]", 1: "[unknown]")
+	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Got, Description)
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ==
+
+]]></Content>
+</UDLText>
+
+<Method name="Skipped">
+<FormalSpec>Reason:%String</FormalSpec>
+<Implementation><![CDATA[
+	If '$IsObject(..Runner) Quit
+	Do ..Runner.RecordTestSkipped(Reason)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

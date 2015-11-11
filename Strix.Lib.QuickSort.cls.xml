@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.QuickSort">
+<Description>
+Helper code for sorting objects.</Description>
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63060,54552.935978</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="SortListOfObjects">
+<Description>
+Sorts a list of objects. SortOn specifies the property (or comma-separated list
+of properties) to sort on. Items are removed and reinserted.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>List:%ListOfObjects,SortOn:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set $ZTrap = "Error"
+	
+	;If no or only one item present, there is nothing to sort
+	If List.Count() < 2 Quit $$$OK
+	
+	;Sort and return in original list:
+	Quit ..QuickSort(List, SortOn)
+	
+	
+Error
+	Set $ZTrap = ""
+	Quit $$$LogTrappedError()
+]]></Implementation>
+</Method>
+
+<Method name="QuickSort">
+<Description>
+Sorts (in-place) the list of objects according to the sort specification.
+Implements a variant of quicksort, with the recursion implemented as a
+stack in a temporary global. This prevents FRAMESTACK errors in edge cases.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ListOfObjects:%ListOfObjects,SortSpec:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ItemCount = ListOfObjects.Count()
+	If ItemCount '> 1 Quit $$$OK
+	
+	Set Status = ..ParseSortSpec(SortSpec, .SortSpecList)
+	If 'Status Quit Status
+	
+	; Create stack for semi-recursion
+	Set Stack = $Name(^||Strix.Sort($Increment(^||Strix.Sort)))
+	Kill @Stack
+	
+	; Create an array of [current index]: [sort key]
+	Set ObjectsNode = $Name(@Stack@("o"))
+	For Index = 1:1:ItemCount {
+		Set Object = ListOfObjects.GetAt(Index)
+		Set SortKey = ..GetSortKey(Object, SortSpecList)
+		Set @ObjectsNode@(Index) = SortKey
+	}
+	
+	; Create a [sort index]: [object index] mapping for the actual sorting code
+	Set SortNode = $Name(@Stack@("s"))
+	Set @SortNode = ItemCount
+	For i = 1:1:ItemCount Set @SortNode@(i) = i
+	
+	; Maintain a stack of semi-recursive sort operations
+	Set StackNode = $Name(@Stack@("k"))
+	
+	Set @StackNode@($Increment(@StackNode)) = $ListBuild(SortNode, 1)
+	
+	; ===== ===== ===== =====
+	
+	For  {
+		Set CurrentNode = $Name(@StackNode@(@StackNode))
+		
+		Set CurrentData = @CurrentNode
+		Set SourceNode = $List(CurrentData, 1)
+		Set State = $List(CurrentData, 2)
+		
+		; Nodes for less-than and more-than to be filled or used at this level
+		Set LessPtr = $Name(@CurrentNode@("less"))
+		Set MorePtr = $Name(@CurrentNode@("more"))
+		
+		
+		; ===== State = 1: split input and sort items smaller than pivot
+		
+		If State = 1 {
+			Set @LessPtr = 0
+			Set @MorePtr = 0
+			
+			; Choose the middle item as pivot
+			Set PivotPtr = @SourceNode \ 2
+			Set Pivot = @SourceNode@(PivotPtr)
+			Set PivotKey = @ObjectsNode@(Pivot)
+			
+			; Save pivot used for combining back in later
+			Set @CurrentNode@("pivot") = Pivot
+			
+			
+			; Split into two groups: smaller and larger items
+			For Index = 1:1:@SourceNode {
+				If Index = PivotPtr Continue
+				Set ObjPtr = @SourceNode@(Index)
+				
+				Set Key = @ObjectsNode@(ObjPtr)
+				Set SortsAfter = 0
+				For i = 1:1:$ListLength(SortSpecList) {
+					Set Value = $List(Key, i), PivotValue = $List(PivotKey, i)
+					Set Direction = $List($List(SortSpecList, i), 2)
+					
+					; Equal values: check next sort spec
+					If Value = PivotValue Continue
+					
+					Set SortsAfter = (Value ] PivotValue)
+					If Direction = "D" Set SortsAfter = 'SortsAfter
+					
+					Quit
+				}
+				
+				If SortsAfter {
+					Set @MorePtr@($Increment(@MorePtr)) = ObjPtr
+				} Else {
+					Set @LessPtr@($Increment(@LessPtr)) = ObjPtr
+				}
+			}
+			
+			; Next state at this level: 2 = sort right half
+			Set $List(@StackNode@(@StackNode), 2) = 2
+			
+			If @LessPtr > 1 {
+				; Handle left half, if anything left there
+				Set @StackNode@($Increment(@StackNode)) = $ListBuild(LessPtr, 1)
+			}
+			
+			Continue
+		}
+		
+		; ===== State = 2: sort items larger than pivot
+		
+		If State = 2, @MorePtr > 1 {
+			; Next state at this level: 3 = combine
+			Set $List(@StackNode@(@StackNode), 2) = 3
+			Set @StackNode@($Increment(@StackNode)) = $ListBuild(MorePtr, 1)
+			Continue
+		}
+		
+		
+		; ===== State = 3: combine
+		
+		Set Pivot = @CurrentNode@("pivot")
+		Kill @SourceNode
+		
+		For i = 1:1:@LessPtr Set @SourceNode@($Increment(@SourceNode)) = @LessPtr@(i)
+		Set @SourceNode@($Increment(@SourceNode)) = Pivot
+		For i = 1:1:@MorePtr Set @SourceNode@($Increment(@SourceNode)) = @MorePtr@(i)
+		
+		;Back-up one level in the stack
+		Kill @StackNode@(@StackNode)
+		Set @StackNode = @StackNode - 1
+		
+		;If we've handled all levels we're done
+		If ' @StackNode Quit
+	}
+	
+	; Place objects in temporary array, and clear list
+	For i = 1:1:ListOfObjects.Count() Set o(i) = ListOfObjects.GetAt(i)
+	Do ListOfObjects.Clear()
+	
+	; Re-insert in sorted order
+	Set SortNode = $Name(@Stack@("s"))
+	For i = 1:1:@SortNode {
+		Set Index = @SortNode@(i)
+		Do ListOfObjects.Insert(o(Index))
+	}
+	
+	; Kill temporary stack data
+	Kill @Stack
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetSortKey">
+<Description>
+Returns, for the given object and sort spec, a list of the values to
+sort on.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Object:%RegisteredObject,SortSpec:%List</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ""
+	
+	For i = 1:1:$ListLength(SortSpec) {
+		Set Item = $List(SortSpec, i), Property = $List(Item, 1)
+		
+		; Perhaps this should support method calls as well?
+		Set Value = $ZObjProperty(Object, Property)
+		
+		If Value = "" Set Value = $List(Item, 3)
+		
+		;Sort alphabetically and case-insensitive
+		Set Value = " "_$ZConvert(Value, "l")
+		
+		Set Result = Result_$ListBuild(Value)
+	}
+	
+	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="ParseSortSpec">
+<Description>
+Convert a string sort specification into the internal %List version, filling
+in defaults for missing properties.
+
+The full sort specification is a comma-separated list of sort specification
+items. Items contain the following information (separated by colons):
+- Value: the name of a property to sort on
+- Direction: "A" (ascending, default) or "D" (descending)
+- Default: a default value to use if the property value is empty.
+
+If errors are detected in the specification, an error status is returned.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SortSpec:%String,*SortSpecList:%List</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set SortSpecList = ""
+	
+	Set Status = $$$OK
+	For i = 1:1:$Length(SortSpec, ",") {
+		Set Item = $ZStrip($Piece(SortSpec, ",", i), "<>W")
+		
+		Set Property = $ZStrip($Piece(Item, ":", 1), "<>W")
+		Set Direction = $ZStrip($Piece(Item, ":", 2), "<>W")
+		Set Default = $ZStrip($Piece(Item, ":", 3, $Length(Item, ":")), "<>W")
+		
+		If Property = "" Set Status = $$$BuildErr("Error in spec "_i_": no property.", 1) Quit
+		If Direction = "" {
+			Set Direction = "A"
+		} ElseIf Direction '= "A", Direction '= "D" {
+			Set Status = $$$BuildErr("Error in spec "_i_": invalid direction '"_Direction_"'.", 1) Quit
+		}
+		
+		Set SortSpecList = SortSpecList_$ListBuild($ListBuild(Property, Direction, Default))
+	}
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

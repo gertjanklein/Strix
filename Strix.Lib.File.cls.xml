@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.File">
+<Description>
+Fil(name) related functions</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63850,49428.501291</TimeCreated>
+
+<Method name="UniqueFilename">
+<Description>
+Returns a unique filename based on the name passed in, by appending a sequence
+number if the file already exists.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Filename:%String,*Changed:%Boolean</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Changed = 0
+	Set NewName = Filename
+	Set Index = 0
+	
+	While ##class(%File).Exists(NewName) {
+		Set Changed = 1
+		Set Index = Index + 1
+		
+		;Determine filename part
+		Set Name = ##class(%File).GetFilename(Filename)
+		;Don't use %File:GetDirectory as it expands the directory (with $ZU(12))
+		Set Dir = $Extract(Filename, 1, $Length(Filename) - $Length(Name))
+		
+		If Name [ "." {
+			;Filename has extension: insert sequence before it
+			Set Name = $Piece(Name, ".", 1, $Length(Name, ".") - 1)_"_"_Index_"."_$Piece(Name, ".", $Length(Name, "."))
+		} Else {
+			;No extension: just append sequence
+			Set Name = Name_"_"_Index
+		}
+		
+		;Put directory back
+		Set NewName = Dir_Name
+	}
+	
+	Quit NewName
+]]></Implementation>
+</Method>
+
+<Method name="Append">
+<Description>
+Appends one or more path components to an existing path. Uses the implementation
+in class %File for platform indepndence, but allows more then one path component
+to be appended at once.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Path:%String,SubPaths...:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Result = Path
+	For i = 1:1:$Get(SubPaths) {
+		Set SubPath = $Get(SubPaths(i))
+		If SubPath = "" Continue
+		Set Result = ##class(%File).SubDirectoryName(Result, SubPath)
+	}
+	Quit Result
+]]></Implementation>
+</Method>
+</Class>
+</Export>

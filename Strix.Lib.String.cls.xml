@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.String">
+<Description>
+Various string manipulation methods.</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63850,48932.807424</TimeCreated>
+
+<Method name="Explode">
+<Description>
+Converts a piece-separated string to individual pieces, indexed sequentially.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input:%String,Separator:%String,*Pieces:%String</FormalSpec>
+<Implementation><![CDATA[
+	Kill Pieces
+	Set Pieces = 0
+	
+	If Input = "" Quit
+	
+	For i = 1:1:$Length(Input, Separator) {
+		Set Pieces($Increment(Pieces)) = $Piece(Input, Separator, i)
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="ListFromArray">
+<Description>
+Converts the keys of an array to a %List or (if Separator is not empty)
+a piece-separated string.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Array:%String,Separator:%String=","]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ""
+	Set Key = ""
+	For  {
+		Set Key = $Order(Array(Key))
+		If Key = "" Quit
+		Set Result = Result_$ListBuild(Key)
+	}
+	
+	If Separator '= "" Set Result = $ListToString(Result, Separator)
+	
+	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="TemplateReplace">
+<Description>
+Replaces parameter references in property Text with their values in property Parameters.
+
+Parameter references use braces, as in:
+  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {1}{2}{3}", "a", "b", "c")
+The number between the braces is the parameter number, and is optional if
+this number would equal the parameter reference number. The following example
+therefore gives the same result as the previous one:
+  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {1}{}{3}", "a", "b", "c")
+and this example as well:
+  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {}{}{}", "a", "b", "c")
+
+Values may be passed in as multiple method parameters, e.g.:
+  Set Result  = ##class(Strix.Lib.Template).Replace(Text, "a", "b", "c", ...)
+or as a single $List, e.g.:
+  Set Result  = ##class(Strix.Lib.Template).Replace(Text, $ListBuild("a", "b", "c", ...))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Template:%String,Parameters...:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	;Allow passing in a $list with parameters
+	If $Get(Parameters) = 1, $Get(Parameters(1)) '= "", $ListValid(Parameters(1)) {
+		Set Data = Parameters(1)
+		Set Parameters = $ListLength(Data)
+		For i = 1:1:$ListLength(Data) Set Parameters(i) = $ListGet(Data, i)
+	}
+	
+	Set RefCounter = 0
+	Set Index = ""
+	For  {
+		Set Index = $Find(Template, "{", Index)
+		If Index = 0 Quit
+		
+		;Found a brace -- check if the next char is a brace as well
+		If $Extract(Template, Index) = "{" {
+			;Two braces; the first escapes the second
+			Set $Extract(Template, Index) = ""
+			Continue
+		}
+		
+		;Found the start of a replacement definition; remember this location
+		Set StartIndex = Index - 1
+		
+		;Find terminating brace
+		Set Index = $Find(Template, "}", Index)
+		If Index = 0 Quit
+		
+		;Found terminating brace; remember its position
+		Set EndIndex = Index - 1
+		
+		;Increment auto parameter reference counter
+		Set RefCounter = RefCounter + 1
+		
+		;Determine parameter number
+		If EndIndex - StartIndex = 1 {
+			;Special case: {} means "use the next one"
+			Set ParmNumber = RefCounter
+			
+		} Else {
+			Set ParmNumber = $Extract(Template, StartIndex + 1, EndIndex - 1)
+			If ParmNumber '= +ParmNumber Quit
+			
+		}
+		
+		;Get parameter value
+		Set Value = $Get(Parameters(ParmNumber))
+		Set ValueLen = $Length(Value)
+		
+		;Replace parameter reference with actual value
+		Set $Extract(Template, StartIndex, EndIndex) = Value
+		
+		;Correct index for difference in length between parm reference and its substituted value
+		Set Index = Index - (EndIndex - StartIndex) - ValueLen - 1
+	}
+	
+	Quit Template
+]]></Implementation>
+</Method>
+</Class>
+</Export>

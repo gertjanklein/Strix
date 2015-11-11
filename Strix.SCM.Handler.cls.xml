@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Handler">
+<Description>
+Base handler: determines the appropriate handler to use.</Description>
+<IncludeCode>Strix.SCM</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63864,78375.457203</TimeCreated>
+
+<Method name="Get">
+<Description>
+Returns the appropriate handler for the document specified in
+property InternalName.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InternalName:%String="",*Status:%Status</FormalSpec>
+<ReturnType>Strix.SCM.Handler.Base</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	Quit ##class(Strix.SCM.Handler.File).%New()
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Forwarding Studio callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="GetStatus">
+<FormalSpec><![CDATA[InternalName:%String,&IsInSourceControl:%Boolean,&Editable:%Boolean,&IsCheckedOut:%Boolean,&UserCheckedOut:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(InternalName, .Status)
+	If 'Status Quit Status
+	Quit Handler.GetStatus(InternalName, .IsInSourceControl, .Editable, .IsCheckedOut, .UserCheckedOut)
+]]></Implementation>
+</Method>
+
+<Method name="IsInSourceControl">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(InternalName, .Status)
+	If 'Status Quit Status
+	Quit Handler.IsInSourceControl(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="UserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(InternalName, .Status)
+	If 'Status Quit Status
+	Quit Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<Method name="OnMenuItem">
+<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(InternalName, .Status)
+	If 'Status Quit Status
+	Quit Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
+]]></Implementation>
+</Method>
+
+<Method name="AfterUserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(InternalName, .Status)
+	If 'Status Quit Status
+	Quit Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Other forwarded methods
+
+]]></Content>
+</UDLText>
+
+<Method name="GetMainMenus">
+<FormalSpec>*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(, .Status)
+	If 'Status Quit ""
+	Quit Handler.GetMainMenus(.Status)
+]]></Implementation>
+</Method>
+
+<Method name="GetMenuItems">
+<FormalSpec>*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ..Get(, .Status)
+	If 'Status Quit ""
+	Quit Handler.GetMenuItems(.Status)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="Strix" type="INC"><![CDATA[
+#include %occErrors
+#include %occStatus
+
+
+#; Macros to get current class and method at compile time. From EnsUtil.inc.
+#define CurrentClass $classname()
+#define CurrentMethod ##safeexpression(""""_$get(%methodname)_"""")
+
+
+#; SQL table name for a class. From EnsUtil.inc. Evaluated at runtime,
+#; can't be used for embedded SQL.
+#define ClassSQLTable(%c) ($$$comClassKeyGet(%c,$$$cCLASSsqlschemaname)_"."_$$$comClassKeyGet(%c,$$$cCLASSsqltablename))
+
+#; ===== Status
+
+#; Create a %Status from a message and another %Status. The message is
+#; wrapped in a general error and prefixed to the status.
+#define BuildErr(%msg,%sc) $System.Status.AppendStatus($s(%msg'="":$System.Status.Error($$$GeneralError,%msg),1:1),%sc)
+
+#; Builds a status from a message and status, places it is %objlasterror,
+#; and quits it. This is intended only for use in %OnNew, where the %Status
+#; return value appears to be ignored -- or at least, not placed in
+#; %objlasterror. (2015)
+#define QuitErrOnNew(%msg,%sc) Set %objlasterror = $System.Status.AppendStatus($s(%msg'="":$System.Status.Error($$$GeneralError,%msg),1:1),%sc) Quit %objlasterror
+
+
+#; ===== Logging
+
+#define LogTrappedError(%msg) ##class(Strix.Lib.Log).LogTrappedError($$$CurrentClass_":"_$$$CurrentMethod,%msg)
+#define LogStatusError(%msg,%sc) ##class(Strix.Lib.Log).LogError($$$CurrentClass_":"_$$$CurrentMethod,%msg,%sc)
+#define LogError(%msg) ##class(Strix.Lib.Log).LogError($$$CurrentClass_":"_$$$CurrentMethod,%msg)
+#define LogInfo(%msg) ##class(Strix.Lib.Log).LogInfo($$$CurrentClass_":"_$$$CurrentMethod,%msg)
+#define LogDebug(%msg) ##class(Strix.Lib.Log).LogDebug($$$CurrentClass_":"_$$$CurrentMethod,%msg)
+
+
+#; Write to terminal if there is one
+#def1arg ToTerm(%args) If (($Principal["|TRM|")||($Principal["|TNT|")) { Write %args }
+
+
+
+
+
+]]></Routine>
+</Export>

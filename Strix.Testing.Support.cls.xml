@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Testing.Support">
+<Description>
+Support code for tests.</Description>
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63863,39872.663386</TimeCreated>
+
+<Method name="CreateClass">
+<Description>
+Creates a class with the specified name. If a class
+by that name already exists, it is deleted.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String,Super:%String="%Persistent",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Kill existing extent (if any)
+	Set Status = ..KillExtent(ClassName)
+	If 'Status Quit Status
+	
+	If ##class(%Dictionary.ClassDefinition).%ExistsId(ClassName) {
+		Set Status = ##class(%Dictionary.ClassDefinition).%DeleteId(ClassName)
+		If 'Status Quit $$$BuildErr("Error deleting test class '"_ClassName_"'", Status)
+	}
+	
+	Set ClassDef = ##class(%Dictionary.ClassDefinition).%New()
+	Set ClassDef.Name = ClassName
+	Set ClassDef.Super = Super
+	Set ClassDef.ProcedureBlock = 1
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="AddProperty">
+<Description>
+Adds a new property to an existing class definition.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String</FormalSpec>
+<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
+<Implementation><![CDATA[
+	Set Property = ##class(%Dictionary.PropertyDefinition).%New()
+	Set Property.Name = Name
+	Set Property.Type = Type
+	Do ClassDef.Properties.Insert(Property)
+	Quit Property
+]]></Implementation>
+</Method>
+
+<Method name="SaveAndCompile">
+<Description>
+Saves and compiles the class passed as a class definition.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ClassDef.%Save()
+	If 'Status Quit $$$BuildErr("Error saving class '"_ClassDef.Name_"'", Status)
+	
+	Set Status = $System.OBJ.Compile(ClassDef.Name, "cko0-d")
+	If 'Status Quit $$$BuildErr("Error compiling class '"_ClassDef.Name_"'", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RemoveClass">
+<Description>
+Remove a class and any data it may contain.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ..KillExtent(ClassName)
+	If 'Status Quit Status
+	
+	;Delete the class itself
+	Set Status = $System.OBJ.Delete(ClassName, "-d")
+	If 'Status Quit $$$BuildErr("Error deleting test class '"_ClassName_"'", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="KillExtent">
+<Description>
+Removes the extent for a class if it has one and is compiled.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;If %KillExtent doesn't exist or isn't runnable we're done
+	If '##class(%Dictionary.CompiledMethod).%ExistsId(ClassName_"||%KillExtent") Quit $$$OK
+	
+	Set Status = $ZObjClassMethod(ClassName, "%KillExtent")
+	If 'Status Quit $$$BuildErr("Error clearing extent for class '"_ClassName_"'", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Handler.File">
+<Description>
+Handles sources by synchronizing with a file system directory.
+Checkin/out etc. is expected to be handled by an external program.</Description>
+<Super>Strix.SCM.Handler.Base</Super>
+<TimeCreated>63864,76212.606502</TimeCreated>
+
+<Method name="UserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Assume we won't handle this action
+	Set Action = 0, Target = "", Msg = "", Reload = 0
+	
+	;Studio-generated action (as opposed to menu item)
+	If Type = 1 Quit $$$OK
+	
+	;===== Actions that are always allowed
+	
+	If Name = "Source control,LaunchUserInterface" {
+		Set Action = 3
+		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
+		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
+		Set Namespace = $ZUtil(5)
+		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/SCM.UI.cls"
+		Quit $$$OK
+	}
+	
+	;===== Get project
+	
+	If InternalName = "" Quit $$$OK
+	
+	#dim Project As Strix.SCM.Project
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
+		If Msg '= "" Set Action = 6
+		Quit $$$OK
+	}
+	
+	
+	;== Export item
+	
+	If Name = "Source control,ExportItem", AsItem {
+		Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
+		If 'Status Quit Status
+		Write !,InternalName_" exported to "_Filename_"."
+		Quit $$$OK
+	}
+	
+	
+	;== Export class data
+	
+	If Name = "Source control,ExportData", AsStorage {
+		Set Status = ##class(Strix.SCM.FileIO).ExportClassData(Project, InternalName, .Filename)
+		If 'Status Quit Status
+		Write !,InternalName_" data exported to "_Filename_"."
+		Quit $$$OK
+	}
+	
+	
+	;== Export project
+	
+	If Name = "Source control,ExportProject" {
+		Set Status = ##class(Strix.SCM.FileIO).ExportProject(Project)
+		If 'Status Quit Status
+		Write "Export of project finished successfully.",!
+		Quit $$$OK
+	}
+	
+	
+	;== Reload item
+	
+	If Name = "Source control,LoadItem", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		Set Action = 1 ;Yes/no/cancel
+		Set Target = "Are you sure you want to reload '"_InternalName_"' from file '"_Filename_"'?"
+		Quit $$$OK
+	}
+	
+	
+	;== Reload data
+	
+	If Name = "Source control,LoadData", AsStorage {
+		Set StorageName = InternalName, $$$ItemType(StorageName) = "stg"
+		Set Filename = Project.GetExportFilename(StorageName, , , .Status)
+		If 'Status Quit Status
+		Set Action = 1 ;Yes/no/cancel
+		Set Target = "Are you sure you want to reload data for '"_InternalName_"' from file '"_Filename_"'?"
+		Quit $$$OK
+	}
+	
+	
+	;== Open folder
+	
+	If Name = "Source control,OpenFolder" {
+		Set FullPath = Project.GetExportFilename(InternalName, .Directory, .Filename)
+		Set Action = 3 ; Run exe
+		Set Target = ..GetExplorerCommand(Directory, Filename)
+		Quit $$$OK
+	}
+	
+	;==
+	
+	Set Action = 6 ; Messagebox
+	Set Target = "Unimplemented menu: "_Name
+	
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="AfterUserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Assume we won't handle this action
+	Set Action = 0, Target = "", Msg = "", Reload = 0
+	
+	;Studio-generated action (as opposed to menu item)
+	If Type = 1 Quit $$$OK
+	
+	;User says no
+	If Answer = 0 Quit $$$OK  ; No
+	If Answer = 2 Quit $$$OK  ; Cancel
+	
+	
+	;===== Get project
+	
+	#dim Project As Strix.SCM.Project
+	If InternalName = "" Quit $$$OK
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	
+	
+	;== Reload item
+	
+	If Name = "Source control,LoadItem" {
+		Set Status = ##class(Strix.SCM.FileIO).LoadItem(Project, InternalName, .Filename)
+		If 'Status Quit Status
+		Write !,"Loaded "_InternalName_" from "_Filename_"."
+		Quit $$$OK
+	}
+	
+	;== Reload data
+	
+	If Name = "Source control,LoadData" {
+		Set Status = ##class(Strix.SCM.FileIO).LoadClassData(Project, InternalName, .Filename)
+		If 'Status Quit Status
+		Write !,"Loaded data for "_InternalName_" from "_Filename_"."
+		Quit $$$OK
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnMenuItem">
+<Description>
+Called when a menu item is to be displayed; determines what to display,
+and whether the item should be enabled or not.</Description>
+<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Top level menus always enabled
+	If MenuName '[ "," Set Enabled = 1 Quit $$$OK
+	
+	;Get display name:
+	Set ItemName = $Piece(MenuName, ",", 2)
+	Set DisplayName = $Case(ItemName,
+	  "ExportItem":          "Save "_InternalName_" to disk",
+	  "ExportData":          "Save data for "_InternalName_" to disk",
+	  "LoadItem":            "Reload "_InternalName_" from disk",
+	  "LoadData":            "Reload data for "_InternalName_" from disk",
+	  "ExportProject":       "Save project to disk",
+	  "OpenFolder":          "Open working copy folder",
+	  "LaunchUserInterface": "Open user interface",
+	  : MenuName
+	)
+	
+	;===== Menus that don't depend on a known item
+	
+	If ItemName = "LaunchUserInterface" {
+		;Disable until it actually works
+		Set Enabled = 0
+		Quit $$$OK
+	}
+	
+	;===== Menus that depend on a known item
+	
+	#dim Project As Strix.SCM.Project
+	If ##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage) {
+		;Default: enabled if known as item, otherwise not
+		Set Enabled = $Select(AsItem: 1, 1: 0)
+		
+		;Exceptions:
+		If ItemName = "ReloadItem" {
+			If AsItem {
+				Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+				Set Enabled = ##class(%File).Exists(Filename)
+			} Else {
+				Set Enabled = 0
+			}
+			
+		} ElseIf (ItemName = "ExportData") || (ItemName = "LoadData") {
+			Set Enabled = $Select(AsStorage: 1, 1: -1)
+			
+		}
+		
+	} Else {
+		;Unknown item in project: don't display at all
+		Set Enabled = -1
+		
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="GetMainMenus">
+<Description>
+Returns a list with the top level menus appropriate for this
+handler. Used by the Studio plugin.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	;Call the menus "Source control", insert in both menu bar
+	;and context menu.
+	Set Menus = $lb($lb("Source control", 0), $lb("Source control", 1))
+	Quit Menus
+]]></Implementation>
+</Method>
+
+<Method name="GetMenuItems">
+<Description>
+Returns a list of menu items for the top-level menu. In addition to
+the menu name, the name of the current document and the currently
+selected text are passed in.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	
+	Set Items = ""
+	
+	;Items working on/depending on a specific project
+	If InternalName '= "" {
+		Set Items = Items_$lb(
+		  ;Name, Enabled, Save before execute, is separator
+		  $lb("ExportItem", 1, 1, 0),
+		  $lb("ExportData", 0, 0, 0),
+		  $lb("LoadItem", 1, 1, 0),
+		  $lb("LoadData", 0, 0, 0),
+		  $lb("ExportProject", 1, 1, 0),
+	  	$lb("", 1, 0, 1),
+	  	$lb("OpenFolder", 1, 0, 0)
+		)
+	}
+	
+	;Items always valid
+	Set Items = Items_$lb(
+	  ;Name, Enabled, Save before execute, is separator
+	  $lb("LaunchUserInterface", 0, 0, 0)
+	)
+	
+	Quit Items
+]]></Implementation>
+</Method>
+</Class>
+</Export>

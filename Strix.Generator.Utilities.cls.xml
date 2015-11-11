@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Generator.Utilities">
+<Description>
+Utility code for generator methods in other classes.</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62935,33467.821661</TimeCreated>
+
+<Method name="GetParameter">
+<Description>
+Returns a ParameterDefinition (or CompiledParameter) object with the
+specified name, if present. ClassNameOrObj can be either a class name
+or a class definition object.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String,*ParameterDefinition:%Dictionary.ParameterDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		If 'sc Quit sc
+	}
+	
+	Set Key = ""
+	For  {
+		Set ParameterDefinition = ClassNameOrObj.Parameters.GetNext(.Key)
+		If Key = "" Quit
+		If ParameterDefinition.Name = ParameterName Quit
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetProperty">
+<Description>
+Returns a PropertyDefinition (or CompiledProperty) object with the
+specified name, if present. ClassNameOrObj can be either a class name
+or a class definition object.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,PropertyName:%String,*PropertyDefinition:%Dictionary.PropertyDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set PropertyDefinition = ""
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		If 'sc Quit sc
+	}
+	
+	Set Key = "", Found = 0
+	For  {
+		Set PropertyDefinition = ClassNameOrObj.Properties.GetNext(.Key)
+		If Key = "" Quit
+		If PropertyDefinition.Name = PropertyName Set Found = 1 Quit
+	
+	}
+	If 'Found Quit $$$ERROR($$$GeneralError, "Property "_PropertyName_" not found.")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetIndexDefinition">
+<Description>
+Returns the global the indices for this class reside in.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,IndexName:%String,*IndexDefinition:%Dictionary.IndexDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set IndexDefinition = ""
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		If 'sc Quit sc
+	}
+	
+	Set Key = "", Found = 0
+	For  {
+		Set IndexDefinition = ClassNameOrObj.Indices.GetNext(.Key)
+		If Key = "" Quit
+		
+		If IndexDefinition.Name = IndexName Set Found = 1 Quit
+	}
+	If 'Found Quit $$$ERROR($$$GeneralError, "Property "_IndexName_" not found.")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetIndexLocation">
+<Description>
+Returns the global the indices for this class reside in.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,*IndexLocation:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set IndexLocation = ""
+	
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		If 'sc Quit sc
+	}
+	
+	Set Key = ""
+	For  {
+		Set StorageDef = ClassNameOrObj.Storages.GetNext(.Key)
+		If Key = "" Quit
+		
+		Set IndexLocation = StorageDef.IndexLocation
+		Quit
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetMethod">
+<Description>
+Returns a MethodDefinition (or CompiledMethod) object with the
+specified name, if present. ClassNameOrObj can be either a class name
+or a class definition object.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,MethodName:%String,*MethodDefinition:%Dictionary.MethodDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set MethodDefinition = ""
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		If 'sc Quit sc
+	}
+	
+	Set Key = "", Found = 0
+	For  {
+		Set MethodDefinition = ClassNameOrObj.Methods.GetNext(.Key)
+		If Key = "" Quit
+		If MethodDefinition.Name = MethodName Set Found = 1 Quit
+	
+	}
+	If 'Found Quit $$$ERROR($$$GeneralError, "Method "_MethodName_" not found.")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="IsDatatype">
+<Description>
+Attempts to determine if the given property is a datatype. Non-datatype
+properties have a few extra system-generated methods such as
+[Property]SetObjectId. ClassNameOrObj can be either a class name or a
+class definition object.
+</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,PropertyName:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim PropDef As %Dictionary.PropertyDefinition
+	Set sc = ..GetProperty(ClassNameOrObj, PropertyName, .PropDef)
+	If 'sc Quit 1
+	
+	Set Type = PropDef.Type
+	If Type = "" Quit 1
+	
+	Quit ..ClassIsDataType(Type)
+]]></Implementation>
+</Method>
+
+<Method name="ClassIsDataType">
+<Description>
+Returns a flag indicating whether a class can be determined to be a datatype.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set ClassName = $$$NormalizeClassname(ClassName)
+	&sql(SELECT Super INTO :Super FROM %Dictionary.ClassDefinition WHERE Name = :ClassName)
+	If SQLCODE Quit ""
+	If Super = "" Quit 0
+	
+	If (Super [ "%DataType") || (Super [ "%Library.DataType") Quit 1
+	
+	For i = 1:1:$Length(Super, ",") {
+		Set ClassName = $Piece(Super, ",", i)
+		Set IsDataType = ..ClassIsDataType(ClassName)
+		If IsDataType Quit
+	}
+	
+	Quit IsDataType
+]]></Implementation>
+</Method>
+
+<Method name="GetParameterValue">
+<Description>
+Shortcut method to quickly retrieve a parameter value. Returns an empty string
+in case the parameter doesn't exist or an error occurs.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set sc = ..GetParameter(ClassNameOrObj, ParameterName, .ParameterDefinition)
+	If 'sc Quit ""
+	If '$IsObject(ParameterDefinition) Quit ""
+	Quit ParameterDefinition.Default
+]]></Implementation>
+</Method>
+
+<Method name="SqlName">
+<Description>
+Returns the SQL variant of a classname</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	;Try CompiledClass definition:
+	&sql(SELECT SqlQualifiedNameQ INTO :SqlName FROM %Dictionary.CompiledClass WHERE Name = :ClassName)
+	If SQLCODE = 0 Quit SqlName
+	
+	;Try class definition in case the table name is specified:
+	&sql(SELECT SqlTableName INTO :SqlName FROM %Dictionary.ClassDefinition WHERE Name = :ClassName)
+	If SqlName = "" Set SqlName = $Piece(ClassName, ".", $Length(ClassName, "."))
+	
+	;Attempt quoting of strange names the same way Caché does
+	If SqlName '? 1A1.AN Set SqlName = """"_SqlName_""""
+	
+	If $Length(ClassName, ".") > 1 {
+		Set Schema = $Piece(ClassName, ".", 1, $Length(ClassName, ".") - 1)
+		Set Schema = $Replace(Schema, ".", "_")
+	} Else {
+		Set Schema = "User"
+	}
+	
+	Quit Schema_"."_SqlName
+]]></Implementation>
+</Method>
+</Class>
+</Export>
