@@ -17,7 +17,6 @@ Test code for class Strix.Lib.Template</Description>
 	Do ..AssertEqual(Result, "cba", "Basic reversed replacement.")
 	
 	Quit
-
 ]]></Implementation>
 </Method>
 </Class>
