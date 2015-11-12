@@ -14,7 +14,7 @@
 
 <Property name="Debug">
 <Description>
-Debug flag; when set and an errertion fails, a Break is executed.</Description>
+Debug flag; when set and an assertion fails, a Break is executed.</Description>
 <Type>%Boolean</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
