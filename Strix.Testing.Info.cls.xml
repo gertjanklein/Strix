@@ -105,6 +105,54 @@ Constructor for error info</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="ReportToTerminal">
+<Implementation><![CDATA[
+	If $X Write !
+	
+	If ..Type = "Fail" {
+		Write ..AssertionType_" failed: "_..Description,!
+		
+		If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertListEqual,AssertListNotEqual"), ..AssertionType) {
+			Set Expected = ..Expected
+			Set Result = ..Result
+			ZWrite Expected
+			ZWrite Result
+			
+		} ElseIf $ListFind($ListFromString("AssertStatusOk,AssertErrorStatus,AssertTrue,AssertFalse"), ..AssertionType) {
+			Write "Got: "_..Result,!
+			
+		} ElseIf ..AssertionType = "AssertStatusEqual" {
+			Write "Status1: "_..Expected,!
+			Write "Status2: "_..Result,!
+			
+		}
+		
+		Quit
+	}
+	
+	If ..Type = "Skip" {
+		Write "  Skipped"_$Select(..Description '= "": ": "_..Description, 1: " (no reason given)"),!
+		Quit
+	}
+	
+	If ..Type = "Error" {
+		Write "Error: "_..Description,!
+		If ..Status '= "", '..Status Write $System.Status.GetErrorText(..Status),!
+		Quit
+	}
+	
+	If ..Type = "Log" {
+		Write "Message: "_..Description,!
+		Quit
+	}
+	
+	;Unrecognised, dump object
+	Do $system.OBJ.Dump(##this)
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====

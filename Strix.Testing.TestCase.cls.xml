@@ -55,7 +55,8 @@ Code to run after all tests in this class have been executed.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -73,7 +74,8 @@ Code to run after all tests in this class have been executed.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -98,7 +100,8 @@ Code to run after all tests in this class have been executed.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -116,7 +119,8 @@ Code to run after all tests in this class have been executed.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -143,7 +147,8 @@ Asserts that string InValue contains string Expected.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Value, Container, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Value, Container, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -168,7 +173,8 @@ Asserts that string InValue contains string Expected.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -186,7 +192,8 @@ Asserts that string InValue contains string Expected.</Description>
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Expected, Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -211,7 +218,8 @@ Asserts that string InValue contains string Expected.</Description>
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
 	Set StatusText = $System.Status.GetErrorText(Status)
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, $$$OK, StatusText, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, $$$OK, StatusText, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -231,7 +239,8 @@ Asserts that string InValue contains string Expected.</Description>
 	
 	Set Text1 = $System.Status.GetErrorText(Status1)
 	Set Text2 = $System.Status.GetErrorText(Status2)
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, Text1, Text2, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, Text1, Text2, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>
@@ -251,7 +260,8 @@ Asserts that string InValue contains string Expected.</Description>
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
 	Set Got = $Select(Status = $$$OK: "[ok status]", Status = "": "[empty status]", Codes = $$$InvalidStatusCodeStruct: "[invalid status]", 1: "[unknown]")
-	Do ..Runner.RecordAssertionFailed($$$CurrentMethod, , Got, Description)
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, , Got, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
 ]]></Implementation>

@@ -12,47 +12,79 @@
 ]]></Content>
 </UDLText>
 
+<Property name="Debug">
+<Description>
+Debug flag; when set and an errertion fails, a Break is executed.</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Property name="TestRunStart">
+<Description>
+Date/time the test run started</Description>
 <Type>%TimeStamp</Type>
 <InitialExpression>$ZDateTime($ZUtil(188), 3, 1, 3)</InitialExpression>
 </Property>
 
 <Property name="TestRunDone">
+<Description>
+Date/time the test run finished</Description>
 <Type>%TimeStamp</Type>
 </Property>
 
 <Property name="Results">
+<Description>
+Information on test failures, trapped errors, etc.</Description>
 <Type>Strix.Testing.Info</Type>
 <Collection>list</Collection>
 <Parameter name="STORAGEDEFAULT" value="array"/>
 </Property>
 
 <Property name="TestCases">
+<Description>
+Number of testcases (classes) seen in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <Property name="Tests">
+<Description>
+Number of tests (methods) seen in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <Property name="Asserts">
+<Description>
+Total number of asserts in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <Property name="Failed">
+<Description>
+Number of failed asserts in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <Property name="Skipped">
+<Description>
+Number of skipped tests in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <Property name="Errors">
+<Description>
+Number errors trapped/returned in this test run</Description>
 <Type>%Integer</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
@@ -65,12 +97,18 @@
 </UDLText>
 
 <Property name="CurrentTestClass">
+<Description>
+Bookkeeping: current testcase</Description>
 <Type>%String</Type>
+<Private>1</Private>
 <Transient>1</Transient>
 </Property>
 
 <Property name="CurrentTestMethod">
+<Description>
+Bookkeeping: current testcase method</Description>
 <Type>%String</Type>
+<Private>1</Private>
 <Transient>1</Transient>
 </Property>
 
@@ -85,10 +123,11 @@
 <Description>
 Runs all tests in the specified package.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Package:%String,*Runner:Strix.Testing.Runner</FormalSpec>
+<FormalSpec>Package:%String,Debug:%Boolean=0,*Runner:Strix.Testing.Runner</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Runner = ..%New()
+	Set Runner.Debug = Debug
 	Quit Runner.RunPackage(Package)
 ]]></Implementation>
 </Method>
@@ -117,7 +156,7 @@ Runs all tests in the specified package.</Description>
 	
 	Set ..TestRunDone = $ZDateTime($ZUtil(188), 3, 1, 3)
 	
-	do ..ReportToTerminal()
+	Do ..ReportToTerminal()
 	
 	
 	Quit $$$OK
@@ -240,11 +279,12 @@ Records a successful assertion (mainly for counting)</Description>
 <Description>
 Records a failed assertion.</Description>
 <FormalSpec>AssertionType:%String,Expected:%String="",Result:%String="",Description:%String=""</FormalSpec>
+<ReturnType>Strix.Testing.Info</ReturnType>
 <Implementation><![CDATA[
 	Set ..Failed = ..Failed + 1
 	Set Info = ##class(Strix.Testing.Info).Get("Fail", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
 	Do ..Results.Insert(Info)
-	Quit
+	Quit Info
 ]]></Implementation>
 </Method>
 
@@ -252,11 +292,12 @@ Records a failed assertion.</Description>
 <Description>
 Records a test skip.</Description>
 <FormalSpec>Reason:%String=""</FormalSpec>
+<ReturnType>Strix.Testing.Info</ReturnType>
 <Implementation><![CDATA[
 	Set ..Skipped = ..Skipped + 1
 	Set Info = ##class(Strix.Testing.Info).Get("Skip", ..CurrentTestClass, ..CurrentTestMethod, , , , Reason)
 	Do ..Results.Insert(Info)
-	Quit
+	Quit Info
 ]]></Implementation>
 </Method>
 
@@ -264,11 +305,12 @@ Records a test skip.</Description>
 <Description>
 Records an error (e.g. trapped error, error status, etc.).</Description>
 <FormalSpec>Description:%String="",Status:%Status=""</FormalSpec>
+<ReturnType>Strix.Testing.Info</ReturnType>
 <Implementation><![CDATA[
 	Set ..Errors = ..Errors + 1
 	Set Info = ##class(Strix.Testing.Info).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
 	Do ..Results.Insert(Info)
-	Quit
+	Quit Info
 ]]></Implementation>
 </Method>
 
@@ -299,46 +341,7 @@ Writes test run results to the terminal</Description>
 		Set Info = ..Results.GetAt(i)
 		
 		Write !,"#"_i_" "_Info.ClassName_":"_Info.MethodName_":",!
-		
-		If Info.Type = "Fail" {
-			Write Info.AssertionType_" failed: "_Info.Description,!
-			
-			If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertListEqual,AssertListNotEqual"), Info.AssertionType) {
-				Set Expected = Info.Expected
-				Set Result = Info.Result
-				ZWrite Expected
-				ZWrite Result
-				
-			} ElseIf $ListFind($ListFromString("AssertStatusOk,AssertErrorStatus,AssertTrue,AssertFalse"), Info.AssertionType) {
-				Write "Got: "_Info.Result,!
-				
-			} ElseIf Info.AssertionType = "AssertStatusEqual" {
-				Write "Status1: "_Info.Expected,!
-				Write "Status2: "_Info.Result,!
-				
-			}
-			
-			Continue
-		}
-		
-		If Info.Type = "Skip" {
-			Write "  Skipped"_$Select(Info.Description '= "": ": "_Info.Description, 1: " (no reason given)"),!
-			Continue
-		}
-		
-		If Info.Type = "Error" {
-			Write "Error: "_Info.Description,!
-			If Info.Status '= "", 'Info.Status Write $System.Status.GetErrorText(Info.Status),!
-			Continue
-		}
-		
-		If Info.Type = "Log" {
-			Write "Message: "_Info.Description,!
-			Continue
-		}
-		
-		;Unrecognised, dump object
-		Do $system.OBJ.Dump(Info)
+		Do Info.ReportToTerminal()
 	}
 ]]></Implementation>
 </Method>
