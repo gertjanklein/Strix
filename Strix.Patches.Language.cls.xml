@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Patches.Language">
+<Description>
+Enables/disables a (locale) language. Caché displays messages translated
+in the language of the server it runs on. It does not offer an option to
+permanently disable this. By removing the translation strings for the
+language involved, Caché falls back to English. The removed translation
+strings are backed up and can be restored later.</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63898,40796.659517</TimeCreated>
+
+<Method name="Disable">
+<Description>
+Disables the translation for a given language identifier (e.g. "nl" or "zh-cn").
+The translations are backed up before removing.
+
+Do ##class(Strix.Patches.Language).Disable("nl")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Language:%String</FormalSpec>
+<Implementation><![CDATA[
+	;Check that the language to disable is present:
+	
+	If '$Data(^%qCacheMsg("%Compiler", Language)) {
+		If $Data(^%qCacheMsgOrg("%Compiler", Language)) {
+			Write "Language already disabled.",!
+		} Else {
+			Write "Language not found.",!
+		}
+		Quit 0
+	}
+	
+	;Check that %SYS is writable:
+	
+	Set Writable = 1
+	Try {
+		Set ^%qCacheMsg("%CHUI.YesNo", "xx", "xx") = "xx"
+	} Catch e {
+		Set Writable = 0
+	}
+	If Writable {
+		Kill ^%qCacheMsg("%CHUI.YesNo", "xx", "xx")
+	} Else {
+		Write "Database CACHLIB is readonly; please mount it read-write. Go to System,",!
+		Write "Configuration,Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
+		Quit 0
+	}
+	
+	Set Section = ""
+	For  {
+		Set Section = $Order(^%qCacheMsg(Section))
+		If Section = "" Quit
+		If '$Data(^%qCacheMsg(Section, Language)) Continue
+		
+		Write "Disabling section "_Section,!
+		Merge ^%qCacheMsgOrg(Section, Language) = ^%qCacheMsg(Section, Language)
+		Kill ^%qCacheMsg(Section, Language)
+	}
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="Enable">
+<Description>
+Re-enables the translation for a given language identifier.
+
+Do ##class(Strix.Patches.Language).Enable("nl")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Language:%String</FormalSpec>
+<Implementation><![CDATA[
+	;Check that the language to enable is present:
+	
+	If '$Data(^%qCacheMsgOrg("%Compiler", Language)) {
+		If $Data(^%qCacheMsg("%Compiler", Language)) {
+			Write "Language already enabled.",!
+		} Else {
+			Write "Language not found.",!
+		}
+		Quit 0
+	}
+	
+	;Check that %SYS is writable:
+	
+	Set Writable = 1
+	Try {
+		Set ^%qCacheMsg("%CHUI.YesNo", "xx", "xx") = "xx"
+	} Catch e {
+		Set Writable = 0
+	}
+	If Writable {
+		Kill ^%qCacheMsg("%CHUI.YesNo", "xx", "xx")
+	} Else {
+		Write "Database CACHLIB is readonly; please mount it read-write. Go to System,",!
+		Write "Configuration,Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
+		Quit 0
+	}
+	
+	Set Section = ""
+	For  {
+		Set Section = $Order(^%qCacheMsgOrg(Section))
+		If Section = "" Quit
+		If '$Data(^%qCacheMsgOrg(Section, Language)) Continue
+		
+		Write "Re-enabling section "_Section,!
+		Merge ^%qCacheMsg(Section, Language) = ^%qCacheMsgOrg(Section, Language)
+		Kill ^%qCacheMsgOrg(Section, Language)
+	}
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="ShowLanguages">
+<Description>
+Displays all languages for which Caché has translations in CACHELIB.
+
+Do ##class(Strix.Patches.Language).ShowLanguages()</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	Set Section = ""
+	For  {
+		Set Section = $Order(^%qCacheMsg(Section))
+		If Section = "" Quit
+		
+		Set Language = ""
+		For  {
+			Set Language = $Order(^%qCacheMsg(Section, Language))
+			If Language = "" Quit
+			
+			Set Languages(Language) = ""
+		}
+	}
+	
+	Write "Available languages:",!
+	Set Language = ""
+	For  {
+		Set Language = $Order(Languages(Language))
+		If Language = "" Quit
+		
+		Write Language,!
+	}
+	
+	;=====
+	
+	Kill Languages
+	Set Section = ""
+	For  {
+		Set Section = $Order(^%qCacheMsgOrg(Section))
+		If Section = "" Quit
+		
+		Set Language = ""
+		For  {
+			Set Language = $Order(^%qCacheMsgOrg(Section, Language))
+			If Language = "" Quit
+			
+			Set Languages(Language) = ""
+		}
+	}
+	
+	If $Order(Languages("")) '= "" {
+		Write !,"Disabled languages:",!
+		Set Language = ""
+		For  {
+			Set Language = $Order(Languages(Language))
+			If Language = "" Quit
+			
+			Write Language,!
+		}
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+</Class>
+</Export>
