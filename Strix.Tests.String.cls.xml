@@ -2,7 +2,7 @@
 <Export generator="Cache" version="25">
 <Class name="Strix.Tests.String">
 <Description>
-Test code for class Strix.Lib.Template</Description>
+Test code for class Strix.Lib.String</Description>
 <Super>Strix.Testing.TestCase</Super>
 <TimeCreated>63863,82042.977252</TimeCreated>
 

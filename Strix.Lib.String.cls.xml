@@ -52,18 +52,18 @@ a piece-separated string.</Description>
 Replaces parameter references in property Text with their values in property Parameters.
 
 Parameter references use braces, as in:
-  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {1}{2}{3}", "a", "b", "c")
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{2}{3}", "a", "b", "c")
 The number between the braces is the parameter number, and is optional if
 this number would equal the parameter reference number. The following example
 therefore gives the same result as the previous one:
-  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {1}{}{3}", "a", "b", "c")
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{}{3}", "a", "b", "c")
 and this example as well:
-  Set Result  = ##class(Strix.Lib.Template).Replace("abc = {}{}{}", "a", "b", "c")
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {}{}{}", "a", "b", "c")
 
 Values may be passed in as multiple method parameters, e.g.:
-  Set Result  = ##class(Strix.Lib.Template).Replace(Text, "a", "b", "c", ...)
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, "a", "b", "c", ...)
 or as a single $List, e.g.:
-  Set Result  = ##class(Strix.Lib.Template).Replace(Text, $ListBuild("a", "b", "c", ...))</Description>
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, $ListBuild("a", "b", "c", ...))</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Template:%String,Parameters...:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
