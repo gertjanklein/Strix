@@ -6,6 +6,35 @@ Utility code for generator methods in other classes.</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>62935,33467.821661</TimeCreated>
 
+<Method name="GetInCollection">
+<Description>
+Returns an item, specified by name, from a relationship collection
+(such as CompiledClass:Properties, etc.).</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Collection:%RelationshipObject,Name:%String,Create:%Boolean=0,*Status:%Status</FormalSpec>
+<ReturnType>%RegisteredObject</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	
+	Set Found = 0
+	Set Key = ""
+	For  {
+		Set Object = Collection.GetNext(.Key)
+		If Key = "" Quit
+		If Object.Name = Name Set Found = 1 Quit
+	}
+	If Found Quit Object
+	
+	If 'Create Quit ""
+	
+	Set Object = $ZObjClassMethod(Collection.ElementType, "%New")
+	Set Object.Name = Name
+	Set Status = Collection.Insert(Object)
+	
+	Quit Object
+]]></Implementation>
+</Method>
+
 <Method name="GetParameter">
 <Description>
 Returns a ParameterDefinition (or CompiledParameter) object with the
