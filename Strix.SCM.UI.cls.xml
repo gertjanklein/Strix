@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.UI">
+<Super>%CSP.Page</Super>
+<TimeCreated>63868,66788.751601</TimeCreated>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If %request.Get("img") '= "" Quit ##class(Strix.SCM.UI.Resources).OnPreHTTP()
+	
+	
+	
+	
+	
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If %request.Get("img") '= "" Quit ##class(Strix.SCM.UI.Resources).OnPage()
+	
+	Do ..Header("Source control configuration")
+	
+	Do ..Footer()
+	
+	
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="Header">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Titel:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	Set System = ..GetSystemText()
+	&html<<!DOCTYPE HTML> 
+
+<html>
+<head>
+<title>#(Titel_" &ndash; "_System)#</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+#(##class(Strix.SCM.UI.Resources).CSS())#
+<script type="text/javascript">
+function Ays()
+{
+	return confirm("Are you sure you want to delete this object?");
+}
+</script>
+</head>
+
+<body>
+
+<h1><a href="Strix.SCM.UI.cls"><img id=Logo src="Strix.SCM.UI.Resources.cls?img=start" alt="" title="To startpage"></a>[<span class=sysid>#(System)#</span>] #(Titel)#</h1>
+
+<div id=Contents>
+>	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="Error">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ErrorMsg:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set System = ..GetSystemText()
+	&html<<!DOCTYPE HTML> 
+
+<html>
+<head>
+<title>Fout</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+#(##class(Strix.SCM.UI.Resources).CSS())#
+</head>
+
+<body>
+
+<h1><a href="Strix.SCM.UI.cls"><img id=Logo src="Strix.SCM.UI.Resources.cls?img=start" alt="" title="To startpage"></a>[<span class=sysid>#(System)#</span>] An error has occurred.</h1>
+
+<div id=Contents>
+<div class=ErrorMsg>
+#(ErrorMsg)#
+</div>
+
+</div>
+</body>
+</html>
+>
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Footer">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<</div>
+</body>
+</html>
+>
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="GetSystemText">
+<Description>
+Returns a system identifier consisting of system name, instance name, namespace.</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set System = $ZUtil(86)
+	If System["*" Set System = $Piece(System, "*", 2)
+	Set System = ##class(%Function).HostName()_":"_System_":"_$ZUtil(5)
+	Quit System
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -24,7 +24,7 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
 		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
 		Set Namespace = $ZUtil(5)
-		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/SCM.UI.cls"
+		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/Strix.SCM.UI.cls"
 		Quit $$$OK
 	}
 	
@@ -182,7 +182,7 @@ and whether the item should be enabled or not.</Description>
 	
 	If ItemName = "LaunchUserInterface" {
 		;Disable until it actually works
-		Set Enabled = 0
+		Set Enabled = 1
 		Quit $$$OK
 	}
 	
@@ -270,7 +270,7 @@ selected text are passed in.</Description>
 	;Items always valid
 	Set Items = Items_$lb(
 	  ;Name, Enabled, Save before execute, is separator
-	  $lb("LaunchUserInterface", 0, 0, 0)
+	  $lb("LaunchUserInterface", 1, 0, 0)
 	)
 	
 	Quit Items
