@@ -118,24 +118,17 @@ Saves the created/updated project.</Description>
 <FormalSpec>FileName:%String,*Project:Strix.SCM.Project</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set Reader = ##class(%XML.Reader).%New()
-	Set Status = Reader.OpenFile(FileName)
-	If 'Status Quit $$$BuildErr("Error opening project configuration file '"_FileName_"':", Status)
+	Set sc = ..LoadProjectFileData(FileName, .ProjectFromFile)
+	If 'sc Quit sc
 	
-	Do Reader.CorrelateRoot(..%ClassName(1))
-	If 'Reader.Next(.FromFile, .Status) {
-		If Status Quit $$$BuildErr("No configuration data found in '"_FileName_"'.", 1)
-		Quit $$$BuildErr("Error correlating data in '"_FileName_"' to the Project class.", Status)
-	}
-	
-	Set Existing = ..%ExistsId(FromFile.GUID)
+	Set Existing = ..%ExistsId(ProjectFromFile.GUID)
 	If Existing {
 		;Update properties of exiting object
-		Set Project = ..%OpenId(FromFile.GUID, , .Status)
-		If 'Status Quit $$$BuildErr("Error opening existing project '"_FromFile.GUID_"'", Status)
-		Do Project.CopyFrom(FromFile)
+		Set Project = ..%OpenId(ProjectFromFile.GUID, , .Status)
+		If 'Status Quit $$$BuildErr("Error opening existing project '{}'", Status, ProjectFromFile.GUID)
+		Do Project.CopyFrom(ProjectFromFile)
 	} Else {
-		Set Project = FromFile
+		Set Project = ProjectFromFile
 	}
 	
 	;Save last filename
@@ -143,6 +136,27 @@ Saves the created/updated project.</Description>
 	
 	Set Status = Project.%Save()
 	If 'Status Quit $$$BuildErr("Error "_$Select(Existing: "updating", 1: "creating")_" project object", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadProjectFileData">
+<Description>
+Loads data from a project file, without altering anything.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,*Project:Strix.SCM.Project</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Reader = ##class(%XML.Reader).%New()
+	Set Status = Reader.OpenFile(FileName)
+	If 'Status Quit $$$BuildErr("Error opening project configuration file '{}':", Status, FileName)
+	
+	Do Reader.CorrelateRoot(..%ClassName(1))
+	If 'Reader.Next(.Project, .Status) {
+		If Status Quit $$$BuildErr("No configuration data found in '{}'.",, FileName)
+		Quit $$$BuildErr("Error correlating data in '{}' to the Project class.", Status, FileName)
+	}
 	
 	Quit $$$OK
 ]]></Implementation>
