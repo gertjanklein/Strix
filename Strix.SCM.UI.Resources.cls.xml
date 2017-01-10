@@ -15,7 +15,7 @@ html, body {
   background-color: #f8f8f8;
 }
 body, input {
-  font: normal 13px Arial, sans-serif;
+  font: normal 14px Arial, sans-serif;
 }
 pre {
 	background-color: white;
@@ -146,8 +146,8 @@ table {
 /* ========== */
 .Explain {
 	margin: 0.5em 0 0.2em 0;
-	color: #060;
-	font-size: 95%;
+	color: #006;
+	font-size: 100%;
 	max-width: 50em;
 }
 ul.Explain {
@@ -167,7 +167,7 @@ div.Summary {
   margin: 1em 0;
   padding: 5px 5px 5px 25px;
   border: 3px double green;
-  background: #ffe url("Strix.SCM.UIResources.cls?Image=ok") no-repeat scroll 3px 5px;
+  background: #ffe url("Strix.SCM.UI.Resources.cls?img=ok") no-repeat scroll 3px 5px;
   color: black;
   font-weight: normal;
 }
@@ -215,7 +215,7 @@ div.Summary {
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Data = ..ImageData(%request.Get("img"))
-	If Data = "" Quit "Not found."
+	If Data = "" Set Data = "Not found."
 	Write Data
 	Quit $$$OK
 ]]></Implementation>
