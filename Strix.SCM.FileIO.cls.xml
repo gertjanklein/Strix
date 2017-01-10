@@ -93,13 +93,13 @@ Loads data for a class from disk</Description>
 <Description>
 Exports an entire project to disk</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project</FormalSpec>
+<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Write "Determining project members: "
+	If 'Quiet Write "Determining project members: "
 	Set Status = Project.GetAllItems(.Items)
 	If 'Status Quit $$$BuildErr("Error determining project members", Status)
-	Write "ok",!
+	If 'Quiet Write "ok",!
 	
 	Set Item = ""
 	For  {
@@ -110,10 +110,10 @@ Exports an entire project to disk</Description>
 		If 'Status Quit
 		
 		If Members = "" Set Members = Item
-		Write "Exporting "_Members_" to "_Filename_": "
+		If 'Quiet Write "Exporting "_Members_" to "_Filename_": "
 		Set Status = $System.OBJ.Export(Members, Filename, "-d/diffexport")
 		If 'Status Set Status = $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status) Quit
-		Write "ok",!
+		If 'Quiet Write "ok",!
 	}
 	If 'Status Quit Status
 	
