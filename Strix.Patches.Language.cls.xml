@@ -42,7 +42,7 @@ Do ##class(Strix.Patches.Language).Disable("nl")</Description>
 		Kill ^%qCacheMsg("%CHUI.YesNo", "xx", "xx")
 	} Else {
 		Write "Database CACHLIB is readonly; please mount it read-write. Go to System,",!
-		Write "Configuration,Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
+		Write "Configuration, Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
 		Quit 0
 	}
 	
