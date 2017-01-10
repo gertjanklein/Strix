@@ -427,6 +427,40 @@ Returns a list of ids of projects owning this item.</Description>
 ]]></Content>
 </UDLText>
 
+<Method name="GetAllProjects">
+<Description>
+Returns all projects in this namespace.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*Projects:%ListOfObjects=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If Projects = "" {
+		Set Projects = ##class(%ListOfObjects).%New()
+	} Else {
+		Do Projects.Clear()
+	}
+	
+	Set rs = ##class(%ResultSet).%New(..%ClassName(1)_":Projects")
+	If '$IsObject(rs) Quit $$$BuildErr("Error creating Projects query", $Get(%objlasterror))
+	Set sc = rs.Execute()
+	If 'sc Quit $$$BuildErr("Error executing Projects query", sc)
+	
+	While rs.Next() {
+		Set Project = rs.GetObject()
+		Do Projects.Insert(Project)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Query name="Projects">
 <Description>
 Returns all known projects</Description>
