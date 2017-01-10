@@ -234,13 +234,18 @@ Returns the basic storage path for files managed by this project</Description>
 <Implementation><![CDATA[
 	Set Status = $$$OK
 	
-	Set Config = ##class(Strix.SCM.Config).Get()
-	Set BasePath = ##class(%File).NormalizeDirectory(Config.BasePath)
-	
 	;Get configured path (may be empty)
 	Set ProjectPath = ..ProjectPath
 	;If it appears a template, substitute namespace and current system
 	If ProjectPath [ "{" Set ProjectPath = ##class(Strix.Lib.String).TemplateReplace(ProjectPath, $ZUtil(5), $ZUtil(110))
+	
+	;If this is an absolute path we're done
+	If ##class(Strix.Lib.File).IsPathAbsolute(ProjectPath) Quit ProjectPath
+	
+	;Get base path for relative path
+	Set Config = ##class(Strix.SCM.Config).Get()
+	Set BasePath = ##class(%File).NormalizeDirectory(Config.BasePath)
+	
 	;Create full path
 	Set ProjectPath = ##class(%File).SubDirectoryName(BasePath, ProjectPath)
 	;...and normalize again
