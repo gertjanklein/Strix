@@ -10,11 +10,7 @@
 Builds a %Status from the combined input. Message is converted to
 a GeneralError %Status; if Status is passed-in, it is appended to
 it. Intended usage is to prefix extra information to an error status
-returned from a system call, through the $$$BuildStatus macro.
-
-Supports minimal argument replacement for Message. Arguments can 
-be passed after the Status parameter; replacement is done with the
-TemplateReplace method from class Strix.Lib.String.</Description>
+returned from a system call, through the $$$BuildStatus macro.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Message:%String,Status:%Status="",Args...:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
