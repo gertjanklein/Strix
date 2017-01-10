@@ -61,5 +61,36 @@ to be appended at once.</Description>
 	Quit Result
 ]]></Implementation>
 </Method>
+
+<Method name="IsPathAbsolute">
+<Description>
+Returns a boolean indicating whether a path is absolute (true) or
+relative (false). If AllowFromRoot is true, a path like "\dir\sub"
+(i.e., without a drive) is considered absolute; by default it is not.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Path:%String,AllowFromRoot:%Boolean=0</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+#if $$$isWINDOWS
+	;Windows allows forwards slashes as paths separators in system calls
+	Set Path = $Replace(Path, "/", "\")
+	;Rooted from drive:
+	If $Extract(Path, 2, 3) = ":\" Quit 1
+	;Network or extended path syntax
+	If $Extract(Path, 1, 2) = "\\" Quit 1
+	;Path from root; still depends on current drive
+	If $Extract(Path) = "\" Quit ''AllowFromRoot
+	
+#elseif $$$isUNIX
+	If $Extract(Path) = "/" Quit 1
+	
+#else
+	SET $ECODE=",Uunsupported operating system,"
+	
+#endif
+	
+	Quit 0
+]]></Implementation>
+</Method>
 </Class>
 </Export>
