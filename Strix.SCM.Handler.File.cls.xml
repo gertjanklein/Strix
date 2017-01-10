@@ -34,7 +34,7 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 	
 	#dim Project As Strix.SCM.Project
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
-		If Msg '= "" Set Action = 6
+		If Msg '= "" Set Action = 6 ; MesssageBox
 		Quit $$$OK
 	}
 	
@@ -62,9 +62,8 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 	;== Export project
 	
 	If Name = "Source control,ExportProject" {
-		Set Status = ##class(Strix.SCM.FileIO).ExportProject(Project)
-		If 'Status Quit Status
-		Write "Export of project finished successfully.",!
+		Set Action = 1 ;Yes/no/cancel
+		Set Target = "Are you sure you want to export the entire project '"_Project.Name_"'?"
 		Quit $$$OK
 	}
 	
@@ -131,6 +130,16 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 	#dim Project As Strix.SCM.Project
 	If InternalName = "" Quit $$$OK
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	
+	
+	;== Export project
+	
+	If Name = "Source control,ExportProject" {
+		Set Status = ##class(Strix.SCM.FileIO).ExportProject(Project)
+		If 'Status Quit Status
+		Write "Export of project finished successfully.",!
+		Quit $$$OK
+	}
 	
 	
 	;== Reload item
