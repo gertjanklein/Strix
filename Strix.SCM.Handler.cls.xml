@@ -15,8 +15,36 @@ property InternalName.</Description>
 <FormalSpec>InternalName:%String="",*Status:%Status</FormalSpec>
 <ReturnType>Strix.SCM.Handler.Base</ReturnType>
 <Implementation><![CDATA[
-	Set Status = $$$OK
-	Quit ##class(Strix.SCM.Handler.Subversion).%New()
+	;Determine which project(s), if any, own this item
+	Set ProjectIds = ##class(Strix.SCM.Project).ProjectsOwningItem(InternalName, .Status)
+	If 'Status {
+		Set Status = $$$BuildErr("Error determining projects owning '"_InternalName_"':", Status)
+		Quit ##class(Strix.SCM.Handler.Base).%New()
+	}
+	;We need exactly one project
+	If $ListLength(ProjectIds) '= 1 Quit ##class(Strix.SCM.Handler.Base).%New()
+	
+	;Open project
+	Set ProjectId = $List(ProjectIds)
+	Set Project = ##class(Strix.SCM.Project).%OpenId(ProjectId, , .Status)
+	If 'Status {
+		Set Status = $$$BuildErr("Error opening project '"_ProjectId_"' for '"_InternalName_"':", Status)
+		Quit ##class(Strix.SCM.Handler.Base).%New()
+	}
+	
+	;Determine handler class
+	Set HandlerClass = Project.Handler
+	If HandlerClass = "" Quit ##class(Strix.SCM.Handler.Base).%New()
+	
+	;Create instance
+	Try {
+		Set Handler = $ZObjClassMethod(HandlerClass, "%New")
+	} Catch e {
+		Set Status = $$$BuildErr("Error opening handler class '"_HandlerClass_"' instance:", e.AsStatus())
+		Set Handler = ##class(Strix.SCM.Handler.Base).%New()
+	}
+	
+	Quit Handler
 ]]></Implementation>
 </Method>
 
