@@ -4,6 +4,12 @@
 <Super>Strix.SCM.Handler.File</Super>
 <TimeCreated>64301,43556.823379</TimeCreated>
 
+<Property name="SvnPath">
+<Description>
+Full path and filename of the SVN executable.</Description>
+<Type>%String</Type>
+</Property>
+
 <Method name="UserAction">
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -32,36 +38,28 @@
 	
 	;== Show revisions
 	
-	;== Show revisions
-	
 	If Name = "Source control,ShowRevisions", AsItem {
 		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
 		If 'Status Quit Status
 		
+		Set Output = ..GetCommandOutput("log """_Filename_"""", , .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		
-		Set Executable = "C:\Program Files\TortoiseSVN\bin\svn.exe"
-		Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
-		Set Command = Executable_" log """_Filename_""""
-		
-		
-		w !,Command,!
-		
-		Set Output = ..GetCommandOutput(Command)
+		Write !,"Revision history for "_InternalName_":",!
 		For i = 1:1:Output.Count() {
 			Set Line = Output.GetAt(i)
 			
-			If Line ?1."-" Write ! Continue
+			If Line ?1."-" Continue
 			If Line = "" Continue
+			
+			;Indent comment line(s)
+			If Line '? 1"r"1.N1.E Write "  "
 			
 			Write Line,!
 		}
 		
 		Quit $$$OK
 	}
-	
-	
-	
-	
 	
 	;===== Fallback to File handler
 	
@@ -85,9 +83,9 @@
 	
 	;===== Get project
 	
-	#dim Project As Strix.SCM.Project
-	If InternalName = "" Quit $$$OK
-	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	;#dim Project As Strix.SCM.Project
+	;If InternalName = "" Quit $$$OK
+	;If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
 	
 	
 	;===== Fallback to File handler
@@ -103,17 +101,14 @@ and whether the item should be enabled or not.</Description>
 <FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
-	  "ShowRevisions":       "Show revisions for "_InternalName_"",
+	  "ShowRevisions": "Show revisions for "_InternalName_"",
 	  : ""
 	)
 	
 	;If we didn't handle this item, fall back to super
-	If Name = "" {
-		Quit ##super(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
-	}
+	If Name = "" Quit ##super(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
 	Set DisplayName = Name
 	
 	#dim Project As Strix.SCM.Project
@@ -139,10 +134,15 @@ and whether the item should be enabled or not.</Description>
 <FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
+	;Get items for file handler
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
-	Set Items = Items_$lb($lb("ShowRevisions", 1, 1, 0))
+	;Append subversion-specific items
+	Set Items = Items_$lb(
+	  $lb("", 1, 0, 1),
+	  $lb("ShowRevisions", 1, 1, 0)
+	)
 	
 	Quit Items
 ]]></Implementation>
@@ -156,27 +156,45 @@ and whether the item should be enabled or not.</Description>
 </UDLText>
 
 <Method name="GetCommandOutput">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Command:%String,Split:%Boolean=1</FormalSpec>
+<Description>
+Returns the output of an svn command (to be passed in without
+specifying the executable path). If Split is true, returns it
+as a list of lines, already stripped. If an error occurs, the
+output parameter ErrorMsg will contain information. A timeout
+may occur on the Read if Cache does not have permission to
+read the repository.</Description>
+<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg</FormalSpec>
 <ReturnType>%ListOfObjects</ReturnType>
 <Implementation><![CDATA[
 	Set $ZTrap = "Error"
 	
-	
-	
-	
-	
-	; Get data from command
 	Set IO = $IO
-	Open Command:"QRU":15
-	Use Command
-	Read Output
+	Set ErrorMsg = ""
+	
+	; Prefix command with normalized path to svn executable
+	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(..SvnPath)
+	Set Command = Executable_" "_Command
+	
+	; Use a so-called command pipe to avoid the maximum length of 256 for
+	; standard pipe commands.
+	Set Pipe = "|CPIPE|"_$Job
+	
+	; Open it
+	Open Pipe:(Command:"QRU"):5
+	If '$Test Set ErrorMsg = "Error: timeout occurred opening pipe to "_Command Quit ""
+	
+	; Get the svn data
+	Use Pipe
+	Read Output:5
+	Set Timedout = '$Test
 	Use IO
-	Close Command
+	Close Pipe
+	If Timedout Set ErrorMsg = "Error: timeout occurred reading pipe "_Command Quit ""
 	
 	; If we're not to split in lines we're done
 	If 'Split Quit Output
 	
+	; Split and strip
 	Set Result = ##class(%ListOfDataTypes).%New()
 	For i = 1:1:$Length(Output, $Char(10)) {
 		Set Line = $Piece(Output, $Char(10), i)
@@ -189,7 +207,26 @@ and whether the item should be enabled or not.</Description>
 Error
 	Set $ZTrap = ""
 	Use IO
-	Quit $Get(Output)
+	Set ErrorMsg = "Error trapped reading pipe: "_$ZError
+	Quit ""
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="%OnNew">
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	; ToDo: Get data from configuration
+	Set ..SvnPath = "C:\Program Files\TortoiseSVN\bin\svn.exe"
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>
