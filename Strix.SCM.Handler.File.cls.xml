@@ -190,7 +190,6 @@ and whether the item should be enabled or not.</Description>
 	;===== Menus that don't depend on a known item
 	
 	If ItemName = "LaunchUserInterface" {
-		;Disable until it actually works
 		Set Enabled = 1
 		Quit $$$OK
 	}

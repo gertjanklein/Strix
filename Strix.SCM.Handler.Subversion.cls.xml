@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Handler.Subversion">
+<Super>Strix.SCM.Handler.File</Super>
+<TimeCreated>64301,43556.823379</TimeCreated>
+
+<Method name="UserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Assume we won't handle this action
+	Set Action = 0, Target = "", Msg = "", Reload = 0
+	
+	;Studio-generated action (as opposed to menu item)
+	If Type = 1 Quit $$$OK
+	
+	;===== Actions that are always allowed
+	
+	; (none here)
+	
+	
+	;===== Get project
+	
+	If InternalName = "" Quit $$$OK
+	
+	#dim Project As Strix.SCM.Project
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
+		If Msg '= "" Set Action = 6 ; MesssageBox
+		Quit $$$OK
+	}
+	
+	
+	;== Show revisions
+	
+	;== Show revisions
+	
+	If Name = "Source control,ShowRevisions", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		
+		
+		Set Executable = "C:\Program Files\TortoiseSVN\bin\svn.exe"
+		Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
+		Set Command = Executable_" log """_Filename_""""
+		
+		
+		w !,Command,!
+		
+		Set Output = ..GetCommandOutput(Command)
+		For i = 1:1:Output.Count() {
+			Set Line = Output.GetAt(i)
+			
+			If Line ?1."-" Write ! Continue
+			If Line = "" Continue
+			
+			Write Line,!
+		}
+		
+		Quit $$$OK
+	}
+	
+	
+	
+	
+	
+	;===== Fallback to File handler
+	
+	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<Method name="AfterUserAction">
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Assume we won't handle this action
+	Set Action = 0, Target = "", Msg = "", Reload = 0
+	
+	;Studio-generated action (as opposed to menu item)
+	If Type = 1 Quit $$$OK
+	
+	;User says no
+	If Answer = 0 Quit $$$OK  ; No
+	If Answer = 2 Quit $$$OK  ; Cancel
+	
+	;===== Get project
+	
+	#dim Project As Strix.SCM.Project
+	If InternalName = "" Quit $$$OK
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	
+	
+	;===== Fallback to File handler
+	
+	Quit ##super(Type, Name, InternalName, Answer, .Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<Method name="OnMenuItem">
+<Description>
+Called when a menu item is to be displayed; determines what to display,
+and whether the item should be enabled or not.</Description>
+<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	Set ItemName = $Piece(MenuName, ",", 2)
+	Set Name = $Case(ItemName,
+	  "ShowRevisions":       "Show revisions for "_InternalName_"",
+	  : ""
+	)
+	
+	;If we didn't handle this item, fall back to super
+	If Name = "" {
+		Quit ##super(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
+	}
+	Set DisplayName = Name
+	
+	#dim Project As Strix.SCM.Project
+	If ##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage) {
+		;Enabled if known as item, otherwise not
+		Set Enabled = $Select(AsItem: 1, 1: 0)
+		
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="GetMenuItems">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
+	If 'Status Quit Items
+	
+	Set Items = Items_$lb($lb("ShowRevisions", 1, 1, 0))
+	
+	Quit Items
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="GetCommandOutput">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Command:%String,Split:%Boolean=1</FormalSpec>
+<ReturnType>%ListOfObjects</ReturnType>
+<Implementation><![CDATA[
+	Set $ZTrap = "Error"
+	
+	
+	
+	
+	
+	; Get data from command
+	Set IO = $IO
+	Open Command:"QRU":15
+	Use Command
+	Read Output
+	Use IO
+	Close Command
+	
+	; If we're not to split in lines we're done
+	If 'Split Quit Output
+	
+	Set Result = ##class(%ListOfDataTypes).%New()
+	For i = 1:1:$Length(Output, $Char(10)) {
+		Set Line = $Piece(Output, $Char(10), i)
+		Set Line = $ZStrip(Line, "<>WC")
+		Do Result.Insert(Line)
+	}
+	
+	Quit Result
+	
+Error
+	Set $ZTrap = ""
+	Use IO
+	Quit $Get(Output)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

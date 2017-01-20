@@ -16,7 +16,7 @@ property InternalName.</Description>
 <ReturnType>Strix.SCM.Handler.Base</ReturnType>
 <Implementation><![CDATA[
 	Set Status = $$$OK
-	Quit ##class(Strix.SCM.Handler.File).%New()
+	Quit ##class(Strix.SCM.Handler.Subversion).%New()
 ]]></Implementation>
 </Method>
 
