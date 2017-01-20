@@ -110,5 +110,36 @@ property InternalName.</Description>
 	Quit Handler.GetMenuItems(.Status)
 ]]></Implementation>
 </Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="GetHandlers">
+<Description>
+Returns a list of classnames of all available handlers.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*Handlers:%ListOfDataTypes</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Handlers = ##class(%ListOfDataTypes).%New()
+	
+	Set stm = ##class(%SQL.Statement).%New()
+	Set sc = stm.%PrepareClassQuery("%Dictionary.ClassDefinitionQuery","SubclassOf")
+	If 'sc Quit $$$BuildErr("Error preparing SubclassOf query:", sc)
+	#dim rs As %SQL.StatementResult
+	Set rs = stm.%Execute("Strix.SCM.Handler.Base")
+	
+	While rs.%Next() {
+		Set Name = rs.%Get("Name")
+		Do Handlers.Insert(Name)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
 </Class>
 </Export>

@@ -84,6 +84,12 @@ instead of .../Strix.SCM.Project.cls.xml</Description>
 <InitialExpression>0</InitialExpression>
 </Property>
 
+<Property name="Handler">
+<Description>
+Classname of handler for this project</Description>
+<Type>%String</Type>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -588,6 +594,9 @@ Returns the id and name of all project owning an item.</Description>
 </Value>
 <Value name="5">
 <Value>PackageSubdirs</Value>
+</Value>
+<Value name="6">
+<Value>Handler</Value>
 </Value>
 </Data>
 </Storage>
