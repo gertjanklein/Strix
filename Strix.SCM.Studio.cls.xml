@@ -11,34 +11,12 @@ The menu item handler; delegates to an appropriate subclass of Strix.SCM.Handler
 <Type>Strix.SCM.Handler</Type>
 </Property>
 
-<Method name="Login">
-<Description>
-Perform any login step here.</Description>
-<FormalSpec>Name:%String,Password:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	Set ..Handler = ##class(Strix.SCM.Handler).%New()
-	Quit $$$OK
-]]></Implementation>
-</Method>
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Source control menu handling methods
 
-<Method name="GetStatus">
-<Description>
-Return information about this entity.</Description>
-<FormalSpec><![CDATA[InternalName:%String,&IsInSourceControl:%Boolean,&Editable:%Boolean,&IsCheckedOut:%Boolean,&UserCheckedOut:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.GetStatus(InternalName, .IsInSourceControl, .Editable, .IsCheckedOut, .UserCheckedOut)
-]]></Implementation>
-</Method>
-
-<Method name="IsInSourceControl">
-<Description>
-Returns true if this item is in source control and false otherwise.</Description>
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.IsInSourceControl(InternalName)
-]]></Implementation>
-</Method>
+]]></Content>
+</UDLText>
 
 <Method name="OnMenuItem">
 <Description>
@@ -73,7 +51,88 @@ has been displayed.</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-// =====
+// ===== Studio callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="Login">
+<Description>
+Login method; use to instantiate delegator</Description>
+<FormalSpec>Name:%String,Password:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ..Handler = ##class(Strix.SCM.Handler).%New()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeLoad">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeLoad(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterLoad">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterLoad(InternalName, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeSave">
+<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeSave(InternalName, Location, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterSave">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterSave(InternalName, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterStorage">
+<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterStorage(InternalName, Location)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeCompile">
+<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeCompile(InternalName, .qstruct)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterCompile">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterCompile(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeDelete(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterDelete(InternalName)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Menu query implementations
 
 ]]></Content>
 </UDLText>
@@ -128,14 +187,9 @@ Provide a list of the top level menu items that Studio will add when connecting 
 ]]></Implementation>
 </Method>
 
-<UDLText name="T">
-<Content><![CDATA[
-// =====
-
-]]></Content>
-</UDLText>
-
 <Query name="MenuItems">
+<Description>
+Query for the items in menu MenuName</Description>
 <Type>%Query</Type>
 <FormalSpec>ClassName:%String,MenuName:%String,InternalName:%String,SelectedText:%String</FormalSpec>
 <Parameter name="ROWSPEC" value="MenuItem_Name:%String,MenuItem_Enabled:%String,MenuItem_Save:%String,MenuItem_Separator:%String"/>

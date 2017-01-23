@@ -2,33 +2,18 @@
 <Export generator="Cache" version="25">
 <Class name="Strix.SCM.Handler.Base">
 <Description>
-Base class with common code for handlers.</Description>
+Base handler for Studio callbacks, with do-nothing implementations.
+Proper handlers subclass this one and implement what they need.</Description>
 <IncludeCode>Strix.SCM</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63864,78142.324488</TimeCreated>
 
 <UDLText name="T">
 <Content><![CDATA[
-// ===== Studio callbacks, do-nothing implementations
+// ===== Studio menu actions
 
 ]]></Content>
 </UDLText>
-
-<Method name="GetStatus">
-<FormalSpec><![CDATA[InternalName:%String,&IsInSourceControl:%Boolean,&Editable:%Boolean,&IsCheckedOut:%Boolean,&UserCheckedOut:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	Set IsInSourceControl = 0, Editable = 1
-	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="IsInSourceControl">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[	Quit 0
-]]></Implementation>
-</Method>
 
 <Method name="OnMenuItem">
 <FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
@@ -40,8 +25,6 @@ Base class with common code for handlers.</Description>
 </Method>
 
 <Method name="UserAction">
-<Description>
-Studio callback: user did something.</Description>
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -52,6 +35,76 @@ Studio callback: user did something.</Description>
 
 <Method name="AfterUserAction">
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Studio callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="OnBeforeLoad">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterLoad">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeSave">
+<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterSave">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterStorage">
+<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeCompile">
+<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterCompile">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
@@ -91,36 +144,6 @@ Returns the menu items for a given menu and document</Description>
 	Set Status = $$$OK
 	Set Items = ""
 	Quit Items
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
-// ===== Helpers
-
-]]></Content>
-</UDLText>
-
-<Method name="GetExplorerCommand">
-<Description>
-Returns a command to open explorer in the given directory. Optionally,
-a file to pre-select can be specified.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Directory:%String,File:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	If File '= "" {
-		Set Path = ##class(%File).SubDirectoryName(Directory, File)
-		If '##class(%File).Exists(Path) Set File = ""
-	}
-	
-	If File = "" {
-		Set Cmd = "C:\Windows\explorer.exe /e /root,"_Directory
-	} Else {
-		Set Cmd = "C:\Windows\explorer.exe /e,/select,"_Path
-	}
-	
-	Quit Cmd
 ]]></Implementation>
 </Method>
 </Class>
