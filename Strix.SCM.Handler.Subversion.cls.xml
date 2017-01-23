@@ -47,15 +47,20 @@ Full path and filename of the SVN executable.</Description>
 		Set Output = ..GetCommandOutput("log """_Filename_"""", , .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		
-		Write !,"Revision history for "_InternalName_":",!
+		Write !,"Revision history for "_InternalName_":"
 		For i = 1:1:Output.Count() {
 			Set Line = Output.GetAt(i)
 			
 			If Line ?1."-" Continue
 			If Line = "" Continue
 			
-			;Indent comment line(s)
-			If Line '? 1"r"1.N1.E Write "  "
+			If Line ? 1"r"1.N1.E {
+				;Keep empty line between revisions
+				Write !
+			} Else {
+				;Indent comment line(s)
+				Write "  "
+			}
 			
 			Write Line,!
 		}
