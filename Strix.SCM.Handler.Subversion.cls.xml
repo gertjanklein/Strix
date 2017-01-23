@@ -214,23 +214,5 @@ Error
 	Quit ""
 ]]></Implementation>
 </Method>
-
-<UDLText name="T">
-<Content><![CDATA[
-// =====
-
-]]></Content>
-</UDLText>
-
-<Method name="%OnNew">
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
-	; ToDo: Get data from configuration
-	Set ..SvnPath = "C:\Program Files\TortoiseSVN\bin\svn.exe"
-	Quit $$$OK
-]]></Implementation>
-</Method>
 </Class>
 </Export>

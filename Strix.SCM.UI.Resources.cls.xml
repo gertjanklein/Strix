@@ -125,6 +125,10 @@ table {
 }
 .DataEntry td {
 }
+.DataEntry th[colspan] {
+  background-color: #ccc;
+  font-size: 120%;
+}
 
 /* ========== */
 

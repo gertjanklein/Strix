@@ -239,9 +239,8 @@ Displays the Edit Project page</Description>
     is set, class Strix.SCM.Project would be exported to .../Strix/SCM/Project.cls.xml,
     instead of .../Strix.SCM.Project.cls.xml.</p>
   </td>
-</tr>>
-	
-	&html<<tr>
+</tr>
+<tr>
   <th>Members:</th>
   <td>
     #(..TextArea("Members", 10, 60))#
@@ -257,10 +256,34 @@ Displays the Edit Project page</Description>
       <li>-Strix.Settings.*.cls (Remove classes in package Strix.Settings and below)
     </ul>
   </td>
-</tr>
-</table>>
+</tr>>
 	
-	&html<<div class=Buttons>
+	;===== Handler settings:
+	
+	Set SettingList = Project.GetHandlerSettings()
+	If $ListLength(SettingList) {
+		&html<<tr><th colspan=2>Handler settings</th></tr>>
+	}
+	For i = 1:1:$ListLength(SettingList) {
+		Set Item = $List(SettingList, i)
+		Set Name = $List(Item, 1), Type = $List(Item, 2), Origin = $List(Item, 3)
+		Set Description = ##class(Strix.SCM.Handler.Base).GetSettingDescription(Origin, Name)
+		Set Size = $Select(
+		  Type = "%Boolean": 5,
+		  1: 80
+		)
+		
+		&html<<tr>
+  <th>#(Name)#:</th>
+  <td>
+    #(..TextInput("s:"_Name, Size))#
+    <p class=Explain>#(..EscapeHTML(Description))#</p>
+  </td>
+</tr>>
+	}
+	
+	&html<</table>
+<div class=Buttons>
   #(..HiddenInput("Page"))#
   #(..HiddenInput("Project"))#
   <input type=submit name=Save value="Save">>
@@ -361,6 +384,12 @@ function Ays()
 	}
 	Do %request.Set("Members", Members)
 	
+	Set SettingList = Project.GetHandlerSettings()
+	For i = 1:1:$ListLength(SettingList) {
+		Set Item = $List(SettingList, i), Name = $List(Item, 1)
+		Do %request.Set("s:"_Name, Project.Settings.GetAt(Name))
+	}
+	
 	Quit
 ]]></Implementation>
 </Method>
@@ -408,6 +437,16 @@ function Ays()
 		If Member = "" Continue
 		Do Project.Members.Insert(Member)
 	}
+	
+	Do Project.Settings.Clear()
+	Set SettingList = Project.GetHandlerSettings()
+	For i = 1:1:$ListLength(SettingList) {
+		Set Item = $List(SettingList, i), Name = $List(Item, 1)
+		Set Value = %request.Get("s:"_Name)
+		If Value = "" Continue
+		Do Project.Settings.SetAt(Value, Name)
+	}
+	
 	Set sc = Project.%Save()
 	If 'sc Quit sc
 	

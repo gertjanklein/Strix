@@ -8,6 +8,59 @@ Proper handlers subclass this one and implement what they need.</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63864,78142.324488</TimeCreated>
 
+<Method name="GetSettings">
+<Description>
+Returns a %List of settings applicable to this class. Each setting
+is returned as a %List with: name, type, origin</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ""
+	
+	Set Key = ""
+	For  {
+		#dim Prop As %Dictionary.CompiledProperty
+		Set Prop = %compiledclass.Properties.GetNext(.Key)
+		If Key = "" Quit
+		
+		If Prop.Private Continue
+		If $Extract(Prop.Name) = "%" Continue
+		
+		If Result '= "" Set Result = Result_","
+		
+		Set Name = Prop.Name
+		Set Type = $$$DenormalizeClassname(Prop.Type)
+		Set Origin = Prop.Origin
+		
+		Set Result = Result_"$lb("""_Name_""","""_Type_""","""_Origin_""")"
+	}
+	
+	If Result '= "" {
+		Set Result = "Quit $lb("_Result_")"
+	} Else {
+		Set Result = "Quit """""
+	}
+	
+	Do %code.WriteLine($Char(9)_Result)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetSettingDescription">
+<Description>
+Returns the (property) description for a specific setting,</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String,Setting:%String,*Status:%Status</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(ClassName_"||"_Setting, , .Status)
+	If 'Status Set Status = $$$BuildErr("Error opening definion for "_ClassName_":"_Setting_":", Status) Quit ""
+	Quit Def.Description
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Studio menu actions

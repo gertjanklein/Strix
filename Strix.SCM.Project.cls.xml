@@ -100,8 +100,11 @@ Classname of handler for this project</Description>
 <Property name="Settings">
 <Description>
 Handler-specific settings for this project</Description>
-<Type>ProjectSetting</Type>
-<Collection>list</Collection>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLITEMNAME" value="Setting"/>
+<Parameter name="XMLKEYNAME" value="Name"/>
 </Property>
 
 <UDLText name="T">
@@ -299,12 +302,26 @@ parameter InternalName, initialized with the project's settings.</Description>
 	If 'Status Quit Status
 	
 	;Get and apply settings
-	For i = 1:1:Project.Settings.Count() {
-		Set Setting = Project.Settings.GetAt(i)
-		Set $ZObjProperty(Handler, Setting.Name) = Setting.Value
+	Set Name = ""
+	For  {
+		Set Value = Project.Settings.GetNext(.Name)
+		If Name = "" Quit
+		Set $ZObjProperty(Handler, Name) = Value
 	}
 	
 	Quit Handler
+]]></Implementation>
+</Method>
+
+<Method name="GetHandlerSettings">
+<Description>
+Retrieves a list of valid settings for the currently configured handler.</Description>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Handler = ..Handler
+	If Handler = "" Quit ""
+	Set Settings = $ZObjClassMethod(Handler, "GetSettings")
+	Quit Settings
 ]]></Implementation>
 </Method>
 
