@@ -27,13 +27,30 @@ The setting value.</Description>
 ]]></Content>
 </UDLText>
 
+<Method name="%OnNew">
+<FormalSpec>Name:%String="",Value:%String=""</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	Set ..Name = Name
+	Set ..Value = Value
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Storage name="Default">
 <Type>%Library.CacheSerialState</Type>
 <State>ProjectSettingState</State>
 <StreamLocation>^Strix.SCM.ProjectSettingS</StreamLocation>
 <Data name="ProjectSettingState">
-<Structure>listnode</Structure>
-<Subscript/>
 <Value name="1">
 <Value>Name</Value>
 </Value>
