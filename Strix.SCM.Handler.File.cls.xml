@@ -7,6 +7,21 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 <Super>Strix.SCM.Handler.Base</Super>
 <TimeCreated>63864,76212.606502</TimeCreated>
 
+<Property name="SyncFile">
+<Description>
+Whether to synchronize the file on each open and compile.
+In essence that means the file is leading.</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Method name="UserAction">
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
 <ReturnType>%Status</ReturnType>

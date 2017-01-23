@@ -97,6 +97,20 @@ Classname of handler for this project</Description>
 ]]></Content>
 </UDLText>
 
+<Property name="Settings">
+<Description>
+Handler-specific settings for this project</Description>
+<Type>ProjectSetting</Type>
+<Collection>list</Collection>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Index name="IdKey">
 <IdKey>1</IdKey>
 <Properties>GUID</Properties>
@@ -236,6 +250,61 @@ the configuration file in the working copy.</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="GetHandler">
+<Description>
+Returns the appropriate handler for the document specified in
+parameter InternalName, initialized with the project's settings.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InternalName:%String="",*Handler:Strix.SCM.Handler.Base</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Initialise the handler to the do-nothing base, in case not specified
+	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
+	
+	;Determine which project(s), if any, own this item
+	Set ProjectIds = ##class(Strix.SCM.Project).ProjectsOwningItem(InternalName, .Status)
+	If 'Status Quit $$$BuildErr("Error determining projects owning '"_InternalName_"':", Status)
+	
+	;We need exactly one project
+	If $ListLength(ProjectIds) '= 1 Quit ##class(Strix.SCM.Handler.Base).%New()
+	
+	;Open project
+	Set ProjectId = $List(ProjectIds)
+	Set Project = ##class(Strix.SCM.Project).%OpenId(ProjectId, , .Status)
+	If 'Status Quit $$$BuildErr("Error opening project '"_ProjectId_"' for '"_InternalName_"':", Status)
+	
+	;Determine handler class
+	Set HandlerClass = Project.Handler
+	If HandlerClass = "" {
+		Write !,"This project doesn't have a handler specified.",!
+		Quit $$$OK
+	}
+	
+	;Create instance
+	Try {
+		Set Handler = $ZObjClassMethod(HandlerClass, "%New")
+	} Catch e {
+		Set Status = $$$BuildErr("Error opening handler class '"_HandlerClass_"' instance:", e.AsStatus())
+	}
+	If 'Status Quit Status
+	
+	;Get and apply settings
+	For i = 1:1:Project.Settings.Count() {
+		Set Setting = Project.Settings.GetAt(i)
+		Set $ZObjProperty(Handler, Setting.Name) = Setting.Value
+	}
+	
+	Quit Handler
 ]]></Implementation>
 </Method>
 
@@ -567,6 +636,13 @@ Returns the id and name of all project owning an item.</Description>
 ]]></Implementation>
 </Method>
 
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^Strix.SCM.ProjectD</DataLocation>
@@ -597,6 +673,9 @@ Returns the id and name of all project owning an item.</Description>
 </Value>
 <Value name="6">
 <Value>Handler</Value>
+</Value>
+<Value name="7">
+<Value>Settings</Value>
 </Value>
 </Data>
 </Storage>

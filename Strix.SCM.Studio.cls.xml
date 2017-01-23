@@ -151,8 +151,7 @@ Provide a list of the top level menu items that Studio will add when connecting 
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ##class(Strix.SCM.Handler).Get(, .Status)
-	If 'Status Quit Status
+	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Set qHandle = $lb(0, Handler.GetMainMenus(.Status))
 	If 'Status Quit Status
 	Quit $$$OK
@@ -201,7 +200,7 @@ Query for the items in menu MenuName</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ##class(Strix.SCM.Handler).Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Set qHandle = $lb(0, Handler.GetMenuItems(MenuName, InternalName, SelectedText, .Status))
 	If 'Status Quit Status

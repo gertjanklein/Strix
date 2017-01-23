@@ -7,47 +7,6 @@ Base handler: determines the appropriate handler to use.</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63864,78375.457203</TimeCreated>
 
-<Method name="Get">
-<Description>
-Returns the appropriate handler for the document specified in
-parameter InternalName.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>InternalName:%String="",*Status:%Status</FormalSpec>
-<ReturnType>Strix.SCM.Handler.Base</ReturnType>
-<Implementation><![CDATA[
-	;Determine which project(s), if any, own this item
-	Set ProjectIds = ##class(Strix.SCM.Project).ProjectsOwningItem(InternalName, .Status)
-	If 'Status {
-		Set Status = $$$BuildErr("Error determining projects owning '"_InternalName_"':", Status)
-		Quit ##class(Strix.SCM.Handler.Base).%New()
-	}
-	;We need exactly one project
-	If $ListLength(ProjectIds) '= 1 Quit ##class(Strix.SCM.Handler.Base).%New()
-	
-	;Open project
-	Set ProjectId = $List(ProjectIds)
-	Set Project = ##class(Strix.SCM.Project).%OpenId(ProjectId, , .Status)
-	If 'Status {
-		Set Status = $$$BuildErr("Error opening project '"_ProjectId_"' for '"_InternalName_"':", Status)
-		Quit ##class(Strix.SCM.Handler.Base).%New()
-	}
-	
-	;Determine handler class
-	Set HandlerClass = Project.Handler
-	If HandlerClass = "" Quit ##class(Strix.SCM.Handler.Base).%New()
-	
-	;Create instance
-	Try {
-		Set Handler = $ZObjClassMethod(HandlerClass, "%New")
-	} Catch e {
-		Set Status = $$$BuildErr("Error opening handler class '"_HandlerClass_"' instance:", e.AsStatus())
-		Set Handler = ##class(Strix.SCM.Handler.Base).%New()
-	}
-	
-	Quit Handler
-]]></Implementation>
-</Method>
-
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Studio menu handlers
@@ -60,7 +19,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
 ]]></Implementation>
@@ -71,7 +30,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
 ]]></Implementation>
@@ -82,7 +41,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
 ]]></Implementation>
@@ -100,7 +59,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeLoad(InternalName)
 ]]></Implementation>
@@ -111,7 +70,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterLoad(InternalName, Object)
 ]]></Implementation>
@@ -122,7 +81,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeSave(InternalName, Location, Object)
 ]]></Implementation>
@@ -133,7 +92,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterSave(InternalName, Object)
 ]]></Implementation>
@@ -144,7 +103,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterStorage(InternalName, Location)
 ]]></Implementation>
@@ -155,7 +114,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeCompile(InternalName, .qstruct)
 ]]></Implementation>
@@ -166,7 +125,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterCompile(InternalName)
 ]]></Implementation>
@@ -177,7 +136,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeDelete(InternalName)
 ]]></Implementation>
@@ -188,7 +147,7 @@ parameter InternalName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(InternalName, .Status)
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterDelete(InternalName)
 ]]></Implementation>
@@ -205,9 +164,7 @@ parameter InternalName.</Description>
 <FormalSpec>*Status:%Status</FormalSpec>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
-	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(, .Status)
-	If 'Status Quit ""
+	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Quit Handler.GetMainMenus(.Status)
 ]]></Implementation>
 </Method>
@@ -216,9 +173,7 @@ parameter InternalName.</Description>
 <FormalSpec>*Status:%Status</FormalSpec>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
-	#dim Handler As Strix.SCM.Handler.Base
-	Set Handler = ..Get(, .Status)
-	If 'Status Quit ""
+	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Quit Handler.GetMenuItems(.Status)
 ]]></Implementation>
 </Method>

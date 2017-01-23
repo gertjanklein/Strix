@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.ProjectSetting">
+<Description>
+Specifies a single setting for the handler for this project</Description>
+<Super>%SerialObject,%XML.Adaptor</Super>
+<TimeCreated>64306,54673.593398</TimeCreated>
+
+<Property name="Name">
+<Description>
+The setting name; this should correspond to a property in the
+handler class</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Value">
+<Description>
+The setting value.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<State>ProjectSettingState</State>
+<StreamLocation>^Strix.SCM.ProjectSettingS</StreamLocation>
+<Data name="ProjectSettingState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>Name</Value>
+</Value>
+<Value name="2">
+<Value>Value</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
