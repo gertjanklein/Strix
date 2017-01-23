@@ -8,7 +8,7 @@
 <Property name="Handler">
 <Description>
 The menu item handler; delegates to an appropriate subclass of Strix.SCM.Handler.Base.</Description>
-<Type>Strix.SCM.Handler</Type>
+<Type>Strix.SCM.HandlerProxy</Type>
 </Property>
 
 <UDLText name="T">
@@ -62,7 +62,7 @@ Login method; use to instantiate delegator</Description>
 <FormalSpec>Name:%String,Password:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set ..Handler = ##class(Strix.SCM.Handler).%New()
+	Set ..Handler = ##class(Strix.SCM.HandlerProxy).%New()
 	Quit $$$OK
 ]]></Implementation>
 </Method>

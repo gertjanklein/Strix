@@ -387,7 +387,7 @@ function Ays()
 	}
 	
 	#dim Handlers As %ListOfDataTypes
-	Set sc = ##class(Strix.SCM.Handler).GetHandlers(.Handlers)
+	Set sc = ##class(Strix.SCM.HandlerProxy).GetHandlers(.Handlers)
 	If 'sc Quit $$$BuildErr("Error retrieving list of available handlers:", sc)
 	If 'Handlers.Find(Project.Handler) Quit $$$BuildErr("No such handler: "_Project.Handler)
 	
