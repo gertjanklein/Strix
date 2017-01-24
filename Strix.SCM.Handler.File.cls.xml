@@ -9,9 +9,9 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 
 <Property name="SyncToDisk">
 <Description>
-Whether to synchronize the file on each open and compile.
-This ensures the file is always kept up to date with the
-Caché-version.</Description>
+Whether to synchronize the file on each save. This ensures the file is
+always kept up to date with the Caché-version. Note that the sync may
+not occur if</Description>
 <Type>%Boolean</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
