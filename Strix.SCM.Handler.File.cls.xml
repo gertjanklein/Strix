@@ -7,17 +7,18 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 <Super>Strix.SCM.Handler.Base</Super>
 <TimeCreated>63864,76212.606502</TimeCreated>
 
-<Property name="SyncFile">
+<Property name="SyncToDisk">
 <Description>
 Whether to synchronize the file on each open and compile.
-In essence that means the file is leading.</Description>
+This ensures the file is always kept up to date with the
+Caché-version.</Description>
 <Type>%Boolean</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
 
 <UDLText name="T">
 <Content><![CDATA[
-// =====
+// ===== Studio menu actions
 
 ]]></Content>
 </UDLText>
@@ -60,7 +61,7 @@ In essence that means the file is leading.</Description>
 	If Name = "Source control,ExportItem", AsItem {
 		Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
 		If 'Status Quit Status
-		Write !,InternalName_" exported to "_Filename_"."
+		Write !,"== "_InternalName_" exported to "_Filename_"."
 		Quit $$$OK
 	}
 	
@@ -70,7 +71,7 @@ In essence that means the file is leading.</Description>
 	If Name = "Source control,ExportData", AsStorage {
 		Set Status = ##class(Strix.SCM.FileIO).ExportClassData(Project, InternalName, .Filename)
 		If 'Status Quit Status
-		Write !,InternalName_" data exported to "_Filename_"."
+		Write !,"== "_InternalName_" data exported to "_Filename_"."
 		Quit $$$OK
 	}
 	
@@ -155,7 +156,7 @@ Implements actions that should only be done after user confirmation and/or input
 	If Name = "Source control,ExportProject" {
 		Set Status = ##class(Strix.SCM.FileIO).ExportProject(Project)
 		If 'Status Quit Status
-		Write "Export of project finished successfully.",!
+		Write "== Export of project finished successfully.",!
 		Quit $$$OK
 	}
 	
@@ -165,7 +166,7 @@ Implements actions that should only be done after user confirmation and/or input
 	If Name = "Source control,LoadItem" {
 		Set Status = ##class(Strix.SCM.FileIO).LoadItem(Project, InternalName, .Filename)
 		If 'Status Quit Status
-		Write !,"Loaded "_InternalName_" from "_Filename_"."
+		Write !,"== Loaded "_InternalName_" from "_Filename_"."
 		Quit $$$OK
 	}
 	
@@ -174,7 +175,7 @@ Implements actions that should only be done after user confirmation and/or input
 	If Name = "Source control,LoadData" {
 		Set Status = ##class(Strix.SCM.FileIO).LoadClassData(Project, InternalName, .Filename)
 		If 'Status Quit Status
-		Write !,"Loaded data for "_InternalName_" from "_Filename_"."
+		Write !,"== Loaded data for "_InternalName_" from "_Filename_"."
 		Quit $$$OK
 	}
 	
@@ -245,7 +246,36 @@ and whether the item should be enabled or not.</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-// =====
+// ===== Studio callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="OnBeforeSave">
+<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '..SyncToDisk Quit $$$OK
+	If InternalName = "" Quit $$$OK
+	
+	#dim Project As Strix.SCM.Project
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
+		If Msg '= "" Set Action = 6 ; MesssageBox
+		Quit $$$OK
+	}
+	
+	Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
+	If 'Status Quit Status
+	
+	Write !,"== "_InternalName_" exported to "_Filename_".",!
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Menus and menu items
 
 ]]></Content>
 </UDLText>
