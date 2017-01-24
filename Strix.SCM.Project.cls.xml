@@ -107,6 +107,15 @@ Handler-specific settings for this project</Description>
 <Parameter name="XMLKEYNAME" value="Name"/>
 </Property>
 
+<Property name="LocalSettings">
+<Description>
+Local handler settings (not stored in the configuration file)</Description>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLPROJECTION" value="NONE"/>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -667,6 +676,11 @@ Returns the id and name of all project owning an item.</Description>
 <IdLocation>^Strix.SCM.ProjectD</IdLocation>
 <IndexLocation>^Strix.SCM.ProjectI</IndexLocation>
 <StreamLocation>^Strix.SCM.ProjectS</StreamLocation>
+<Data name="LocalSettings">
+<Attribute>LocalSettings</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"LocalSettings"</Subscript>
+</Data>
 <Data name="Members">
 <Attribute>Members</Attribute>
 <Structure>subnode</Structure>
