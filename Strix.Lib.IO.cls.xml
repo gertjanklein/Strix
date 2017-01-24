@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.IO">
+<Super>%RegisteredObject</Super>
+<TimeCreated>64307,60337.004726</TimeCreated>
+
+<Method name="GetCommandOutput">
+<Description>
+Creates a pipe to the specified OS command. Returns the data either as string or
+as list of lines. If an error occurs opening or reading the pipe, a message is
+placed in output parameter ErrorMsg.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg</FormalSpec>
+<ReturnType>%ListOfObjects</ReturnType>
+<Implementation><![CDATA[
+	Set $ZTrap = "Error"
+	
+	Set IO = $IO
+	Set ErrorMsg = ""
+	
+	; Use a so-called command pipe to avoid the maximum length of 256 for
+	; standard pipe commands.
+	Set Pipe = "|CPIPE|"_$Job
+	
+	; Open it
+	Open Pipe:(Command:"QRU"):5
+	If '$Test Set ErrorMsg = "Error: timeout occurred opening pipe to "_Command Quit ""
+	
+	; Get the pipe data
+	Use Pipe
+	Read Output:5
+	Set Timedout = '$Test
+	Use IO
+	Close Pipe
+	If Timedout Set ErrorMsg = "Error: timeout occurred reading pipe "_Command Quit ""
+	
+	; If we're not to split in lines we're done
+	If 'Split Quit Output
+	
+	; Split and strip
+	Set Result = ##class(%ListOfDataTypes).%New()
+	For i = 1:1:$Length(Output, $Char(10)) {
+		Set Line = $Piece(Output, $Char(10), i)
+		Set Line = $ZStrip(Line, "<>WC")
+		Do Result.Insert(Line)
+	}
+	
+	Quit Result
+	
+Error
+	Set $ZTrap = ""
+	Use IO
+	Close Pipe
+	Set ErrorMsg = "Error trapped reading pipe: "_$ZError
+	Quit ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
