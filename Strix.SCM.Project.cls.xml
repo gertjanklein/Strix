@@ -311,11 +311,13 @@ parameter InternalName, initialized with the project's settings.</Description>
 	If 'Status Quit Status
 	
 	;Get and apply settings
-	Set Name = ""
-	For  {
-		Set Value = Project.Settings.GetNext(.Name)
-		If Name = "" Quit
-		Set $ZObjProperty(Handler, Name) = Value
+	For Collection = Project.Settings, Project.LocalSettings {
+		Set Name = ""
+		For  {
+			Set Value = Collection.GetNext(.Name)
+			If Name = "" Quit
+			Set $ZObjProperty(Handler, Name) = Value
+		}
 	}
 	
 	Quit Handler
