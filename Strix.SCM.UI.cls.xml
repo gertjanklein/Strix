@@ -386,8 +386,9 @@ function Ays()
 	
 	Set SettingList = Project.GetHandlerSettings()
 	For i = 1:1:$ListLength(SettingList) {
-		Set Item = $List(SettingList, i), Name = $List(Item, 1)
-		Do %request.Set("s:"_Name, Project.Settings.GetAt(Name))
+		Set Item = $List(SettingList, i), Name = $List(Item, 1), Global = $List(Item, 4)
+		Set Value = $Select(Global: Project.Settings.GetAt(Name), 1: Project.LocalSettings.GetAt(Name))
+		Do %request.Set("s:"_Name, Value)
 	}
 	
 	Quit
@@ -439,12 +440,17 @@ function Ays()
 	}
 	
 	Do Project.Settings.Clear()
+	Do Project.LocalSettings.Clear()
 	Set SettingList = Project.GetHandlerSettings()
 	For i = 1:1:$ListLength(SettingList) {
-		Set Item = $List(SettingList, i), Name = $List(Item, 1)
+		Set Item = $List(SettingList, i), Name = $List(Item, 1), Global = $List(Item, 4)
 		Set Value = %request.Get("s:"_Name)
 		If Value = "" Continue
-		Do Project.Settings.SetAt(Value, Name)
+		If Global {
+			Do Project.Settings.SetAt(Value, Name)
+		} Else {
+			Do Project.LocalSettings.SetAt(Value, Name)
+		}
 	}
 	
 	Set sc = Project.%Save()
