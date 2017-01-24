@@ -68,6 +68,16 @@ Full path and filename of the SVN executable.</Description>
 		Quit $$$OK
 	}
 	
+	
+	;== Delete item
+	
+	If Name = "Source control,Delete", AsItem {
+		Set Action = 1 ;Yes/no/cancel
+		Set Target = "Are you sure you want to delete '"_InternalName_"'?"
+		Quit $$$OK
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
@@ -90,9 +100,29 @@ Full path and filename of the SVN executable.</Description>
 	
 	;===== Get project
 	
-	;#dim Project As Strix.SCM.Project
-	;If InternalName = "" Quit $$$OK
-	;If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	#dim Project As Strix.SCM.Project
+	If InternalName = "" Quit $$$OK
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	
+	
+	;===== Delete item
+	
+	If Name = "Source control,Delete", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		
+		If ##class(%File).Exists(Filename) {
+			;Delete from source control
+			Set Output = ..GetCommandOutput("delete --force """_Filename_"""", 0, .ErrorMsg)
+			If ErrorMsg '= "" Write !,ErrorMsg,! Quit $$$OK
+			If Output [ "svn: E" Write !,Output,! Quit $$$OK
+		}
+		
+		Set Status = $System.OBJ.Delete(InternalName, "d")
+		If 'Status Quit Status
+		
+		Quit $$$OK
+	}
 	
 	
 	;===== Fallback to File handler
@@ -111,6 +141,7 @@ and whether the item should be enabled or not.</Description>
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
 	  "ShowRevisions": "Show revisions for "_InternalName_"",
+	  "Delete": "Delete "_InternalName_"",
 	  : ""
 	)
 	
@@ -148,7 +179,8 @@ and whether the item should be enabled or not.</Description>
 	;Append subversion-specific items
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
-	  $lb("ShowRevisions", 1, 1, 0)
+	  $lb("ShowRevisions", 1, 1, 0),
+	  $lb("Delete", 1, 1, 0)
 	)
 	
 	Quit Items
