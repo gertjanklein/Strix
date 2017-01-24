@@ -47,7 +47,7 @@ Full path and filename of the SVN executable.</Description>
 		Set Output = ..GetCommandOutput("log """_Filename_"""", , .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		
-		Write !,"Revision history for "_InternalName_":"
+		Write !,"== Revision history for "_InternalName_":"
 		For i = 1:1:Output.Count() {
 			Set Line = Output.GetAt(i)
 			
@@ -74,6 +74,18 @@ Full path and filename of the SVN executable.</Description>
 	If Name = "Source control,Delete", AsItem {
 		Set Action = 1 ;Yes/no/cancel
 		Set Target = "Are you sure you want to delete '"_InternalName_"'?"
+		Quit $$$OK
+	}
+	
+	
+	;== Status
+	
+	Write !,"== Working copy status:"
+	If Name = "Source control,Status" {
+		Set Output = ..GetCommandOutput("status """_Project.ProjectPath_"""", 0, .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Write !,Output,!
+		
 		Quit $$$OK
 	}
 	
@@ -142,6 +154,7 @@ and whether the item should be enabled or not.</Description>
 	Set Name = $Case(ItemName,
 	  "ShowRevisions": "Show revisions for "_InternalName_"",
 	  "Delete": "Delete "_InternalName_"",
+	  "Status": "Working copy status",
 	  : ""
 	)
 	
@@ -180,7 +193,8 @@ and whether the item should be enabled or not.</Description>
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
 	  $lb("ShowRevisions", 1, 1, 0),
-	  $lb("Delete", 1, 1, 0)
+	  $lb("Delete", 1, 1, 0),
+	  $lb("Status", 1, 1, 0),
 	)
 	
 	Quit Items
