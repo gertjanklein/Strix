@@ -394,7 +394,7 @@ Returns the file name for an item, based on project settings.</Description>
 		Do ##class(Strix.Lib.String).Explode(Name, ".", .Pieces)
 		Set Filename = Pieces(Pieces)
 		Set Pieces = Pieces - 1
-		Set Directory = ##class(Strix.Lib.File).Append(Path, Pieces...)
+		Set Directory = ##class(Strix.Lib.File).AppendPath(Path, Pieces...)
 		
 	} Else {
 		Set Directory = Path

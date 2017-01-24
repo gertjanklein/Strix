@@ -43,10 +43,10 @@ number if the file already exists.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="Append">
+<Method name="AppendPath">
 <Description>
 Appends one or more path components to an existing path. Uses the implementation
-in class %File for platform indepndence, but allows more then one path component
+in class %File for platform independence, but allows more then one path component
 to be appended at once.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Path:%String,SubPaths...:%String</FormalSpec>
