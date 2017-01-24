@@ -3,6 +3,7 @@
 <Class name="Strix.Generator.Utilities">
 <Description>
 Utility code for generator methods in other classes.</Description>
+<IncludeCode>Strix</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>62935,33467.821661</TimeCreated>
 
@@ -58,6 +59,21 @@ or a class definition object.</Description>
 	}
 	
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetParameterValue">
+<Description>
+Shortcut method to quickly retrieve a parameter value. Returns an empty string
+in case the parameter doesn't exist or an error occurs.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set sc = ..GetParameter(ClassNameOrObj, ParameterName, .ParameterDefinition)
+	If 'sc Quit ""
+	If '$IsObject(ParameterDefinition) Quit ""
+	Quit ParameterDefinition.Default
 ]]></Implementation>
 </Method>
 
@@ -220,18 +236,76 @@ Returns a flag indicating whether a class can be determined to be a datatype.</D
 ]]></Implementation>
 </Method>
 
-<Method name="GetParameterValue">
+<Method name="MRO">
 <Description>
-Shortcut method to quickly retrieve a parameter value. Returns an empty string
-in case the parameter doesn't exist or an error occurs.</Description>
+Member resolution order / inheritance order.
+Returns a list of all superclasses of the given class. The order in
+which they are returned is intended to be the order the compiler
+uses to determine the origin of a member (if it has multiple origins).
+Duplicates in the result (if e.g. a class inherits from %XML.Adaptor
+via multiple superclasses) are removed.
+
+By default, system classes are not returned in the results, but they
+can be included by clearing ExcludeSystem. If errors occur they are
+returned in output parameter Status.
+
+See:
+http://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes#GOBJ_model_inheritance_mult
+</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
+<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ExcludeSystem:%Boolean=1,*Status:%Status</FormalSpec>
+<ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
-	Set sc = ..GetParameter(ClassNameOrObj, ParameterName, .ParameterDefinition)
-	If 'sc Quit ""
-	If '$IsObject(ParameterDefinition) Quit ""
-	Quit ParameterDefinition.Default
+	Set Result = ""
+	
+	If '$IsObject(ClassNameOrObj) {
+		;Not an object, so a class name
+		Set ClassName = $$$NormalizeClassname(ClassNameOrObj)
+		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassName, , .Status)
+		If 'Status Set Status = $$$BuildErr("Error opening definition for {}", Status, ClassName) Quit Result
+	}
+	
+	;Skip system classes, including EnsLib.* etc., if so requested.
+	If ExcludeSystem, ClassNameOrObj.System Quit ""
+	
+	;Always return "self' prefering %String over %Library.String
+	Set Result = Result_$ListBuild($$$DenormalizeClassname(ClassNameOrObj.Name))
+	
+	;Get superclasses; if none, we're done.
+	Set Super = ClassNameOrObj.Super
+	If Super = "" Quit Result
+	
+#if ##safeexpression($System.Version.GetMajor()>=2010)
+	;From v2010 onwards, inheritance is specified in the class definition
+	If ClassNameOrObj.Inheritance = "left" {
+		Set From = 1, To = $Length(Super, ","), Step = 1
+	} Else {
+		Set From = $Length(Super, ","), To = 1, Step = -1
+	}
+#else
+	;Before v2010 inheritance is right to left always
+	Set From = $Length(Super, ","), To = 1, Step = -1
+#endif
+	
+	;Handle superclasses, in the order determined above, recursively
+	For i = From:Step:To {
+		Set Name = $Piece(Super, ",", i)
+		If ExcludeSystem, $Extract(Name) = "%" Continue
+		Set Result = Result_..MRO(Name, ExcludeSystem, .Status)
+		If 'Status Quit
+	}
+	If 'Status Quit Result
+	
+	;De-duplicate
+	Set WithDuplicates = Result, Result = ""
+	For i = 1:1:$ListLength(WithDuplicates) {
+		Set Name = $List(WithDuplicates, i)
+		If $Data(Names(Name)) Continue
+		Set Result = Result_$ListBuild(Name)
+		Set Names(Name) = ""
+	}
+	
+	Quit Result
 ]]></Implementation>
 </Method>
 
