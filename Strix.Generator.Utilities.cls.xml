@@ -47,7 +47,7 @@ or a class definition object.</Description>
 <Implementation><![CDATA[
 	If '$IsObject(ClassNameOrObj) {
 		;Not an object, so a class name
-		Set ClassNameOrObj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassNameOrObj, , .sc)
+		Set ClassNameOrObj = ##class(%Dictionary.CompiledClass).%OpenId(ClassNameOrObj, , .sc)
 		If 'sc Quit sc
 	}
 	
