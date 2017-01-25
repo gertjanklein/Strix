@@ -80,12 +80,11 @@ Full path and filename of the SVN executable.</Description>
 	
 	;== Status
 	
-	Write !,"== Working copy status:"
 	If Name = "Source control,Status" {
-		Set Output = ..GetCommandOutput("status """_Project.ProjectPath_"""", 0, .ErrorMsg)
+		Write !,"== Working copy status:"
+		Set Output = ..GetCommandOutput("status -u """_Project.ProjectPath_"""", 0, .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		Write !,Output,!
-		
 		Quit $$$OK
 	}
 	

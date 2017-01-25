@@ -120,5 +120,51 @@ Exports an entire project to disk</Description>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
+
+<Method name="ImportProject">
+<Description>
+Loads all project members form the configured directory</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Get list of XML files in the project directory
+	If 'Quiet Write !,"== Reading directory: "
+	Set stm = ##class(%SQL.Statement).%New()
+	Set sc = stm.%PrepareClassQuery("%File","FileSet")
+	If 'sc Quit $$$BuildErr("Error preparing FileSet query:", sc)
+	
+	#dim rs As %SQL.StatementResult
+	Set rs = stm.%Execute(Project.GetProjectPath(), "*.xml")
+	
+	While rs.%Next() {
+		Set Name = rs.%Get("Name")
+		Set ItemName = rs.%Get("ItemName")
+		Set Files(ItemName) = Name
+	}
+	Kill rs
+	If 'Quiet Write "ok",!
+	
+	Set ItemName = ""
+	For  {
+		Set ItemName = $Order(Files(ItemName), 1, FullPath)
+		If ItemName = "" Quit
+		
+		Write "Importing "_ItemName_": "
+		
+		Set sc = $System.OBJ.Load(FullPath, "-d", , .FileItems)
+		Merge Loaded = FileItems
+		
+		Write "ok.",!
+	}
+	
+	If 'Quiet Write !,"Compiling: "
+	Set sc = $System.OBJ.CompileList(.Loaded, "cku-d")
+	If 'sc Quit $$$BuildErr("Error compiling loaded items:", sc)
+	If 'Quiet Write "ok",!
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
 </Class>
 </Export>

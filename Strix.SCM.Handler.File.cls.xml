@@ -10,8 +10,7 @@ Checkin/out etc. is expected to be handled by an external program.</Description>
 <Property name="SyncToDisk">
 <Description>
 Whether to synchronize the file on each save. This ensures the file is
-always kept up to date with the Caché-version. Note that the sync may
-not occur if</Description>
+always kept up to date with the Caché-version.</Description>
 <Type>%Boolean</Type>
 <InitialExpression>0</InitialExpression>
 </Property>
@@ -80,7 +79,16 @@ not occur if</Description>
 	
 	If Name = "Source control,ExportProject" {
 		Set Action = 1 ;Yes/no/cancel
-		Set Target = "Are you sure you want to export the entire project '"_Project.Name_"'?"
+		Set Target = "Are you sure you want to export the entire project '"_Project.Name_"' to the working copy?"
+		Quit $$$OK
+	}
+	
+	
+	;== Import project
+	
+	If Name = "Source control,ImportProject" {
+		Set Action = 1 ;Yes/no/cancel
+		Set Target = "Are you sure you want to import the entire project '"_Project.Name_"' from the working copy?"
 		Quit $$$OK
 	}
 	
@@ -161,6 +169,16 @@ Implements actions that should only be done after user confirmation and/or input
 	}
 	
 	
+	;== Import project
+	
+	If Name = "Source control,ImportProject" {
+		Set Status = ##class(Strix.SCM.FileIO).ImportProject(Project)
+		If 'Status Quit Status
+		Write "== Import of project finished successfully.",!
+		Quit $$$OK
+	}
+	
+	
 	;== Reload item
 	
 	If Name = "Source control,LoadItem" {
@@ -201,6 +219,7 @@ and whether the item should be enabled or not.</Description>
 	  "LoadItem":            "Reload "_InternalName_" from disk",
 	  "LoadData":            "Reload data for "_InternalName_" from disk",
 	  "ExportProject":       "Save project to disk",
+	  "ImportProject":       "Load project from disk",
 	  "OpenFolder":          "Open working copy folder",
 	  "LaunchUserInterface": "Open user interface",
 	  : MenuName
@@ -235,7 +254,7 @@ and whether the item should be enabled or not.</Description>
 		}
 		
 	} Else {
-		;Unknown item in project: don't display at all
+		;Item unknown in project: don't display at all
 		Set Enabled = -1
 		
 	}
@@ -251,8 +270,8 @@ and whether the item should be enabled or not.</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="OnBeforeSave">
-<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<Method name="OnAfterSave">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If '..SyncToDisk Quit $$$OK
@@ -260,7 +279,7 @@ and whether the item should be enabled or not.</Description>
 	
 	#dim Project As Strix.SCM.Project
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
-		If Msg '= "" Set Action = 6 ; MesssageBox
+		Write Msg,!
 		Quit $$$OK
 	}
 	
@@ -307,6 +326,8 @@ selected text are passed in.</Description>
 <Implementation><![CDATA[
 	Set Status = $$$OK
 	
+	;Items is a list of lists containing:
+	;  Name, Enabled, Save before execute, is separator
 	Set Items = ""
 	
 	;Items working on/depending on a specific project
@@ -318,6 +339,7 @@ selected text are passed in.</Description>
 		  $lb("LoadItem", 1, 1, 0),
 		  $lb("LoadData", 0, 0, 0),
 		  $lb("ExportProject", 1, 1, 0),
+		  $lb("ImportProject", 1, 0, 0),
 	  	$lb("", 1, 0, 1),
 	  	$lb("OpenFolder", 1, 0, 0)
 		)
@@ -325,7 +347,6 @@ selected text are passed in.</Description>
 	
 	;Items always valid
 	Set Items = Items_$lb(
-	  ;Name, Enabled, Save before execute, is separator
 	  $lb("LaunchUserInterface", 1, 0, 0)
 	)
 	
