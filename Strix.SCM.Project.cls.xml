@@ -361,16 +361,9 @@ Returns the basic storage path for files managed by this project</Description>
 	
 	;Get base path for relative path
 	Set Config = ##class(Strix.SCM.Config).Get()
-	Set BasePath = ##class(%File).NormalizeDirectory(Config.BasePath)
 	
 	;Create full path
-	Set ProjectPath = ##class(%File).SubDirectoryName(BasePath, ProjectPath)
-	;...and normalize again
-	Set ProjectPath = ##class(%File).NormalizeDirectory(ProjectPath)
-	
-	If $Extract(ProjectPath, 1, $Length(BasePath)) '= BasePath {
-		Set Status = $$$BuildErr("Error: project path '"_ProjectPath_"' not below base path '"_BasePath_"'.", 1)
-	}
+	Set ProjectPath = ##class(%File).SubDirectoryName(Config.BasePath, ProjectPath)
 	
 	Quit ProjectPath
 ]]></Implementation>
