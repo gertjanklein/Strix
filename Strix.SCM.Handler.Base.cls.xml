@@ -130,6 +130,11 @@ Returns the (property) description for a specific setting,</Description>
 		Quit $$$OK
 	}
 	
+	
+	Set Action = 6 ; Messagebox
+	Set Target = "Unimplemented menu: "_Name
+	
+	
 	Quit $$$OK
 ]]></Implementation>
 </Method>
