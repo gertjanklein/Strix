@@ -305,21 +305,18 @@ selected text are passed in.</Description>
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
-	;Items working on/depending on a specific project
-	If InternalName '= "" {
-		Set Items = Items_$lb(
-		  ;Name, Enabled, Save before execute, is separator
-	  	$lb("OpenFolder", 1, 0, 0),
-	  	$lb("", 1, 0, 1),
-		  $lb("ExportProject", 1, 1, 0),
-		  $lb("ImportProject", 1, 0, 0),
-	  	$lb("", 1, 0, 1),
-		  $lb("ExportItem", 1, 1, 0),
-		  $lb("ExportData", 0, 0, 0),
-		  $lb("LoadItem", 1, 1, 0),
-		  $lb("LoadData", 0, 0, 0)
-		)
-	}
+	Set Items = Items_$lb(
+	  ;Name, Enabled, Save before execute, is separator
+  	$lb("OpenFolder", 1, 0, 0),
+  	$lb("", 1, 0, 1),
+	  $lb("ExportProject", 1, 1, 0),
+	  $lb("ImportProject", 1, 0, 0),
+  	$lb("", 1, 0, 1),
+	  $lb("ExportItem", 1, 1, 0),
+	  $lb("ExportData", 0, 0, 0),
+	  $lb("LoadItem", 1, 1, 0),
+	  $lb("LoadData", 0, 0, 0)
+	)
 	
 	Quit Items
 ]]></Implementation>
