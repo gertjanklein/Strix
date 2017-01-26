@@ -94,7 +94,19 @@ Returns the (property) description for a specific setting,</Description>
 <FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	;All menus defined here are always enabled
 	Set Enabled = 1
+	
+	;Top level menu
+	If MenuName '[ "," Quit $$$OK
+	
+	;Get display name:
+	Set SubMenuName = $Piece(MenuName, ",", 2)
+	Set DisplayName = $Case(SubMenuName,
+	  "LaunchUserInterface": "Open user interface",
+	  : MenuName
+	)
+	
 	Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -103,7 +115,21 @@ Returns the (property) description for a specific setting,</Description>
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	;Defaults
 	Set Action = 0, Target = "", Msg = "", Reload = 0
+	
+	;Studio-generated action (as opposed to menu item)
+	If Type = 1 Quit $$$OK
+	
+	If Name = "Source control,LaunchUserInterface" {
+		Set Action = 3
+		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
+		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
+		Set Namespace = $ZUtil(5)
+		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/Strix.SCM.UI.cls"
+		Quit $$$OK
+	}
+	
 	Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -217,7 +243,12 @@ Returns the menu items for a given menu and document</Description>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
 	Set Status = $$$OK
-	Set Items = ""
+	
+	;Menus that are always valid, regardless of which item is selected
+	Set Items = $lb(
+	  $lb("LaunchUserInterface", 1, 0, 0)
+	)
+	
 	Quit Items
 ]]></Implementation>
 </Method>

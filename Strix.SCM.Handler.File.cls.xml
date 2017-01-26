@@ -33,17 +33,6 @@ always kept up to date with the Caché-version.</Description>
 	If Type = 1 Quit $$$OK
 	
 	
-	;===== Actions that are always allowed
-	
-	If Name = "Source control,LaunchUserInterface" {
-		Set Action = 3
-		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
-		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
-		Set Namespace = $ZUtil(5)
-		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/Strix.SCM.UI.cls"
-		Quit $$$OK
-	}
-	
 	;===== Get project
 	
 	If InternalName = "" Quit $$$OK
@@ -299,22 +288,6 @@ and whether the item should be enabled or not.</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="GetMainMenus">
-<Description>
-Returns a list with the top level menus appropriate for this
-handler.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
-	Set Status = $$$OK
-	;Call the menus "Source control", insert in both menu bar
-	;and context menu.
-	Set Menus = $lb($lb("Source control", 0), $lb("Source control", 1))
-	Quit Menus
-]]></Implementation>
-</Method>
-
 <Method name="GetMenuItems">
 <Description>
 Returns a list of menu items for the top-level menu. In addition to
@@ -328,27 +301,25 @@ selected text are passed in.</Description>
 	
 	;Items is a list of lists containing:
 	;  Name, Enabled, Save before execute, is separator
-	Set Items = ""
+	
+	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
+	If 'Status Quit Items
 	
 	;Items working on/depending on a specific project
 	If InternalName '= "" {
 		Set Items = Items_$lb(
 		  ;Name, Enabled, Save before execute, is separator
-		  $lb("ExportItem", 1, 1, 0),
-		  $lb("ExportData", 0, 0, 0),
-		  $lb("LoadItem", 1, 1, 0),
-		  $lb("LoadData", 0, 0, 0),
+	  	$lb("OpenFolder", 1, 0, 0),
+	  	$lb("", 1, 0, 1),
 		  $lb("ExportProject", 1, 1, 0),
 		  $lb("ImportProject", 1, 0, 0),
 	  	$lb("", 1, 0, 1),
-	  	$lb("OpenFolder", 1, 0, 0)
+		  $lb("ExportItem", 1, 1, 0),
+		  $lb("ExportData", 0, 0, 0),
+		  $lb("LoadItem", 1, 1, 0),
+		  $lb("LoadData", 0, 0, 0)
 		)
 	}
-	
-	;Items always valid
-	Set Items = Items_$lb(
-	  $lb("LaunchUserInterface", 1, 0, 0)
-	)
 	
 	Quit Items
 ]]></Implementation>

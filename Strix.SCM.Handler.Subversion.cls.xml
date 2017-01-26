@@ -151,7 +151,7 @@ and whether the item should be enabled or not.</Description>
 <Implementation><![CDATA[
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
-	  "ShowRevisions": "Show revisions for "_InternalName_"",
+	  "ShowRevisions": "Revisions for "_InternalName_"",
 	  "Delete": "Delete "_InternalName_"",
 	  "Status": "Working copy status",
 	  : ""
@@ -191,9 +191,9 @@ and whether the item should be enabled or not.</Description>
 	;Append subversion-specific items
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
-	  $lb("ShowRevisions", 1, 1, 0),
-	  $lb("Delete", 1, 1, 0),
 	  $lb("Status", 1, 1, 0),
+	  $lb("ShowRevisions", 1, 1, 0),
+	  $lb("Delete", 1, 1, 0)
 	)
 	
 	Quit Items
