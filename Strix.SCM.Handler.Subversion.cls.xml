@@ -89,6 +89,16 @@ Full path and filename of the SVN executable.</Description>
 	}
 	
 	
+	;== Checkin
+	
+	If Name = "Source control,Checkin" {
+		Set Target = ..GetGUICommand("/command:commit /path:"_Project.GetProjectPath(), .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
@@ -154,6 +164,7 @@ and whether the item should be enabled or not.</Description>
 	  "ShowRevisions": "Revisions for "_InternalName_"",
 	  "Delete": "Delete "_InternalName_"",
 	  "Status": "Working copy status",
+	  "Checkin": "Open checkin dialog",
 	  : ""
 	)
 	
@@ -192,6 +203,8 @@ and whether the item should be enabled or not.</Description>
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
 	  $lb("Status", 1, 1, 0),
+	  $lb("Checkin", 1, 1, 0),
+	  $lb("", 1, 0, 1),
 	  $lb("ShowRevisions", 1, 1, 0),
 	  $lb("Delete", 1, 1, 0)
 	)
@@ -215,7 +228,7 @@ as a list of lines, already stripped. If an error occurs, the
 output parameter ErrorMsg will contain information. A timeout
 may occur on the Read if Cache does not have permission to
 read the repository.</Description>
-<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg</FormalSpec>
+<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg:%String</FormalSpec>
 <ReturnType>%ListOfObjects</ReturnType>
 <Implementation><![CDATA[
 	; Prefix command with normalized path to svn executable
@@ -226,6 +239,27 @@ read the repository.</Description>
 	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, Split, .ErrorMsg)
 	
 	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="GetGUICommand">
+<FormalSpec>Command:%String,*ErrorMsg:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ErrorMsg = ""
+	
+	Set Dir = ##class(%File).GetDirectory(..SvnPath)
+	Set Executable = ##class(%File).SubDirectoryName(Dir, "TortoiseProc.exe")
+	
+	If '##class(%File).Exists(Executable) {
+		Set ErrorMsg = "Option not available: TortoiseSVN executable '"_Executable_"' not found."
+		Quit ""
+	}
+	
+	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
+	Set Command = Executable_" "_Command
+	
+	Quit Command
 ]]></Implementation>
 </Method>
 </Class>
