@@ -272,9 +272,18 @@ and whether the item should be enabled or not.</Description>
 	Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
 	If 'Status Quit Status
 	
-	Write !,"== "_InternalName_" exported to "_Filename_".",!
+	Write !,"== "_InternalName_" exported to "_Filename_"."
 	
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterCompile">
+<Description>
+Compilation may have changed storage.</Description>
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..OnAfterSave(InternalName)
 ]]></Implementation>
 </Method>
 
