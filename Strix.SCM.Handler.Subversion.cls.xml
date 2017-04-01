@@ -299,7 +299,7 @@ and whether the item should be enabled or not.</Description>
 	
 	If ..PostProcessor '= "" {
 		If '##class(%Dictionary.CompiledMethod).%ExistsId(..PostProcessor_"||Run") {
-			Set ErrorMsg = "Postprocessor "_..PostProcessor_":Run() doen't exist."
+			Set ErrorMsg = "Postprocessor "_..PostProcessor_":Run() doesn't exist."
 			Quit $$$OK
 		}
 		
