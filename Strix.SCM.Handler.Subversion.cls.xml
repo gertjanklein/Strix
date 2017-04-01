@@ -13,8 +13,17 @@ Full path and filename of the SVN executable.</Description>
 
 <Property name="ReleasePath">
 <Description>
-Full path to release directory</Description>
+Full path to release base directory; releases are created below it.</Description>
 <Type>%String</Type>
+</Property>
+
+<Property name="PostProcessor">
+<Description>
+ClassName:MethodName of a classmethod to call to post-process
+the release. Arguments passed in are the Project object, release
+number, and direcory of the release. Return value must be a %Status.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="80"/>
 </Property>
 
 <UDLText name="T">
@@ -281,12 +290,28 @@ and whether the item should be enabled or not.</Description>
 	
 	;Export from SCM
 	Write !,"== Exporting revision "_Revision_" to "_ReleasePath,!
-	Set Output = ..GetCommandOutput("export -r "_Revision_" "_Url_" """_ReleasePath_"""", , .ErrorMsg)
+	Set Output = ..GetCommandOutput("export -r "_Revision_" --force "_Url_" """_ReleasePath_"""", , .ErrorMsg)
 	If ErrorMsg '= "" Quit $$$OK
 	
 	If Output ? 1"svn: E"1.E Set ErrorMsg = "Error exporting revision: "_Output Quit $$$OK
 	
 	Write "== Release "_Revision_" exported successfully.",!
+	
+	If ..PostProcessor '= "" {
+		If '##class(%Dictionary.CompiledMethod).%ExistsId(..PostProcessor_"||Run") {
+			Set ErrorMsg = "Postprocessor "_..PostProcessor_":Run() doen't exist."
+			Quit $$$OK
+		}
+		
+		Write "== Running postprocessor "_..PostProcessor,!
+		Try {
+			Set Status = $ZObjClassMethod(..PostProcessor, "Run", Project, Revision, ReleasePath)
+		} Catch e {
+			Set Status = e.AsStatus()
+		}
+		If 'Status Set ErrorMsg = "Error running postprocessor: "_$System.Status.GetErrorText(Status) Quit $$$OK
+		Write "== Successfully ran postprocessor.",!
+	}
 	
 	Quit $$$OK
 ]]></Implementation>

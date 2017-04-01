@@ -53,13 +53,14 @@ Splits a string containing newlines into a list of lines. StripCfg
 configures how whitespace in the lines is handled; if empty it is left
 untouched.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Input:%String,StripCfg:%String=">WC"]]></FormalSpec>
+<FormalSpec><![CDATA[Input:%String,StripCfg:%String=">WC",SkipEmptyLines:%Boolean=0]]></FormalSpec>
 <ReturnType>%ListOfDataTypes</ReturnType>
 <Implementation><![CDATA[
 	Set Result = ##class(%ListOfDataTypes).%New()
 	For i = 1:1:$Length(Input, $Char(10)) {
 		Set Line = $Piece(Input, $Char(10), i)
 		If StripCfg '= "" Set Line = $ZStrip(Line, StripCfg)
+		If SkipEmptyLines, Line = "" Continue
 		Do Result.Insert(Line)
 	}
 	Quit Result

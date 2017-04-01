@@ -62,6 +62,25 @@ to be appended at once.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="SplitPath">
+<Description>
+Split Path into ParentDir and LastPiece, where LastPiece is the last pathname
+component and ParentDir is everything leading up to that. If Path is already
+at the root, returns false.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Path:%String,*ParentDir:%String,*LastPiece:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set ParentDir = ##class(%File).ParentDirectoryName(Path)
+	If ParentDir = Path Quit 0
+	
+	Set Len = ##class(%File).GetDirectoryLength(Path)
+	Set LastPiece = ##class(%File).GetDirectoryPiece(Path, Len)
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
 <Method name="IsPathAbsolute">
 <Description>
 Returns a boolean indicating whether a path is absolute (true) or
