@@ -17,7 +17,7 @@ Full path to release base directory; releases are created below it.</Description
 <Type>%String</Type>
 </Property>
 
-<Property name="PostProcessor">
+<Property name="PostProcessors">
 <Description>
 ClassName:MethodName of a classmethod to call to post-process
 the release. Arguments passed in are the Project object, release
@@ -297,19 +297,45 @@ and whether the item should be enabled or not.</Description>
 	
 	Write "== Release "_Revision_" exported successfully.",!
 	
-	If ..PostProcessor '= "" {
-		If '##class(%Dictionary.CompiledMethod).%ExistsId(..PostProcessor_"||Run") {
-			Set ErrorMsg = "Postprocessor "_..PostProcessor_":Run() doesn't exist."
-			Quit $$$OK
+	If ..PostProcessors '= "" {
+		Set Status = ..HandlePostProcessors(Project, Revision, ReleasePath, .ErrorMsg)
+		If 'Status Quit Status
+		If ErrorMsg '= "" Quit $$$OK
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="HandlePostProcessors">
+<FormalSpec>Project:Strix.SCM.Project,Revision:%String,ReleasePath:%String,*ErrorMsg:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ErrorMsg = ""
+	
+	For i = 1:1:$Length(..PostProcessors, ",") {
+		Set ClassName = $ZStrip($Piece(..PostProcessors, ",", i), "<>W")
+		
+		;If no package specified, default to the Strix processors package
+		If ClassName '[ ".", ##class(%Dictionary.ClassDefinition).%ExistsId("Strix.SCM.Processor."_ClassName) {
+			Set ClassName = "Strix.SCM.Processor."_ClassName
 		}
 		
-		Write "== Running postprocessor "_..PostProcessor,!
+		If '##class(%Dictionary.CompiledMethod).%ExistsId(ClassName_"||Run") {
+			Set ErrorMsg = "Postprocessor "_ClassName_":Run() doesn't exist."
+			Return $$$OK
+		}
+		
+		Write "== Running postprocessor "_ClassName,!
 		Try {
-			Set Status = $ZObjClassMethod(..PostProcessor, "Run", Project, Revision, ReleasePath)
+			Set Status = $ZObjClassMethod(ClassName, "Run", Project, Revision, ReleasePath)
 		} Catch e {
 			Set Status = e.AsStatus()
 		}
-		If 'Status Set ErrorMsg = "Error running postprocessor: "_$System.Status.GetErrorText(Status) Quit $$$OK
+		If 'Status {
+			Set ErrorMsg = "Error running "_ClassName_": "_$System.Status.GetErrorText(Status)
+			Return $$$OK
+		}
 		Write "== Successfully ran postprocessor.",!
 	}
 	

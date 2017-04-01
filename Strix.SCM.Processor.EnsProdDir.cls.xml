@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Processor.EnsProdDir">
+<Description>
+Moves Ensemble Production classes to a subdirectory "Productions".</Description>
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64374,67492.869936</TimeCreated>
+
+<Method name="Run">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ..MoveProductions(Directory)
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MoveProductions">
+<Description>
+Checks all export files in a directory, and moves any file containing
+a production to a subdirectory "Productions".</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set rs = ##class(%ResultSet).%New("%File:FileSet")
+	Set Status = rs.Execute(Directory, "*.xml")
+	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
+	
+	While rs.Next() {
+		Set FileName = rs.Get("Name")
+		
+		Kill Loaded
+		Set Status = $System.OBJ.Load(FileName, "-d", , .Loaded, 1)
+		If 'Status Return $$$BuildErr("Error loading export file {}:", Status, FileName)
+		
+		Set Name =""
+		For  {
+			Set Name = $Order(Loaded(Name))
+			If Name = "" Quit
+			
+			If $Piece(Name, ".", *) '= "cls" Continue
+			Set ClassName = $Piece(Name, ".", 1, *-1)
+			
+			;If we can't find this class or it's not compiled, we can't check if this is a production
+			If '##class(%Dictionary.CompiledClass).%ExistsId(ClassName) Continue
+			If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue
+			
+			;A production. Make sure production directory present:
+			Set Status = ..EnsureProductionDir(Directory)
+			If 'Status Return Status
+			
+			;Move the file containing the production class
+			Set NewName = ##class(Strix.Lib.File).AppendPath(Directory, "Productions", rs.Get("ItemName"))
+			Set rc = ##class(%File).Rename(FileName, NewName, .ec)
+			If 'rc Return $$$BuildErr("Error {} moving file {} to {}", , ec, FileName, NewName)
+		}
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="EnsureProductionDir">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ReleaseDirectory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ProdDir = ##class(%File).SubDirectoryName(ReleaseDirectory, "Productions")
+	If ##class(%File).DirectoryExists(ProdDir) Quit $$$OK
+	
+	Set rc = ##class(%File).CreateDirectory(ProdDir, .ec)
+	If 'rc Quit $$$BuildErr("Error {} creating directory {}", , ec, ProdDir)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
