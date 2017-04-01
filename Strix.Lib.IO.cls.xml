@@ -6,12 +6,13 @@
 
 <Method name="GetCommandOutput">
 <Description>
-Creates a pipe to the specified OS command. Returns the data either as string or
-as list of lines. If an error occurs opening or reading the pipe, a message is
-placed in output parameter ErrorMsg.</Description>
+Creates a pipe to the specified OS command. If an error occurs opening
+or reading the pipe, a message is placed in output parameter ErrorMsg.
+If Strip is true, leading and trailing whitespace is removed from the
+result.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg</FormalSpec>
-<ReturnType>%ListOfObjects</ReturnType>
+<FormalSpec>Command:%String,Strip:%Boolean=1,*ErrorMsg:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	Set $ZTrap = "Error"
 	
@@ -34,18 +35,11 @@ placed in output parameter ErrorMsg.</Description>
 	Close Pipe
 	If Timedout Set ErrorMsg = "Error: timeout occurred reading pipe "_Command Quit ""
 	
-	; If we're not to split in lines we're done
-	If 'Split Quit Output
+	; Strip whitespace if so requested
+	If Strip Set Output = $ZStrip(Output, "<>WC")
 	
-	; Split and strip
-	Set Result = ##class(%ListOfDataTypes).%New()
-	For i = 1:1:$Length(Output, $Char(10)) {
-		Set Line = $Piece(Output, $Char(10), i)
-		Set Line = $ZStrip(Line, "<>WC")
-		Do Result.Insert(Line)
-	}
+	Quit Output
 	
-	Quit Result
 	
 Error
 	Set $ZTrap = ""

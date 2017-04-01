@@ -47,6 +47,25 @@ a piece-separated string.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="SplitLines">
+<Description>
+Splits a string containing newlines into a list of lines. StripCfg
+configures how whitespace in the lines is handled; if empty it is left
+untouched.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Input:%String,StripCfg:%String=">WC"]]></FormalSpec>
+<ReturnType>%ListOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ##class(%ListOfDataTypes).%New()
+	For i = 1:1:$Length(Input, $Char(10)) {
+		Set Line = $Piece(Input, $Char(10), i)
+		If StripCfg '= "" Set Line = $ZStrip(Line, StripCfg)
+		Do Result.Insert(Line)
+	}
+	Quit Result
+]]></Implementation>
+</Method>
+
 <Method name="TemplateReplace">
 <Description>
 Replaces parameter references in property Text with their values in property Parameters.
