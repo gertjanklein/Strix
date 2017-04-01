@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Processor.RemoveCfgFile">
+<Description>
+Removes the SCM configuration file from the release.</Description>
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64374,71436.986665</TimeCreated>
+
+<Method name="Run">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ConfigFileName = ##class(%File).GetFilename(Project.ConfigFilePath)
+	Set ConfigFilePath = ##class(%File).SubDirectoryName(Directory, ConfigFileName)
+	
+	If '##class(%File).Exists(ConfigFilePath) {
+		Quit $$$BuildErr("Error: configuration file {} not found.", , ConfigFilePath)
+	}
+	
+	Set rc = ##class(%File).Delete(ConfigFilePath, .ec)
+	If 'rc Quit $$$BuildErr("Error {} deleting {}.", , ec, ConfigFilePath)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
