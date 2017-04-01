@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Processor.Zip">
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64374,53782.637984</TimeCreated>
+
+<Method name="Run">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ..SplitProductions(Directory)
+	If 'Status Quit Status
+	
+	Set Status = ..ZipDir(Directory, 1)
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ZipDir">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Directory:%String,Delete:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Executable = "C:\Program Files\7-Zip\7z.exe"
+	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
+	
+	Do ##class(Strix.Lib.File).SplitPath(Directory, .BaseDir, .ReleaseDir)
+	Set ZipFile = ##class(%File).SubDirectoryName(BaseDir, ReleaseDir_".zip")
+	
+	Set Command = Executable_" "_"a """_ZipFile_""" """_Directory_""""
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	If ErrorMsg '= "" Quit $$$BuildErr("Error running command '{}': {}",, Command, ErrorMsg)
+	
+	Set Lines = ##class(Strix.Lib.String).SplitLines(Result, , 1)
+	If 'Lines.Count() || (Lines.GetAt(Lines.Count()) '= "Everything is Ok") {
+		Quit $$$BuildErr("Error from zip: {}", , Result)
+	}
+	
+	If 'Delete Quit $$$OK
+	
+	Set rc = ##class(%File).RemoveDirectoryTree(Directory)
+	If 'rc Quit $$$BuildErr("Error {} removing directory.",, rc)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SplitProductions">
+<Description>
+Checks all export files in a directory, and moves any file containing
+a production to a subdirectory "Productions".</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ProdDir = ##class(%File).SubDirectoryName(Directory, "Productions")
+	If '##class(%File).DirectoryExists(ProdDir) {
+		Set rc = ##class(%File).CreateDirectory(ProdDir, .ec)
+		If 'rc Quit $$$BuildErr("Error {} creating directory {}", , ec, ProdDir)
+	}
+	
+	Set rs = ##class(%ResultSet).%New("%File:FileSet")
+	Set Status = rs.Execute(Directory, "*.xml")
+	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
+	
+	While rs.Next() {
+		Set FileName = rs.Get("Name")
+		
+		Kill Loaded
+		Set Status = $System.OBJ.Load(FileName, "-d", , .Loaded, 1)
+		If 'Status Return $$$BuildErr("Error loading export file {}:", Status, FileName)
+		
+		Set Name =""
+		For  {
+			Set Name = $Order(Loaded(Name))
+			If Name = "" Quit
+			
+			If $Piece(Name, ".", *) '= "cls" Continue
+			Set ClassName = $Piece(Name, ".", 1, *-1)
+			
+			;If we can't find this class or it's not compiled, we can't check if this is a production
+			If '##class(%Dictionary.CompiledClass).%ExistsId(ClassName) Continue
+			If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue
+			
+			;A production. Move it.
+			Set NewName = ##class(Strix.Lib.File).AppendPath(Directory, "Productions", rs.Get("ItemName"))
+			Set rc = ##class(%File).Rename(FileName, NewName, .ec)
+			If 'rc Return $$$BuildErr("Error {} moving file {} to {}", , ec, FileName, NewName)
+		}
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
