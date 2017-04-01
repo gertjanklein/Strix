@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="Strix.SCM.Handler.Subversion">
+<IncludeCode>Strix</IncludeCode>
 <Super>Strix.SCM.Handler.File</Super>
 <TimeCreated>64301,43556.823379</TimeCreated>
 
 <Property name="SvnPath">
 <Description>
 Full path and filename of the SVN executable.</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ReleasePath">
+<Description>
+Full path to release directory</Description>
 <Type>%String</Type>
 </Property>
 
@@ -44,7 +51,7 @@ Full path and filename of the SVN executable.</Description>
 		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
 		If 'Status Quit Status
 		
-		Set Output = ..GetCommandOutput("log """_Filename_"""", , .ErrorMsg)
+		Set Output = ..GetCommandOutput("log """_Filename_"""", 1, .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		
 		Write !,"== Revision history for "_InternalName_":"
@@ -82,7 +89,7 @@ Full path and filename of the SVN executable.</Description>
 	
 	If Name = "Source control,Status" {
 		Write !,"== Working copy status:"
-		Set Output = ..GetCommandOutput("status -u """_Project.GetProjectPath()_"""", 0, .ErrorMsg)
+		Set Output = ..GetCommandOutput("status -u """_Project.GetProjectPath()_"""", , .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		Write !,Output,!
 		Quit $$$OK
@@ -99,6 +106,21 @@ Full path and filename of the SVN executable.</Description>
 	}
 	
 	
+	;== Make release
+	
+	If Name = "Source control,MakeRelease" {
+		If ..ReleasePath '= "" {
+			Set Target = "Please specify the revision to create a release for:"
+			Set Msg = "HEAD"
+			Set Action = 7 ; Ask user for input
+		} Else {
+			Set Action = 6 ;Alert
+			Set Target = "No release path configured."
+		}
+		Quit $$$OK
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
@@ -109,8 +131,7 @@ Full path and filename of the SVN executable.</Description>
 <FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	;Assume we won't handle this action
-	Set Action = 0, Target = "", Msg = "", Reload = 0
+	Set Reload = 0
 	
 	;Studio-generated action (as opposed to menu item)
 	If Type = 1 Quit $$$OK
@@ -123,7 +144,10 @@ Full path and filename of the SVN executable.</Description>
 	
 	#dim Project As Strix.SCM.Project
 	If InternalName = "" Quit $$$OK
-	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) Quit $$$OK
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .ErrorMsg) {
+		Write !,ErrorMsg,!
+		Quit $$$OK
+	}
 	
 	
 	;===== Delete item
@@ -134,7 +158,7 @@ Full path and filename of the SVN executable.</Description>
 		
 		If ##class(%File).Exists(Filename) {
 			;Delete from source control
-			Set Output = ..GetCommandOutput("delete --force """_Filename_"""", 0, .ErrorMsg)
+			Set Output = ..GetCommandOutput("delete --force """_Filename_"""", , .ErrorMsg)
 			If ErrorMsg '= "" Write !,ErrorMsg,! Quit $$$OK
 			If Output [ "svn: E" Write !,Output,! Quit $$$OK
 		}
@@ -143,6 +167,15 @@ Full path and filename of the SVN executable.</Description>
 		If 'Status Quit Status
 		
 		Quit $$$OK
+	}
+	
+	
+	;== Make release
+	
+	If Name = "Source control,MakeRelease" {
+		Set Status = ..MakeRelease(Project, Msg, .ErrorMsg)
+		If ErrorMsg '= "" Write !,ErrorMsg,!
+		Quit Status
 	}
 	
 	
@@ -165,6 +198,7 @@ and whether the item should be enabled or not.</Description>
 	  "Delete": "Delete "_InternalName_"",
 	  "Status": "Working copy status",
 	  "Checkin": "Open checkin dialog",
+	  "MakeRelease": "Make release",
 	  : ""
 	)
 	
@@ -206,7 +240,9 @@ and whether the item should be enabled or not.</Description>
 	  $lb("Checkin", 1, 1, 0),
 	  $lb("", 1, 0, 1),
 	  $lb("ShowRevisions", 1, 1, 0),
-	  $lb("Delete", 1, 1, 0)
+	  $lb("Delete", 1, 1, 0),
+	  $lb("", 1, 0, 1),
+	  $lb("MakeRelease", 1, 1, 0),
 	)
 	
 	Quit Items
@@ -220,6 +256,42 @@ and whether the item should be enabled or not.</Description>
 ]]></Content>
 </UDLText>
 
+<Method name="MakeRelease">
+<FormalSpec>Project:Strix.SCM.Project,Revision:%String,*ErrorMsg:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ErrorMsg = ""
+	
+	;Get project directory
+	Set Dir = Project.GetProjectPath(.Status)
+	If 'Status Quit $$$BuildErr("Error determining project path", Status)
+	
+	;Get corresponding repository URL
+	Set Url = ..GetCommandOutput("info --show-item url """_Dir_"""", , .ErrorMsg)
+	If ErrorMsg '= "" Quit $$$OK
+	If Url ? 1"svn: E"1.E Set ErrorMsg = "Error determining repository Url: "_Url Quit $$$OK
+	
+	If Revision = "HEAD" {
+		Set Revision = ..GetCurrentRevision(Dir, .ErrorMsg)
+		If ErrorMsg '= "" Quit $$$OK
+	}
+	
+	;Determine directory for release
+	Set ReleasePath = ##class(%File).SubDirectoryName(..ReleasePath, "R"_Revision)
+	
+	;Export from SCM
+	Write !,"== Exporting revision "_Revision_" to "_ReleasePath,!
+	Set Output = ..GetCommandOutput("export -r "_Revision_" "_Url_" """_ReleasePath_"""", , .ErrorMsg)
+	If ErrorMsg '= "" Quit $$$OK
+	
+	If Output ? 1"svn: E"1.E Set ErrorMsg = "Error exporting revision: "_Output Quit $$$OK
+	
+	Write "== Release "_Revision_" exported successfully.",!
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="GetCommandOutput">
 <Description>
 Returns the output of an svn command (to be passed in without
@@ -228,7 +300,7 @@ as a list of lines, already stripped. If an error occurs, the
 output parameter ErrorMsg will contain information. A timeout
 may occur on the Read if Cache does not have permission to
 read the repository.</Description>
-<FormalSpec>Command:%String,Split:%Boolean=1,*ErrorMsg:%String</FormalSpec>
+<FormalSpec>Command:%String,Split:%Boolean=0,*ErrorMsg:%String</FormalSpec>
 <ReturnType>%ListOfObjects</ReturnType>
 <Implementation><![CDATA[
 	; Prefix command with normalized path to svn executable
@@ -236,7 +308,44 @@ read the repository.</Description>
 	Set Command = Executable_" "_Command
 	
 	;Get output
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, Split, .ErrorMsg)
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	If ErrorMsg '= "" Quit ""
+	
+	If Split Set Result = ##class(Strix.Lib.String).SplitLines(Result)
+	
+	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="GetCurrentRevision">
+<FormalSpec>ItemPath:%String,*ErrorMsg:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	;Split executable in file and directory
+	Set Dir = ##class(%File).GetDirectory(..SvnPath)
+	Set File = ##class(%File).GetFilename(..SvnPath)
+	
+	;Change executable; we need svnversion
+	Set File = $Replace(File, "svn", "svnversion")
+	Set Executable = ##class(%File).SubDirectoryName(Dir, File)
+	
+	;Normalize spaces
+	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
+	
+	;Build full command
+	Set Command = Executable_" """_ItemPath_""""
+	
+	;Get output
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	If ErrorMsg '= "" Quit ""
+	
+	If $Extract(Result) '? 1N Set ErrorMsg = "Error determining current revision: "_Result Quit ""
+	
+	;If multiple revisions for this item, we want the latest
+	If Result [ ":" Set Result = $Piece(Result, ":", 2)
+	
+	;Strip modifier flags
+	Set Result = +Result
 	
 	Quit Result
 ]]></Implementation>
