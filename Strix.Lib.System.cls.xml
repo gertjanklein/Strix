@@ -38,7 +38,7 @@ previous value will be returned.</Description>
 <FormalSpec>ReadOnly:%Boolean="",*Status:%Status</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-	New $Namespace
+	New $Namespace, %objlasterror
 	
 	Set Directory = ..GetDatabaseDirectory("CACHELIB", .Status)
 	If 'Status Set Status = $$$BuildErr("Error determining CACHELIB database directory:", Status) Quit ""
