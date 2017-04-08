@@ -20,31 +20,18 @@ Do ##class(Strix.Patches.Language).Disable("nl")</Description>
 <FormalSpec>Language:%String</FormalSpec>
 <Implementation><![CDATA[
 	;Check that the language to disable is present:
-	
 	If '$Data(^%qCacheMsg("%Compiler", Language)) {
 		If $Data(^%qCacheMsgOrg("%Compiler", Language)) {
 			Write "Language already disabled.",!
 		} Else {
 			Write "Language not found.",!
 		}
-		Quit 0
+		Quit
 	}
 	
-	;Check that %SYS is writable:
-	
-	Set Writable = 1
-	Try {
-		Set ^%qCacheMsg("%CHUI.YesNo", "xx", "xx") = "xx"
-	} Catch e {
-		Set Writable = 0
-	}
-	If Writable {
-		Kill ^%qCacheMsg("%CHUI.YesNo", "xx", "xx")
-	} Else {
-		Write "Database CACHLIB is readonly; please mount it read-write. Go to System,",!
-		Write "Configuration, Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
-		Quit 0
-	}
+	;Make sure %SYS is writable:
+	Set PrevReadOnly = ##class(Strix.Lib.System).CacheLibReadOnly(0, .Status)
+	If 'Status Do $System.Status.DisplayError(Status) Quit
 	
 	Set Section = ""
 	For  {
@@ -57,7 +44,12 @@ Do ##class(Strix.Patches.Language).Disable("nl")</Description>
 		Kill ^%qCacheMsg(Section, Language)
 	}
 	
-	Quit 1
+	If PrevReadOnly {
+		Do ##class(Strix.Lib.System).CacheLibReadOnly(1, .Status)
+		If 'Status Do $System.Status.DisplayError(Status) Quit
+	}
+	
+	Quit
 ]]></Implementation>
 </Method>
 
@@ -70,31 +62,18 @@ Do ##class(Strix.Patches.Language).Enable("nl")</Description>
 <FormalSpec>Language:%String</FormalSpec>
 <Implementation><![CDATA[
 	;Check that the language to enable is present:
-	
 	If '$Data(^%qCacheMsgOrg("%Compiler", Language)) {
 		If $Data(^%qCacheMsg("%Compiler", Language)) {
 			Write "Language already enabled.",!
 		} Else {
 			Write "Language not found.",!
 		}
-		Quit 0
+		Quit
 	}
 	
-	;Check that %SYS is writable:
-	
-	Set Writable = 1
-	Try {
-		Set ^%qCacheMsg("%CHUI.YesNo", "xx", "xx") = "xx"
-	} Catch e {
-		Set Writable = 0
-	}
-	If Writable {
-		Kill ^%qCacheMsg("%CHUI.YesNo", "xx", "xx")
-	} Else {
-		Write "Database CACHLIB is readonly; please mount it read-write. Go to System,",!
-		Write "Configuration,Local databases, select CACHELIB, uncheck Always Mount Read-Only.",!
-		Quit 0
-	}
+	;Make sure %SYS is writable:
+	Set PrevReadOnly = ##class(Strix.Lib.System).CacheLibReadOnly(0, .Status)
+	If 'Status Do $System.Status.DisplayError(Status) Quit
 	
 	Set Section = ""
 	For  {
@@ -107,7 +86,109 @@ Do ##class(Strix.Patches.Language).Enable("nl")</Description>
 		Kill ^%qCacheMsgOrg(Section, Language)
 	}
 	
-	Quit 1
+	If PrevReadOnly {
+		Do ##class(Strix.Lib.System).CacheLibReadOnly(1, .Status)
+		If 'Status Do $System.Status.DisplayError(Status) Quit
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="DisableEnsemble">
+<Description>
+Disable translation for Ensemble messages
+
+Do ##class(Strix.Patches.Language).DisableEnsemble("nl")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Language:%String</FormalSpec>
+<Implementation><![CDATA[
+	;If this is not an Ensemble installation, there's nothing to do here
+	If $System.Version.GetISCProduct() '= 2 {
+		Write "This is not an Ensemble installation, nothing to do.",!
+		Quit
+	}
+	
+	;Get directory, EnsLib database has no namespace
+	Set Directory = ##class(Strix.Lib.System).GetDatabaseDirectory("EnsLib", .Status)
+	If 'Status {
+		Write "An error occurred determining the EnsLib database directory:",!
+		Do $System.Status.DisplayError(Status)
+		Quit
+	}
+	Set ExtRef = "^^"_Directory
+	
+	;Check if data already moved away
+	If '$Data(^[ExtRef]CacheMsg("Confirm", Language)) {
+		If $Data(^[ExtRef]CacheMsgOrg("Confirm", Language)) {
+			Write "Language already disabled.",!
+		} Else {
+			Write "Language not found.",!
+		}
+		Quit
+	}
+	
+	Set Section = ""
+	For  {
+		Set Section = $Order(^[ExtRef]CacheMsg(Section))
+		If Section = "" quit
+		If '$Data(^[ExtRef]CacheMsg(Section, Language)) Continue
+		
+		Write "Disabling section "_Section,!
+		Merge ^[ExtRef]CacheMsgOrg(Section, Language) = ^[ExtRef]CacheMsg(Section, Language)
+		Kill ^[ExtRef]CacheMsg(Section, Language)
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="EnableEnsemble">
+<Description>
+Re-enables the translation for a given language identifier.
+
+Do ##class(Strix.Patches.Language).EnableEnsemble("nl")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Language:%String</FormalSpec>
+<Implementation><![CDATA[
+	;If this is not an Ensemble installation, there's nothing to do here
+	If $System.Version.GetISCProduct() '= 2 {
+		Write "This is not an Ensemble installation, nothing to do.",!
+		Quit
+	}
+	
+	;Get directory, EnsLib database has no namespace
+	Set Directory = ##class(Strix.Lib.System).GetDatabaseDirectory("EnsLib", .Status)
+	If 'Status {
+		Write "An error occurred determining the EnsLib database directory:",!
+		Do $System.Status.DisplayError(Status)
+		Quit
+	}
+	Set ExtRef = "^^"_Directory
+	
+	;Check that the language to enable is present:
+	
+	If '$Data(^[ExtRef]CacheMsgOrg("Confirm", Language)) {
+		If $Data(^[ExtRef]CacheMsg("Confirm", Language)) {
+			Write "Language already enabled.",!
+		} Else {
+			Write "Language not found.",!
+		}
+		Quit
+	}
+	
+	Set Section = ""
+	For  {
+		Set Section = $Order(^[ExtRef]CacheMsgOrg(Section))
+		If Section = "" Quit
+		If '$Data(^[ExtRef]CacheMsgOrg(Section, Language)) Continue
+		
+		Write "Re-enabling section "_Section,!
+		Merge ^[ExtRef]CacheMsg(Section, Language) = ^[ExtRef]CacheMsgOrg(Section, Language)
+		Kill ^[ExtRef]CacheMsgOrg(Section, Language)
+	}
+	
+	Quit
 ]]></Implementation>
 </Method>
 
