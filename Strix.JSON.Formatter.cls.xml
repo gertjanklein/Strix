@@ -66,18 +66,24 @@ indentation level.</Description>
 <Implementation><![CDATA[
 	Set ThisIndent = Indent_$Justify("", ..#Indent)
 	
-	Set Result = "["_$$$EOL
+	Set Result = "["
+	Set PrevType = ""
 	
 	#dim it As %Iterator.Object
 	Set it = Array.%GetIterator()
 	While it.%GetNext(.Name, .Value) {
-		Set p = it.pointer, HasNext = it.%GetNext(), it.pointer = p
-		Set Comma = $Select(HasNext: ",", 1:"")
-		
 		Set Type = Array.%GetTypeOf(Name)
-		Set Result = Result_ThisIndent_..FormatValue(Value, Type, ThisIndent)_Comma_$$$EOL
+		
+		If "object,array" [ Type, PrevType = Type {
+			Set Result = Result_", "_..FormatValue(Value, Type, ThisIndent)
+		} Else {
+			If PrevType '= "" Set Result = Result_","
+			Set Result = Result_$$$EOL_ThisIndent_..FormatValue(Value, Type, ThisIndent)
+		}
+		
+		Set PrevType = Type
 	}
-	Set Result = Result_Indent_"]"
+	Set Result = Result_$$$EOL_Indent_"]"
 	
 	Quit Result
 ]]></Implementation>
