@@ -33,6 +33,7 @@ objects with the same sort key stay in the same order.</Description>
 		Set Property = $List(Item, 1)
 		Set Direction = $List(Item, 2)
 		Set Default = $List(Item, 3)
+		Set Flags = $List(Item, 4)
 		
 		Set Direction = $Case(Direction, "A": 1, "D": -1)
 		
@@ -41,7 +42,12 @@ objects with the same sort key stay in the same order.</Description>
 			Set Object = List.GetAt(i)
 			Set Value = $ZObjProperty(Object, Property)
 			If Value = "" Set Value = Default
-			Set Value = " "_$ZConvert(Value, "l")
+			If Flags [ "N" {
+				;Numeric
+				Set Value = +Value
+			} Else {
+				Set Value = " "_$ZConvert(Value, "l")
+			}
 			
 			Set Sorted(Value, $Increment(Sorted(Value))) = Object
 		}
@@ -100,7 +106,8 @@ If errors are detected in the specification, an error status is returned.</Descr
 		
 		Set Property = $ZStrip($Piece(Item, ":", 1), "<>W")
 		Set Direction = $ZStrip($Piece(Item, ":", 2), "<>W")
-		Set Default = $ZStrip($Piece(Item, ":", 3, $Length(Item, ":")), "<>W")
+		Set Default = $ZStrip($Piece(Item, ":", 3), "<>W")
+		Set Flags = $ZStrip($Piece(Item, ":", 4), "<>W")
 		
 		If Property = "" Set Status = $$$BuildErr("Error in spec "_i_": no property.", 1) Quit
 		If Direction = "" {
@@ -109,7 +116,7 @@ If errors are detected in the specification, an error status is returned.</Descr
 			Set Status = $$$BuildErr("Error in spec "_i_": invalid direction '"_Direction_"'.", 1) Quit
 		}
 		
-		Set SortSpecList = SortSpecList_$ListBuild($ListBuild(Property, Direction, Default))
+		Set SortSpecList = SortSpecList_$ListBuild($ListBuild(Property, Direction, Default, Flags))
 	}
 	If 'Status Quit Status
 	
