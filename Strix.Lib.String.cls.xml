@@ -146,5 +146,28 @@ or as a single $List, e.g.:
 	Quit Template
 ]]></Implementation>
 </Method>
+
+<Method name="HexEncode">
+<Description>
+Converts a binary sequence of bytes into a string of hexadecimal digits
+representing the byte's value.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input:%Binary,Lowercase:%Boolean=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ""
+	
+	For i = 1:1:$Length(Input) {
+		Set Byte = $Extract(Input, i)
+		Set Hex = $ZHex($Ascii(Byte))
+		If $Length(Hex) = 1 Set Hex = "0"_Hex
+		Set Result = Result_Hex
+	}
+	
+	If Lowercase Set Result = $ZConvert(Result, "l")
+	
+	Quit Result
+]]></Implementation>
+</Method>
 </Class>
 </Export>
