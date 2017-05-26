@@ -47,7 +47,10 @@ a production to a subdirectory "Productions".</Description>
 			Set ClassName = $Piece(Name, ".", 1, *-1)
 			
 			;If we can't find this class or it's not compiled, we can't check if this is a production
-			If '##class(%Dictionary.CompiledClass).%ExistsId(ClassName) Continue
+			If '##class(%Dictionary.CompiledClass).%ExistsId(ClassName) {
+				 Write "Warning: can't find compiled class "_ClassName,!
+				 Continue
+			}
 			If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue
 			
 			;A production. Make sure production directory present:
