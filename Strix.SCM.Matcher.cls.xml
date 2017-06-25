@@ -53,6 +53,9 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 	$$$NormalizeType(Item)
 	Set ItemType = $$$ItemType(Item)
 	
+	;Treat BPL and DTL types as the classes they are
+	If "bpl,dtl" [ ItemType Set $$$ItemType(Item) = "cls"
+	
 	;First check the negative specifications: if one of them matches we must
 	;reject this item.
 	Set Found = 0
