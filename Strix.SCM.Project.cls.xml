@@ -284,7 +284,7 @@ parameter InternalName, initialized with the project's settings.</Description>
 	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	
 	;Determine which project(s), if any, own this item
-	Set ProjectIds = ##class(Strix.SCM.Project).ProjectsOwningItem(InternalName, .Status)
+	Set ProjectIds = ..GetProjectsOwningItem(InternalName, .Status)
 	If 'Status Quit $$$BuildErr("Error determining projects owning '"_InternalName_"':", Status)
 	
 	;We need exactly one project
@@ -380,8 +380,9 @@ Returns the file name for an item, based on project settings.</Description>
 	Set Path = ..GetProjectPath(.Status)
 	If 'Status Quit ""
 	
-	Set Type = $$$NormalizedType(ItemName)
 	Set Name = $$$ItemName(ItemName)
+	Set Type = $$$NormalizedType(ItemName)
+	If "bpl,dtl" [ Type Set Type = "cls"
 	
 	If ..PackageSubdirs {
 		Do ##class(Strix.Lib.String).Explode(Name, ".", .Pieces)
@@ -425,10 +426,10 @@ Returns a boolean indicating whether this item is handled by a project.</Descrip
 	
 	;We currently only support the types below
 	Set Type = $$$ItemType(Item)
-	If '$ListFind($ListFromString("cls,mac,int,inc"), Type) Quit 0
+	If '$ListFind($ListFromString("cls,bpl,dtl,mac,int,inc"), Type) Quit 0
 	
 	;Get id of project owning this item:
-	Set ProjectIds = ##class(Strix.SCM.Project).ProjectsOwningItem(Item, .Status)
+	Set ProjectIds = ..GetProjectsOwningItem(Item, .Status)
 	If 'Status Set Msg = "Error determining project for '"_Item_"'." Quit 0
 	If ProjectIds = "" Quit 0
 	
@@ -507,7 +508,7 @@ Open and return the project with the specified name, if present.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ProjectsOwningItem">
+<Method name="GetProjectsOwningItem">
 <Description>
 Returns a list of ids of projects owning this item.</Description>
 <ClassMethod>1</ClassMethod>
