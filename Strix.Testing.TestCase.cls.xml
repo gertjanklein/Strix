@@ -44,7 +44,7 @@ Code to run after all tests in this class have been executed.</Description>
 </UDLText>
 
 <Method name="AssertTrue">
-<FormalSpec>Result,Description:%String=""</FormalSpec>
+<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Result {
@@ -52,6 +52,7 @@ Code to run after all tests in this class have been executed.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -63,7 +64,7 @@ Code to run after all tests in this class have been executed.</Description>
 </Method>
 
 <Method name="AssertFalse">
-<FormalSpec>Result,Description:%String=""</FormalSpec>
+<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If 'Result {
@@ -71,6 +72,7 @@ Code to run after all tests in this class have been executed.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -89,7 +91,7 @@ Code to run after all tests in this class have been executed.</Description>
 </UDLText>
 
 <Method name="AssertEqual">
-<FormalSpec>Result,Expected,Description:%String=""</FormalSpec>
+<FormalSpec>Result,Expected,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Expected = Result {
@@ -97,6 +99,7 @@ Code to run after all tests in this class have been executed.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -108,7 +111,7 @@ Code to run after all tests in this class have been executed.</Description>
 </Method>
 
 <Method name="AssertNotEqual">
-<FormalSpec>Result,Expected,Description:%String=""</FormalSpec>
+<FormalSpec>Result,Expected,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Expected '= Result {
@@ -116,6 +119,7 @@ Code to run after all tests in this class have been executed.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -136,7 +140,7 @@ Code to run after all tests in this class have been executed.</Description>
 <Method name="AssertContains">
 <Description>
 Asserts that string InValue contains string Expected.</Description>
-<FormalSpec>Container,Value,Description:%String=""</FormalSpec>
+<FormalSpec>Container,Value,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Container [ Value {
@@ -144,6 +148,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -162,7 +167,7 @@ Asserts that string InValue contains string Expected.</Description>
 </UDLText>
 
 <Method name="AssertListEqual">
-<FormalSpec>Result:%List,Expected:%List,Description:%String=""</FormalSpec>
+<FormalSpec>Result:%List,Expected:%List,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If $ListSame(Expected, Result) {
@@ -170,6 +175,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -181,7 +187,7 @@ Asserts that string InValue contains string Expected.</Description>
 </Method>
 
 <Method name="AssertListNotEqual">
-<FormalSpec>Result:%List,Expected:%List,Description:%String=""</FormalSpec>
+<FormalSpec>Result:%List,Expected:%List,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If '$ListSame(Expected, Result) {
@@ -189,6 +195,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -207,7 +214,7 @@ Asserts that string InValue contains string Expected.</Description>
 </UDLText>
 
 <Method name="AssertStatusOk">
-<FormalSpec>Status:%Status,Description:%String=""</FormalSpec>
+<FormalSpec>Status:%Status,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Status = $$$OK {
@@ -215,6 +222,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -227,7 +235,7 @@ Asserts that string InValue contains string Expected.</Description>
 </Method>
 
 <Method name="AssertStatusEqual">
-<FormalSpec>Status1:%Status,Status2:%Status,Description:%String=""</FormalSpec>
+<FormalSpec>Status1:%Status,Status2:%Status,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	If Status1 = Status2 {
@@ -235,6 +243,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
@@ -249,7 +258,7 @@ Asserts that string InValue contains string Expected.</Description>
 </Method>
 
 <Method name="AssertErrorStatus">
-<FormalSpec>Status:%Status,Description:%String=""</FormalSpec>
+<FormalSpec>Status:%Status,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
 	Set Codes = $System.Status.GetErrorCodes(Status)
@@ -259,6 +268,7 @@ Asserts that string InValue contains string Expected.</Description>
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
 		Quit 1
 	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	
 	$$$ToTerm("E")
 	If '$IsObject(..Runner) Quit 0
