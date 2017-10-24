@@ -115,8 +115,8 @@ Constructor for error info</Description>
 		If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertListEqual,AssertListNotEqual"), ..AssertionType) {
 			Set Expected = ..Expected
 			Set Result = ..Result
-			ZWrite Expected
-			ZWrite Result
+			Write "Expected: ",Expected,!
+			Write "Result:   ",Result,!
 			
 		} ElseIf $ListFind($ListFromString("AssertStatusOk,AssertErrorStatus,AssertTrue,AssertFalse"), ..AssertionType) {
 			Write "Got: "_..Result,!
