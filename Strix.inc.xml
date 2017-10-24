@@ -29,6 +29,11 @@
 #define QuitErrOnNew(%msg,%sc) Set %objlasterror = $System.Status.AppendStatus($s(%msg'="":$System.Status.Error($$$GeneralError,%msg),1:1),%sc) Quit %objlasterror
 
 
+#; ===== Formatting
+
+#def1arg BuildStr(%args) ##class(Strix.Lib.String).TemplateReplace(%args)
+
+
 #; ===== Logging
 
 #define LogTrappedError(%msg) ##class(Strix.Lib.Log).LogTrappedError($$$CurrentClass_":"_$$$CurrentMethod,%msg)
