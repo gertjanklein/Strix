@@ -7,6 +7,7 @@ Proper handlers subclass this one and implement what they need.</Description>
 <IncludeCode>Strix.SCM</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63864,78142.324488</TimeCreated>
+<DependsOn>Strix.Generator.Utilities</DependsOn>
 
 <Parameter name="GlobalSettings">
 <Description>
