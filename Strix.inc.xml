@@ -44,6 +44,7 @@
 
 
 #; Write to terminal if there is one
+#define IsTerm (($Principal["|TRM|")||($Principal["|TNT|"))
 #def1arg ToTerm(%args) If (($Principal["|TRM|")||($Principal["|TNT|")) { Write %args }
 
 
