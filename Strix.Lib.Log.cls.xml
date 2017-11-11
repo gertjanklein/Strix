@@ -94,6 +94,30 @@ Logs a trapped error (e.g., from a $ZTrap trap)</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="LogAssertionError">
+<Description>
+Logs an assert failure</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Location:%String,Condition:%String,Message:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Me = ..%New()
+	
+	Set Me.Type = "Assert"
+	Set Me.Location = Location
+	Set Me.Message = Condition
+	If Message '= "" Set Me.Message = Me.Message_" ("_Message_")"
+	
+	Set sc = Me.%Save()
+	If 'sc Do Me.HandleSaveFailure(sc)
+	
+	;Return a status containing the message
+	If $Quit Quit $$$BuildErr(Message, 1)
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <Method name="LogInfo">
 <Description>
 Logs an event of type Info</Description>

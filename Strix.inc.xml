@@ -48,7 +48,11 @@
 #def1arg ToTerm(%args) If (($Principal["|TRM|")||($Principal["|TNT|")) { Write %args }
 
 
+#; ===== Assertions
 
+#define LogAssert(%msg) ##class(Strix.Lib.Log).LogAssert($$$CurrentClass_":"_$$$CurrentMethod,%msg)
+#define Assert(%cond) If '(%cond) { Throw ##class(%Exception.General).%New("Assertion error",,,##quote(%cond)) }
+#define AssertAndLog(%cond) If '(%cond) { Do $$$LogAssert(##quote(%cond)) Throw ##class(%Exception.General).%New("Assertion error",,,##quote(%cond)) }
 
 
 ]]></Routine>
