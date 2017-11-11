@@ -115,7 +115,7 @@ types, does not handle Caché objects.</Description>
 	
 	If Type = "oref" {
 		;Caché object. Maybe a callback machanism can be used here. For now,
-		;return the oref as string for now.
+		;return the oref as string.
 		Quit """"_Value_""""
 	}
 	
