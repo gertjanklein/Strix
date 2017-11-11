@@ -43,7 +43,7 @@ Code to run after all tests in this class have been executed.</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="AssertTrue">
+<Method name="Assert">
 <FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
@@ -60,6 +60,16 @@ Code to run after all tests in this class have been executed.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="AssertTrue">
+<Description>
+Alias for ..Assert</Description>
+<CodeMode>expression</CodeMode>
+<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[..Assert(.Result, .Description, Parms...)
 ]]></Implementation>
 </Method>
 
