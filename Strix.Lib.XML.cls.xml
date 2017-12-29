@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.XML">
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64646,40025.46564</TimeCreated>
+
+<Method name="ObjectsFromXML">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input,ClassNames:%String,*Objects:%Collection.AbstractListOfObj=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '$IsObject(Objects) || 'Objects.%IsA("%Collection.AbstractListOfObj") {
+		Set Objects = ##class(%ListOfObjects).%New()
+	}
+	
+	Set Reader = ##class(%XML.Reader).%New()
+	
+	;== Determine input type
+	
+	If $IsObject(Input) {
+		;Assume stream
+		Set Status = Reader.OpenStream(Input)
+		If 'Status Quit $$$BuildErr("Error opening input as stream:", Status)
+		
+	} ElseIf ##class(%File).%Exists(Input) {
+		Set Status = Reader.OpenFile(Input)
+		If 'Status Quit $$$BuildErr("Error opening input as file:", Status)
+		
+	} Else {
+		Set Status = Reader.OpenString(Input)
+		If 'Status Quit $$$BuildErr("Error opening input as string:", Status)
+		
+	}
+	
+	;== Process list of class names
+	
+	;Convert to list if it isn't already
+	If '$ListValid(ClassNames) Set ClassNames = $ListFromString(ClassNames)
+	For i = 1:1:$ListLength(ClassNames) {
+		Set ClassName = $ZStrip($List(ClassNames, i), "<>W")
+		If ClassName = "" Continue
+		
+		Set XMLName = $$$GetClassParameter(tClassname,"XMLNAME")
+		If XMLName = "" Set XMLName = $Piece(ClassName, ".", $Length(ClassName, "."))
+		
+		Do Reader.Correlate(XMLName, ClassName)
+	}
+	
+	;== Get objects
+	
+	While Reader.Next(.Object, .Status) {
+		Do Objects.Insert(Object)
+	}
+	If 'Status Quit $$$BuildErr("Error correlating object:", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
