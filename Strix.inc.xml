@@ -14,6 +14,12 @@
 #; can't be used for embedded SQL.
 #define ClassSQLTable(%c) ($$$comClassKeyGet(%c,$$$cCLASSsqlschemaname)_"."_$$$comClassKeyGet(%c,$$$cCLASSsqltablename))
 
+
+#; Get class or property parameter. From EnsUtil.inc.
+#define GetClassParameter(%cls,%parm) $$$comMemberKeyGet(%cls,$$$cCLASSparameter,%parm,$$$cPARAMdefault)
+#define GetPropertyParameter(%cls,%prop,%parm) $$$comMemberArrayGet(%cls,$$$cCLASSproperty,%prop,$$$cPROPparameter,%parm)
+
+
 #; ===== Status
 
 #; Create a %Status from a message and another %Status. The message is
