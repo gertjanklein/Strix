@@ -6,10 +6,20 @@
 <TimeCreated>64646,40025.46564</TimeCreated>
 
 <Method name="ObjectsFromXML">
+<Description>
+Creates objects for the classes specified in ClassNames, from the
+XML in Input (a string, stream or filename), and returns them
+in Objects.
+The names of the classes to look for should be specified as either
+a comma-separated string or a $list. The XML name is taken from
+the XMLNAME class parameter.
+The Objects collection will be created if it doesn't exists; if it
+does, it will not be cleared.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Input,ClassNames:%String,*Objects:%Collection.AbstractListOfObj=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	; Only create collection if not passed in
 	If '$IsObject(Objects) || 'Objects.%IsA("%Collection.AbstractListOfObj") {
 		Set Objects = ##class(%ListOfObjects).%New()
 	}
@@ -24,10 +34,12 @@
 		If 'Status Quit $$$BuildErr("Error opening input as stream:", Status)
 		
 	} ElseIf ##class(%File).%Exists(Input) {
+		;Valid filename is unlikely to be intended as XML
 		Set Status = Reader.OpenFile(Input)
 		If 'Status Quit $$$BuildErr("Error opening input as file:", Status)
 		
 	} Else {
+		;No stream, not a file: must be XML in string
 		Set Status = Reader.OpenString(Input)
 		If 'Status Quit $$$BuildErr("Error opening input as string:", Status)
 		
@@ -35,7 +47,7 @@
 	
 	;== Process list of class names
 	
-	;Convert to list if it isn't already
+	; Convert to list if it isn't already
 	If '$ListValid(ClassNames) Set ClassNames = $ListFromString(ClassNames)
 	For i = 1:1:$ListLength(ClassNames) {
 		Set ClassName = $ZStrip($List(ClassNames, i), "<>W")
