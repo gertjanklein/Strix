@@ -321,11 +321,6 @@ and whether the item should be enabled or not.</Description>
 			Set ClassName = "Strix.SCM.Processor."_ClassName
 		}
 		
-		If '##class(%Dictionary.CompiledMethod).%ExistsId(ClassName_"||Run") {
-			Set ErrorMsg = "Postprocessor "_ClassName_":Run() doesn't exist."
-			Return $$$OK
-		}
-		
 		Write "== Running postprocessor "_ClassName,!
 		
 		#dim Processor As Strix.SCM.Processor.Base
