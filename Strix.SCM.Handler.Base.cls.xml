@@ -219,6 +219,21 @@ Returns the (property) description for a specific setting,</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
+// ===== PostProcessor callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="HandlePostProcessorOutput">
+<Description>
+Callback to handle messages from a postprocessor.</Description>
+<FormalSpec>Text:%String</FormalSpec>
+<Implementation><![CDATA[	Write "   "_Text,!
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
 // ===== Menus and menu items
 
 ]]></Content>

@@ -327,15 +327,19 @@ and whether the item should be enabled or not.</Description>
 		}
 		
 		Write "== Running postprocessor "_ClassName,!
-		Try {
-			Set Status = $ZObjClassMethod(ClassName, "Run", Project, Revision, ReleasePath)
-		} Catch e {
-			Set Status = e.AsStatus()
-		}
+		
+		#dim Processor As Strix.SCM.Processor.Base
+		Set Processor = ##class(Strix.SCM.Processor.Base).Get(ClassName, $this, Project, .Status)
 		If 'Status {
-			Set ErrorMsg = "Error running "_ClassName_": "_$System.Status.GetErrorText(Status)
+			Set ErrorMsg = "Error getting postprocessor "_ClassName_": "_$System.Status.GetErrorText(Status)
 			Return $$$OK
 		}
+		Set Status = Processor.Run(Revision, ReleasePath)
+		If 'Status {
+			Set ErrorMsg = "Error running postprocessor "_ClassName_": "_$System.Status.GetErrorText(Status)
+			Return $$$OK
+		}
+		
 		Write "== Successfully ran postprocessor.",!
 	}
 	

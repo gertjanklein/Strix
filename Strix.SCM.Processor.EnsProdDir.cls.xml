@@ -3,13 +3,11 @@
 <Class name="Strix.SCM.Processor.EnsProdDir">
 <Description>
 Moves Ensemble Production classes to a subdirectory "Productions".</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
+<Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,67492.869936</TimeCreated>
 
 <Method name="Run">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Status = ..MoveProductions(Directory)
@@ -23,7 +21,6 @@ Moves Ensemble Production classes to a subdirectory "Productions".</Description>
 <Description>
 Checks all export files in a directory, and moves any file containing
 a production to a subdirectory "Productions".</Description>
-<ClassMethod>1</ClassMethod>
 <FormalSpec>Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -48,7 +45,7 @@ a production to a subdirectory "Productions".</Description>
 			
 			;If we can't find this class or it's not compiled, we can't check if this is a production
 			If '##class(%Dictionary.CompiledClass).%ExistsId(ClassName) {
-				 Write "Warning: can't find compiled class "_ClassName,!
+				 Do ..Write("Warning: can't find compiled class "_ClassName)
 				 Continue
 			}
 			If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue

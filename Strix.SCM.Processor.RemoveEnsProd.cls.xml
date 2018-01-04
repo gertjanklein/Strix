@@ -3,13 +3,11 @@
 <Class name="Strix.SCM.Processor.RemoveEnsProd">
 <Description>
 Removes Ensemble Production classes from the export.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
+<Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,67492.869936</TimeCreated>
 
 <Method name="Run">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Status = ..RemoveProductions(Directory)
@@ -23,7 +21,6 @@ Removes Ensemble Production classes from the export.</Description>
 <Description>
 Checks all export files in a directory, and removes any file containing
 an Ensemble production.</Description>
-<ClassMethod>1</ClassMethod>
 <FormalSpec>Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -32,7 +29,7 @@ an Ensemble production.</Description>
 	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
 	
 	While rs.Next() {
-		Set FileName = rs.Get("Name")
+		Set FileName = rs.Get("Name"), ItemName = rs.Get("ItemName")
 		
 		Kill Loaded
 		Set Status = $System.OBJ.Load(FileName, "-d", , .Loaded, 1)
@@ -50,13 +47,14 @@ an Ensemble production.</Description>
 				If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue
 				
 			} Else {
-				 Write "Warning: class "_ClassName_" not compiled.",!
+				 Do ..Write("Warning: class "_ClassName_" not compiled.")
 				 Set MROList = ##class(Strix.Generator.Utilities).MRO(ClassName, 0)
 				 If '$ListFind(MROList, "Ens.Production") Continue
 				 
 			}
 			
 			;A production. Remove this file:
+			Do ..Write("Removing "_ItemName_" from release because it contains an Ensemble production.")
 			Set rc = ##class(%File).Delete(FileName, .ec)
 			If 'rc Return $$$BuildErr("Error {} removing file {}.", , ec, FileName)
 		}

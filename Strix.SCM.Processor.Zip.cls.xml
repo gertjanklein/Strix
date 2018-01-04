@@ -3,13 +3,11 @@
 <Class name="Strix.SCM.Processor.Zip">
 <Description>
 Zips the release directory.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
+<Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,53782.637984</TimeCreated>
 
 <Method name="Run">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Revision:%String,Directory:%String</FormalSpec>
+<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Status = ..ZipDir(Directory, 1)
