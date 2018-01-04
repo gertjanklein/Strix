@@ -24,9 +24,9 @@
 
 #; Create a %Status from a message and another %Status. The message is
 #; wrapped in a general error and prefixed to the status.
-#;define BuildErr(%msg,%sc) $System.Status.AppendStatus($s(%msg'="":$System.Status.Error($$$GeneralError,%msg),1:1),%sc)
+#def1arg BuildStatus(%args) ##class(Strix.Lib.Status).BuildStatus(%args)
+#; Deprecated name for BuildStatus
 #def1arg BuildErr(%args) ##class(Strix.Lib.Status).BuildStatus(%args)
-
 
 #; Builds a status from a message and status, places it is %objlasterror,
 #; and quits it. This is intended only for use in %OnNew, where the %Status
