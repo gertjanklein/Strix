@@ -129,17 +129,29 @@ Runs all tests in the specified package.</Description>
 	Set Runner = ..%New()
 	Set Runner.Debug = Debug
 	
-	If ##class(%Dictionary.ClassDefinition).%ExistsId(Package) {
-		;Apparently a class, run its tests
+	Set (ClassName, MethodName) = ""
+	If Package [ ":" {
+		Set ClassName = $Piece(Package, ":", 1)
+		Set MethodName = $Piece(Package, ":", 2)
+		
+	} ElseIf ##class(%Dictionary.ClassDefinition).%ExistsId(Package) {
 		Set ClassName = Package
-		Set sc = Runner.RunClass(ClassName)
+		
+	}
+	
+	If ClassName '= "" {
+		Set sc = Runner.RunClass(ClassName, MethodName)
 		If 'sc Do Runner.RecordError("Error running testcase '"_ClassName_"'", sc)
 		Set Runner.TestRunDone = $ZDateTime($ZUtil(188), 3, 1, 3)
 		Do Runner.ReportToTerminal()
-		Quit $$$OK
+		
+	} Else {
+		Set sc = Runner.RunPackage(Package)
+		If 'sc Quit sc
+		
 	}
 	
-	Quit Runner.RunPackage(Package)
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -177,7 +189,7 @@ Runs all tests in the specified package.</Description>
 <Method name="RunClass">
 <Description>
 Runs test methods in the specified subclass of Strix.Testing.TestCase</Description>
-<FormalSpec>ClassName:%String</FormalSpec>
+<FormalSpec>ClassName:%String,TestToRun:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set ..CurrentTestClass = ClassName, ..CurrentTestMethod = ""
@@ -199,6 +211,7 @@ Runs test methods in the specified subclass of Strix.Testing.TestCase</Descripti
 	#dim MethodNames As %ListOfDataTypes
 	For i = 1:1:MethodNames.Count() {
 		Set MethodName = MethodNames.GetAt(i)
+		If TestToRun '= "", TestToRun '= MethodName Continue
 		Set sc = ..RunMethod(TestObject, MethodName)
 		If 'sc Do ..RecordError("Error running test method '"_MethodName_"'", sc)
 	}
