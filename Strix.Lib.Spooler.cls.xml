@@ -58,7 +58,7 @@ data collected when the spooler was active</Description>
 		Set LineNr = $Order(^SPOOL(..DocumentNumber, LineNr), 1, Line)
 		If LineNr = "" Quit
 		If LineNr = 2147483647 Quit
-		Set Data = Data_Line_$Char(13,10)
+		Set Data = Data_Line
 	}
 	Set ..Data = Data
 	
