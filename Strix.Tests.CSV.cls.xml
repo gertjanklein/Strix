@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Tests.CSV">
+<Description>
+Tests Strix.Lib.CSV.</Description>
+<Super>Strix.Testing.TestCase</Super>
+<TimeCreated>64594,31293.265299</TimeCreated>
+
+<Property name="Stream">
+<Description>
+Stream to use as input to parser</Description>
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Tests
+
+]]></Content>
+</UDLText>
+
+<Method name="TestBasic">
+<Description>
+Test basic functionality</Description>
+<Implementation><![CDATA[
+	Do ..MakeStream("a,b,c", "1,2,3")
+	
+	#dim p As Strix.Lib.CSV
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "a", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "b", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "c", "Result {} should have expected value.", 3)
+	
+	If '..Assert(p.Next(.Status), "Second row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "2", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	
+	If '..Assert('p.Next(.Status), "No third row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestSkip">
+<Description>
+Test header skipping functionality</Description>
+<Implementation><![CDATA[
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	
+	; Test skipping first row
+	
+	#dim p As Strix.Lib.CSV
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream,,1)
+	
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "2", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	
+	If '..Assert(p.Next(.Status), "Second row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	
+	If '..Assert('p.Next(.Status), "No third row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	;Test skipping all rows
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream,,3)
+	If '..Assert('p.Next(.Status), "No rows should be found when skipping all.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestSeparator">
+<Description>
+Test different separator</Description>
+<Implementation><![CDATA[
+	Do ..MakeStream("a;b;c", "1;2,a;3", "4;5;6")
+	
+	#dim p As Strix.Lib.CSV
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream, ";")
+	
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	
+	If '..Assert(p.Next(.Status), "Second row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "2,a", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	
+	If '..Assert(p.Next(.Status), "Third row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still ok.")
+	
+	If '..Assert('p.Next(.Status), "No fourth row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestQuoteSimple">
+<Description>
+Test quoted fields</Description>
+<Implementation><![CDATA[
+	Do ..MakeStream("1,""x,y,z"",3", "4,5,""6,""", """9"",""8"",""7""")
+	
+	#dim p As Strix.Lib.CSV
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "x,y,z", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	
+	If '..Assert(p.Next(.Status), "Second row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "4", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "5", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "6,", "Result {} should have expected value.", 3)
+	
+	If '..Assert(p.Next(.Status), "Third row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "9", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "8", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "7", "Result {} should have expected value.", 3)
+	
+	If '..Assert('p.Next(.Status), "No fourth row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestErrors">
+<Description>
+Test unparseable data</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.Lib.CSV
+	
+	; Lone quote in quoted field
+	
+	Do ..MakeStream("1,""before""after"",3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
+	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
+	
+	; End of data searching for close quote
+	
+	Do ..MakeStream("1,""")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
+	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
+	
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestMultiline">
+<Description>
+Test multiline quoted fields</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.Lib.CSV
+	
+	; Field 2 split over 3 lines
+	
+	Do ..MakeStream("1,""This is"_$$$EOL_"a multiline"_$$$EOL_"field."",3")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
+	Do ..AssertEqual(p.Get(2), "This is"_$$$EOL_"a multiline"_$$$EOL_"field.", "Result {} should have expected value.", 2)
+	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	
+	
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="MakeStream">
+<FormalSpec>Lines...:%String</FormalSpec>
+<Implementation><![CDATA[
+	Do ..Stream.Clear()
+	For i = 1:1:$Get(Lines) {
+		Do ..Stream.WriteLine($Get(Lines(i)))
+	}
+	Do ..Stream.Rewind()
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Cleanup code.
+
+]]></Content>
+</UDLText>
+
+<Method name="TearDown">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
