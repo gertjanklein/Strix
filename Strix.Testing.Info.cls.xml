@@ -112,7 +112,7 @@ Constructor for error info</Description>
 	If ..Type = "Fail" {
 		Write ..AssertionType_" failed: "_..Description,!
 		
-		If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertListEqual,AssertListNotEqual"), ..AssertionType) {
+		If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertListEqual,AssertListNotEqual,AssertStatusParameter"), ..AssertionType) {
 			Set Expected = ..Expected
 			Set Result = ..Result
 			Write "Expected: ",Expected,!
