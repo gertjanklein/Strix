@@ -2,11 +2,18 @@
 <Export generator="Cache" version="25">
 <Class name="Strix.Lib.CSV">
 <Description>
-A class to parse CSV data formatted according to rfc4180.
+A class to parse CSV data formatted according to RFC4180.
 Provides a resultset-like interface.</Description>
 <IncludeCode>Strix</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>64661,63159.857904</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ----- Input and configuration
+
+]]></Content>
+</UDLText>
 
 <Property name="Input">
 <Description>
@@ -18,17 +25,26 @@ The input data as a stream</Description>
 <Description>
 The separator to use</Description>
 <Type>%String</Type>
+<InitialExpression>","</InitialExpression>
 </Property>
 
 <Property name="SkipCount">
 <Description>
 The number of initial (header) lines to skip on parsing</Description>
 <Type>%Integer</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="NamesFromFirstRow">
+<Description>
+Whether to take column names from the first row</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
 </Property>
 
 <UDLText name="T">
 <Content><![CDATA[
-// ----- Private data
+// ----- State
 
 ]]></Content>
 </UDLText>
@@ -46,6 +62,13 @@ The data, indexed by column number</Description>
 <MultiDimensional>1</MultiDimensional>
 </Property>
 
+<Property name="Names">
+<Description>
+Optional mapping of column name to column index</Description>
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -54,14 +77,18 @@ The data, indexed by column number</Description>
 </UDLText>
 
 <Method name="GetParser">
+<Description>
+Returns an instance of this class with some properties setup.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%AbstractStream,Separator:%String=",",SkipCount:%Integer=0</FormalSpec>
+<FormalSpec>Input:%AbstractStream,Separator:%String=",",SkipCount:%Integer=0,ColumnNames:%String</FormalSpec>
 <ReturnType>Strix.Lib.CSV</ReturnType>
 <Implementation><![CDATA[
 	Set Me = ..%New()
 	Set Me.Input = Input
 	Set Me.Separator = Separator
 	Set Me.SkipCount = SkipCount
+	If SkipCount = 1, '$Data(ColumnNames) Set Me.NamesFromFirstRow = 1
+	If $Get(ColumnNames) '= "" Do Me.SetColumnNames(ColumnNames)
 	Quit Me
 ]]></Implementation>
 </Method>
@@ -76,6 +103,13 @@ Get the next record. Returns 0 if no more records available.</Description>
 		Set ok = ..GetRecord(.Status)
 		If 'ok Quit
 		Set ..RecordNr = ..RecordNr + 1
+		If ..RecordNr = 1, ..NamesFromFirstRow {
+			For ColumnNr = 1:1:..Data {
+				Set ColumnName = $ZStrip(..Data(ColumnNr), "<>W")
+				If ColumnName = "" Continue
+				Set ..Names(ColumnName) = ColumnNr
+			}
+		}
 		If ..RecordNr > ..SkipCount Quit
 	}
 	If 'ok Quit 0
@@ -85,6 +119,10 @@ Get the next record. Returns 0 if no more records available.</Description>
 </Method>
 
 <Method name="Get">
+<Description>
+Returns the data in the specified column for the current record.
+Parameter Default specifies what to return if a column is requested
+that wasn't present in the input.</Description>
 <CodeMode>expression</CodeMode>
 <FormalSpec>Column:%Integer,Default:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -92,14 +130,52 @@ Get the next record. Returns 0 if no more records available.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetByName">
+<Description>
+Returns the data in the column, specified by name, for the current
+record. If no column with that name is present, or if no data was
+supplied for it, returns the default value.</Description>
+<FormalSpec>ColumnName:%String,Default:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ColumnNr = $Get(..Names(ColumnName))
+	If ColumnNr = "" Quit Default
+	Quit $Get(..Data(ColumnNr), Default)
+]]></Implementation>
+</Method>
+
+<Method name="SetColumnNames">
+<Description>
+Sets the column names to use for method GetByName. Specify as a
+string, the separator defaults to ..Separator but can be overridden.</Description>
+<FormalSpec>Names:%String,Separator:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	If Separator = "" Set Separator = ..Separator
+	
+	For ColumnNr = 1:1:$Length(Names, Separator) {
+		Set Name = $ZStrip($Piece(Names, Separator, ColumnNr), "<>W")
+		;Name is not required to be present
+		If Name = "" Continue
+		Set ..Names(Name) = ColumnNr
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
-// =====
+// ===== Private helpers
 
 ]]></Content>
 </UDLText>
 
 <Method name="GetRecord">
+<Description>
+Retrieve the next record from the input stream. If no more records
+are present, returns false. In case of quoted fields, a record may
+span multiple lines. Returns parsing errors, if any, in output
+parameter Status.</Description>
 <FormalSpec>*Status:%Status</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[

@@ -199,6 +199,61 @@ Test multiline quoted fields</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="TestByName">
+<Description>
+Test retrieving column by name</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.Lib.CSV
+	
+	; Take column names from first row if skipcount is precisely 1
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream, , 1)
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.GetByName("a"), "1", "Result a should have expected value.")
+	Do ..AssertEqual(p.GetByName("b"), "2", "Result b should have expected value.")
+	Do ..AssertEqual(p.GetByName("c"), "3", "Result c should have expected value.")
+	
+	; ...unless this is explicitly turned off
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream, , 1, "")
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.GetByName("a"), "", "Column 1 should not be found by name.")
+	Do ..AssertEqual(p.GetByName("b"), "", "Column 2 should not be found by name.")
+	Do ..AssertEqual(p.GetByName("c"), "", "Column 3 should not be found by name.")
+	
+	; Columns names set manually
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream, , 1, "x,y,z")
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.GetByName("x"), "1", "Column 1 should be accessible by name x.")
+	Do ..AssertEqual(p.GetByName("y"), "2", "Column 2 should be accessible by name y.")
+	Do ..AssertEqual(p.GetByName("z"), "3", "Column 3 should be accessible by name z.")
+	
+	; Not all names need to be present
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream, , 1, "x,,z")
+	If '..Assert(p.Next(.Status), "First row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should be ok.")
+	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
+	Do ..AssertEqual(p.GetByName("x"), "1", "Column 1 should be accessible by name x.")
+	Do ..AssertEqual(p.Get(2), "2", "Column 2 should be accessible by column number.")
+	Do ..AssertEqual(p.GetByName("z"), "3", "Column 3 should be accessible by name z.")
+	
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers
