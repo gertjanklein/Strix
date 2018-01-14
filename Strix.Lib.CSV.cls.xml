@@ -124,9 +124,9 @@ Returns the data in the specified column for the current record.
 Parameter Default specifies what to return if a column is requested
 that wasn't present in the input.</Description>
 <CodeMode>expression</CodeMode>
-<FormalSpec>Column:%Integer,Default:%String=""</FormalSpec>
+<FormalSpec>ColumnNr:%Integer,Default:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[$Get(i%Data(Column), Default)
+<Implementation><![CDATA[$Get(i%Data(ColumnNr), Default)
 ]]></Implementation>
 </Method>
 
@@ -200,7 +200,6 @@ parameter Status.</Description>
 	
 	; Quotes present, more elaborate parsing needed.
 	
-	Set CellNr = 1
 	Set Index = 1
 	For  {
 		; Check the first char of the record
@@ -209,7 +208,7 @@ parameter Status.</Description>
 		If Char = "" {
 			; No more data, we're done
 			
-			Set ..Data = CellNr, ..Data(CellNr) = ""
+			Set ..Data($Increment(..Data)) = ""
 			Quit
 			
 		} ElseIf Char = """" {
@@ -234,7 +233,7 @@ parameter Status.</Description>
 				Set NextChar = $Extract(Line, Test)
 				If NextChar = "" {
 					Set Cell = Cell_$Extract(Line, Index, Test-2)
-					Set ..Data = CellNr, ..Data(CellNr) = Cell
+					Set ..Data($Increment(..Data)) = Cell
 					Return 1
 				}
 				If NextChar = """" {
@@ -244,7 +243,7 @@ parameter Status.</Description>
 				}
 				If NextChar = ..Separator {
 					Set Cell = Cell_$Extract(Line, Index, Test-2)
-					Set ..Data = CellNr, ..Data(CellNr) = Cell, CellNr = CellNr + 1
+					Set ..Data($Increment(..Data)) = Cell
 					Set Index = Test + 1
 					Quit
 				}
@@ -258,7 +257,7 @@ parameter Status.</Description>
 		} ElseIf Char = ..Separator {
 			; At the start of the next record, this one is empty
 			
-			Set ..Data = CellNr, ..Data(CellNr) = "", CellNr = CellNr + 1
+			Set ..Data($Increment(..Data)) = ""
 			Set Index = Index + 1
 			
 		} Else {
@@ -267,10 +266,10 @@ parameter Status.</Description>
 			Set Test = $Find(Line, ..Separator, Index+1)
 			If Test = 0 {
 				;No more separators
-				Set ..Data = CellNr, ..Data(CellNr) = $Extract(Line, Index, *)
+				Set ..Data($Increment(..Data)) = $Extract(Line, Index, *)
 				Quit
 			} Else {
-				Set ..Data = CellNr, ..Data(CellNr) = $Extract(Line, Index, Test-2), CellNr = CellNr + 1
+				Set ..Data($Increment(..Data)) = $Extract(Line, Index, Test-2)
 				Set Index = Test
 			}
 			
