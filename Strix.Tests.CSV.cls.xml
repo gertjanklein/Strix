@@ -118,64 +118,41 @@ Test different separator</Description>
 <Description>
 Test quoted fields</Description>
 <Implementation><![CDATA[
-	Do ..MakeStream("1,""x,y,z"",3", "4,5,""6,""", """9"",""8"",""7""")
+	Do ..MakeStream("1,""x,y,z"",3", "4,5,""6,""", """9"",""8"",""7""", """"""""",b,c")
 	
 	#dim p As Strix.Lib.CSV
 	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
 	
-	If '..Assert(p.Next(.Status), "First row should be found.") Quit
-	Do ..AssertStatusOk(Status, "Returned status should be ok.")
-	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
-	Do ..AssertEqual(p.Get(1), "1", "Result {} should have expected value.", 1)
-	Do ..AssertEqual(p.Get(2), "x,y,z", "Result {} should have expected value.", 2)
-	Do ..AssertEqual(p.Get(3), "3", "Result {} should have expected value.", 3)
+	If '..Assert(p.Next(.Status), "Record {} should be found.", p.RecordNr) Quit
+	Do ..AssertStatusOk(Status, "Returned status for record {} should be ok.", p.RecordNr)
+	Do ..AssertEqual(p.Data, 3, "Record {} should have expected number of columns.", p.RecordNr)
+	Do ..AssertEqual(p.Get(1), "1", "Record {}, field 1 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(2), "x,y,z", "Record {}, field 2 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(3), "3", "Record {}, field 3 should have expected value.", p.RecordNr)
 	
-	If '..Assert(p.Next(.Status), "Second row should be found.") Quit
-	Do ..AssertStatusOk(Status, "Returned status should be ok.")
-	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
-	Do ..AssertEqual(p.Get(1), "4", "Result {} should have expected value.", 1)
-	Do ..AssertEqual(p.Get(2), "5", "Result {} should have expected value.", 2)
-	Do ..AssertEqual(p.Get(3), "6,", "Result {} should have expected value.", 3)
+	If '..Assert(p.Next(.Status), "Record {} should be found.", p.RecordNr) Quit
+	Do ..AssertStatusOk(Status, "Returned status for record {} should be ok.", p.RecordNr)
+	Do ..AssertEqual(p.Data, 3, "Record {} should have expected number of columns.", p.RecordNr)
+	Do ..AssertEqual(p.Get(1), "4", "Record {}, field 1 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(2), "5", "Record {}, field 2 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(3), "6,", "Record {}, field 3 should have expected value.", p.RecordNr)
 	
-	If '..Assert(p.Next(.Status), "Third row should be found.") Quit
-	Do ..AssertStatusOk(Status, "Returned status should be ok.")
-	Do ..AssertEqual(p.Data, 3, "Result should have expected number of columns.")
-	Do ..AssertEqual(p.Get(1), "9", "Result {} should have expected value.", 1)
-	Do ..AssertEqual(p.Get(2), "8", "Result {} should have expected value.", 2)
-	Do ..AssertEqual(p.Get(3), "7", "Result {} should have expected value.", 3)
+	If '..Assert(p.Next(.Status), "Record {} should be found.", p.RecordNr) Quit
+	Do ..AssertStatusOk(Status, "Returned status for record {} should be ok.", p.RecordNr)
+	Do ..AssertEqual(p.Data, 3, "Record {} should have expected number of columns.", p.RecordNr)
+	Do ..AssertEqual(p.Get(1), "9", "Record {}, field 1 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(2), "8", "Record {}, field 2 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(3), "7", "Record {}, field 3 should have expected value.", p.RecordNr)
 	
-	If '..Assert('p.Next(.Status), "No fourth row should be found.") Quit
+	If '..Assert(p.Next(.Status), "Record {} should be found.", p.RecordNr) Quit
+	Do ..AssertStatusOk(Status, "Returned status for record {} should be ok.", p.RecordNr)
+	Do ..AssertEqual(p.Data, 3, "Record {} should have expected number of columns.", p.RecordNr)
+	Do ..AssertEqual(p.Get(1), """", "Record {}, field 1 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(2), "b", "Record {}, field 2 should have expected value.", p.RecordNr)
+	Do ..AssertEqual(p.Get(3), "c", "Record {}, field 3 should have expected value.", p.RecordNr)
+	
+	If '..Assert('p.Next(.Status), "No more rows should be found.") Quit
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
-	
-	Quit
-]]></Implementation>
-</Method>
-
-<Method name="TestErrors">
-<Description>
-Test unparseable data</Description>
-<Implementation><![CDATA[
-	#dim p As Strix.Lib.CSV
-	
-	; Lone quote in quoted field
-	
-	Do ..MakeStream("1,""before""after"",3", "4,5,6")
-	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
-	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
-	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
-	
-	; End of data searching for close quote
-	
-	Do ..MakeStream("1,""")
-	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
-	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
-	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
-	
-	Do ..MakeStream("1,"""_$$$EOL_$$$EOL)
-	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
-	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
-	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
-	
 	
 	Quit
 ]]></Implementation>
@@ -206,6 +183,36 @@ Test multiline quoted fields</Description>
 	Do ..AssertStatusOk(Status, "Returned status should be ok.")
 	Do ..AssertEqual(p.Data, 1, "Result should have expected number of columns.")
 	Do ..AssertEqual(p.Get(1), "Newlines: "_$$$EOL_$$$EOL, "Result should have expected value.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestErrors">
+<Description>
+Test unparseable data</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.Lib.CSV
+	
+	; Lone quote in quoted field
+	
+	Do ..MakeStream("1,""before""after"",3", "4,5,6")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
+	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
+	
+	; End of data searching for close quote
+	
+	Do ..MakeStream("1,""")
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
+	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
+	
+	Do ..MakeStream("1,"""_$$$EOL_$$$EOL)
+	Set p = ##class(Strix.Lib.CSV).GetParser(..Stream)
+	Do ..AssertFalse(p.Next(.Status), "First row should not be found.")
+	Do ..AssertErrorStatus(Status, "Returned status should be an error.")
+	
 	
 	Quit
 ]]></Implementation>

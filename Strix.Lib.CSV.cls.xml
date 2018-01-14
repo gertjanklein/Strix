@@ -51,7 +51,8 @@ Whether to take column names from the first row</Description>
 
 <Property name="RecordNr">
 <Description>
-The number of the current record</Description>
+The number of the current record. This includes header rows,
+if any.</Description>
 <Type>%Integer</Type>
 </Property>
 
