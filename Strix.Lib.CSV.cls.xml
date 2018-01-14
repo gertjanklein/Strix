@@ -144,6 +144,19 @@ supplied for it, returns the default value.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetAsList">
+<Description>
+Returns the row as a list.</Description>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set List = ""
+	For i = 1:1:..Data {
+		Set List = List_$ListBuild(..Data(i))
+	}
+	Quit List
+]]></Implementation>
+</Method>
+
 <Method name="SetColumnNames">
 <Description>
 Sets the column names to use for method GetByName. Specify as a
@@ -165,7 +178,7 @@ string, the separator defaults to ..Separator but can be overridden.</Descriptio
 
 <UDLText name="T">
 <Content><![CDATA[
-// ===== Private helpers
+// ===== Private helper code
 
 ]]></Content>
 </UDLText>
@@ -202,7 +215,7 @@ parameter Status.</Description>
 	
 	Set Index = 1
 	For  {
-		; Check the first char of the record
+		; Check the first char of the record data
 		
 		Set Char = $Extract(Line, Index)
 		If Char = "" {
@@ -212,10 +225,10 @@ parameter Status.</Description>
 			Quit
 			
 		} ElseIf Char = """" {
-			; Quoted record, looking for a closing quote
+			; Quoted field, looking for a closing quote
 			
 			Set Index = Index + 1
-			Set Cell = ""
+			Set FieldData = ""
 			For  {
 				Set Test = $Find(Line, """", Index)
 				If Test = 0 {
@@ -230,20 +243,25 @@ parameter Status.</Description>
 					Set Line = Line_..Input.LineTerminator_NextLine
 					Continue
 				}
+				
+				; Found quote; check next character
 				Set NextChar = $Extract(Line, Test)
 				If NextChar = "" {
-					Set Cell = Cell_$Extract(Line, Index, Test-2)
-					Set ..Data($Increment(..Data)) = Cell
+					; End of line: this is the last field
+					Set FieldData = FieldData_$Extract(Line, Index, Test-2)
+					Set ..Data($Increment(..Data)) = FieldData
 					Return 1
 				}
 				If NextChar = """" {
-					Set Cell = Cell_$Extract(Line, Index, Test-2)_""""
+					; Quote: escaped quote, save and search on
+					Set FieldData = FieldData_$Extract(Line, Index, Test-2)_""""
 					Set Index = Test + 1
 					Continue
 				}
 				If NextChar = ..Separator {
-					Set Cell = Cell_$Extract(Line, Index, Test-2)
-					Set ..Data($Increment(..Data)) = Cell
+					; Separator: this was the end of this field
+					Set FieldData = FieldData_$Extract(Line, Index, Test-2)
+					Set ..Data($Increment(..Data)) = FieldData
 					Set Index = Test + 1
 					Quit
 				}
@@ -255,7 +273,7 @@ parameter Status.</Description>
 			}
 			
 		} ElseIf Char = ..Separator {
-			; At the start of the next record, this one is empty
+			; At the start of the next field, this one is empty
 			
 			Set ..Data($Increment(..Data)) = ""
 			Set Index = Index + 1
@@ -265,10 +283,11 @@ parameter Status.</Description>
 			
 			Set Test = $Find(Line, ..Separator, Index+1)
 			If Test = 0 {
-				;No more separators
+				; No more fields
 				Set ..Data($Increment(..Data)) = $Extract(Line, Index, *)
 				Quit
 			} Else {
+				; Found start of next field
 				Set ..Data($Increment(..Data)) = $Extract(Line, Index, Test-2)
 				Set Index = Test
 			}
