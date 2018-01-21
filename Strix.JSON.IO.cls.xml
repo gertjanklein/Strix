@@ -13,7 +13,7 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 <FormalSpec>Object:Strix.JSON.Adaptor,*Status:%Status</FormalSpec>
 <ReturnType>%DynamicObject</ReturnType>
 <Implementation><![CDATA[
-	Set Result = {}
+	Set Result = {}, Status = $$$OK
 	
 	Do Object.GetPropertyInfo(.InfoArray)
 	For i = 1:1:InfoArray {
