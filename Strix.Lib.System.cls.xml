@@ -69,5 +69,17 @@ previous value will be returned.</Description>
 	Return PrevState
 ]]></Implementation>
 </Method>
+
+<Method name="MemoryUsed">
+<Description>
+Returns the amount of memory used (in bytes) in the current process.
+$ZStorage returns the maximum available memory (in kB)
+$Storage returns the currently available memor (in bytes)</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[($ZStorage*1024) - $Storage
+]]></Implementation>
+</Method>
 </Class>
 </Export>
