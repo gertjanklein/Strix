@@ -37,14 +37,44 @@ by that name already exists, it is deleted.</Description>
 <Description>
 Adds a new property to an existing class definition.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String</FormalSpec>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String,Collection:%String=""</FormalSpec>
 <ReturnType>%Dictionary.PropertyDefinition</ReturnType>
 <Implementation><![CDATA[
 	Set Property = ##class(%Dictionary.PropertyDefinition).%New()
 	Set Property.Name = Name
 	Set Property.Type = Type
+	Set Property.Collection = Collection
 	Do ClassDef.Properties.Insert(Property)
 	Quit Property
+]]></Implementation>
+</Method>
+
+<Method name="SetPropertyParameter">
+<Description>
+Sets a property parameter value</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,PropertyName:%String,ParameterName:%String,Value:%String="",Compile:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Find property definition
+	
+	Set Key = ""
+	For  {
+		Set PropDef = ClassDef.Properties.GetNext(.Key)
+		If Key = "" Quit
+		If PropDef.Name = PropertyName Quit
+	}
+	If Key = "" Quit $$$BuildStatus("No property '{} found.",, PropertyName)
+	
+	; Set parameter
+	
+	Do PropDef.Parameters.SetAt(Value, ParameterName)
+	
+	; Compile if so requested
+	
+	If Compile Quit ..SaveAndCompile(ClassDef)
+	
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
