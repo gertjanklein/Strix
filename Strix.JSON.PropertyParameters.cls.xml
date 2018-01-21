@@ -11,7 +11,7 @@ with the first letter lowercased.</Description>
 
 <Parameter name="JSONIO">
 <Type>STRING</Type>
-<Constraint>,INOUT,IN,OUT,CALC,NONE</Constraint>
+<Constraint>,IN,OUT,CALC,NONE</Constraint>
 <Flags>ENUM</Flags>
 </Parameter>
 </Class>
