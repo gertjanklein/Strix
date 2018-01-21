@@ -59,7 +59,7 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 			Set Value = Value.Read()
 			Do Result.%Set(JSONName, Value, "string")
 			
-		} Else {
+		} ElseIf $IsObject(Value) {
 			Set Value = Value.JSONExport(.Status)
 			If 'Status Return $$$BuildErr("Error handling subobject {} of type {}:", Status, Name, Type)
 			Do Result.%Set(JSONName, Value)
