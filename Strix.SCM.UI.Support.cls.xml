@@ -37,7 +37,6 @@
 	If AddZE Set Message = Message_Separator_$Select(EscapeHTML: $ZConvert($ZError, "O", "HTML"), 1: $ZError)
 	
 	Quit Message
-
 ]]></Implementation>
 </Method>
 
@@ -58,7 +57,6 @@
 	Set Result = Result_">"
 	
 	Quit Result
-
 ]]></Implementation>
 </Method>
 
@@ -67,6 +65,12 @@
 <FormalSpec>Name:%String,Rows:%Integer,Cols:%Integer</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+	Set Value = %request.Get(Name)
+	
+	;Simple auto-resize
+	Set Lines = $Length(Value, $Char(10))
+	If Lines > Rows Set Rows = Lines
+	
 	Set Result = "<textarea name="""_Name_""""
 	Set Result = Result_" rows="""_Rows_""" cols="""_Cols_""">"
 	
@@ -76,7 +80,6 @@
 	Set Result = Result_"</textarea>"
 	
 	Quit Result
-
 ]]></Implementation>
 </Method>
 
@@ -93,7 +96,6 @@
 	Set Result = Result_">"
 	
 	Quit Result
-
 ]]></Implementation>
 </Method>
 
@@ -109,7 +111,6 @@
 	Set Result = Result_">"
 	
 	Quit Result
-
 ]]></Implementation>
 </Method>
 </Class>
