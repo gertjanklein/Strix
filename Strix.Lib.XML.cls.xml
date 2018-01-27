@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="Strix.Lib.XML">
+<Description>
+Various XML-related helper methods</Description>
 <IncludeCode>Strix</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>64646,40025.46564</TimeCreated>
@@ -65,6 +67,41 @@ does, it will not be cleared.</Description>
 		Do Objects.Insert(Object)
 	}
 	If 'Status Quit $$$BuildErr("Error correlating object:", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetClassSchema">
+<Description>
+Outputs the schema for the given class (and dependent classes) to
+a stream.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String,*Output:%Stream.Object=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '$IsObject(Output) {
+		Set Output = ##class(%Stream.TmpBinary).%New()
+	}
+	
+	Set Schema = ##class(%XML.Schema).%New()
+	
+	Set Namespace = "http://tempuri.org/"
+	Set Schema.DefaultNamespace = Namespace
+	
+	Set Writer = ##class(%XML.Writer).%New()
+	Set Writer.Indent = 1
+	Do Writer.AddSchemaNamespace()
+	Do Writer.AddNamespace(Namespace, "o")
+	
+	Set Status = Writer.OutputToStream(Output)
+	If 'Status Quit $$$BuildStatus("Error setting output stream:", Status)
+	
+	Set Status = Schema.AddSchemaType(ClassName)
+	If 'Status Quit $$$BuildStatus("Error adding schema type:", Status)
+	
+	Set Status = Writer.DocumentNode(Schema.GetSchema(Namespace))
+	If 'Status Quit $$$BuildStatus("Error writing schema:", Status)
 	
 	Quit $$$OK
 ]]></Implementation>
