@@ -90,6 +90,13 @@ Classname of handler for this project</Description>
 <Type>%String</Type>
 </Property>
 
+<Property name="ExportUDL">
+<Description>
+Whether to export items as XML (0) or CDL (1)</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -395,7 +402,9 @@ Returns the file name for an item, based on project settings.</Description>
 		Set Filename = Name
 	}
 	
-	Set Filename = Filename_"."_Type_".xml"
+	Set Filename = Filename_"."_Type
+	If '..ExportUDL Set Filename = Filename_".xml"
+	
 	Set FullPath = ##class(%File).SubDirectoryName(Directory, Filename)
 	
 	Set ok = ##class(%File).CreateDirectoryChain(Directory)
@@ -703,6 +712,9 @@ Returns the id and name of all project owning an item.</Description>
 </Value>
 <Value name="7">
 <Value>Settings</Value>
+</Value>
+<Value name="8">
+<Value>ExportUDL</Value>
 </Value>
 </Data>
 </Storage>

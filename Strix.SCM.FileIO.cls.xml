@@ -17,8 +17,12 @@ Exports a single item to disk</Description>
 	Set Filename = Project.GetExportFilename(Item, , , .Status)
 	If 'Status Quit Status
 	
-	Set Status = $System.OBJ.Export(Item, Filename, "-d/diffexport")
-	If 'Status Quit $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status)
+	If Project.ExportUDL {
+		Set Status = $System.OBJ.ExportUDL(Item, Filename, "-d/diffexport")
+	} Else {
+		Set Status = $System.OBJ.Export(Item, Filename, "-d/diffexport")
+	}
+		If 'Status Quit $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status)
 	
 	Quit $$$OK
 ]]></Implementation>
