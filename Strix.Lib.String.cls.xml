@@ -169,5 +169,60 @@ representing the byte's value.</Description>
 	Quit Result
 ]]></Implementation>
 </Method>
+
+<Method name="ListObjToString">
+<Description>
+Converts a %ListOfDataType-type object to a character-separated
+string if Separator is non-empty, or to a %List if it is empty.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>List:%Collection.AbstractListOfDT,Separator:%String=","</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ""
+	
+	Set Key = "", Nr = 0
+	For  {
+		Set Value = List.GetNext(.Key)
+		If Key = "" Quit
+		Set Nr = Nr + 1
+		
+		If Separator '= "" {
+			If Nr > 1 Set Result = Result_Separator
+			Set Result = Result_Value
+		} Else {
+			Set Result = Result_$ListBuild(Value)
+		}
+	}
+	
+	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="ListObjFromString">
+<Description>
+Converts a character-separated string or a %List into a
+%ListOfDataType-type object. If no list object is passed in,
+a %ListOfDataTypes object is created.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input:%String,Separator:%String=",",*Result:%Collection.AbstractListOfDT</FormalSpec>
+<Implementation><![CDATA[
+	If '$IsObject($Get(Result)) Set Result = ##class(%ListOfDataTypes).%New()
+	
+	If Input = "" Quit
+	
+	If $ListValid(Input) {
+		For i = 1:1:$ListLength(Input) {
+			Do Result.Insert($ListGet(Input, i))
+		}
+		
+	} Else {
+		For i = 1:1:$Length(Input, Separator) {
+			Do Result.Insert($Piece(Input, Separator, i))
+		}
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
 </Class>
 </Export>
