@@ -55,7 +55,7 @@ does, it will not be cleared.</Description>
 		Set ClassName = $ZStrip($List(ClassNames, i), "<>W")
 		If ClassName = "" Continue
 		
-		Set XMLName = $$$GetClassParameter(tClassname,"XMLNAME")
+		Set XMLName = $$$GetClassParameter(Classname, "XMLNAME")
 		If XMLName = "" Set XMLName = $Piece(ClassName, ".", $Length(ClassName, "."))
 		
 		Do Reader.Correlate(XMLName, ClassName)
