@@ -35,7 +35,7 @@ does, it will not be cleared.</Description>
 		Set Status = Reader.OpenStream(Input)
 		If 'Status Quit $$$BuildErr("Error opening input as stream:", Status)
 		
-	} ElseIf ##class(%File).%Exists(Input) {
+	} ElseIf ##class(%File).Exists(Input) {
 		;Valid filename is unlikely to be intended as XML
 		Set Status = Reader.OpenFile(Input)
 		If 'Status Quit $$$BuildErr("Error opening input as file:", Status)
@@ -55,7 +55,7 @@ does, it will not be cleared.</Description>
 		Set ClassName = $ZStrip($List(ClassNames, i), "<>W")
 		If ClassName = "" Continue
 		
-		Set XMLName = $$$GetClassParameter(Classname, "XMLNAME")
+		Set XMLName = $$$GetClassParameter(ClassName, "XMLNAME")
 		If XMLName = "" Set XMLName = $Piece(ClassName, ".", $Length(ClassName, "."))
 		
 		Do Reader.Correlate(XMLName, ClassName)
