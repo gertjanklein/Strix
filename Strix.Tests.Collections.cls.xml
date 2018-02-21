@@ -123,6 +123,56 @@ on Oref.</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="TestGetCopy">
+<Implementation><![CDATA[
+	Set ClassName = ..#TestClassName_"2"
+	Set Type = ..#TestClassName
+	Set Status = ..CreateClass(ClassName, "a:%String:list,b:%String:array,c:"_Type_":list,d:"_Type_":array")
+	If '..AssertStatusOk(Status, "Create test class") Quit
+	Set Inst = $ZObjClassMethod(ClassName, "%New")
+	
+	; Test replacing %Collection-type collections
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.a)
+	Do ..AssertEqual(Copy.%ClassName(), "%ListOfDataTypes", "Get proper collection type for property a.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.b)
+	Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfDataTypes", "Get proper collection type for property b.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.c)
+	Do ..AssertEqual(Copy.%ClassName(), "%ListOfObjects", "Get proper collection type for property c.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.d)
+	Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfObjects", "Get proper collection type for property d.")
+	
+	Kill Inst
+	Do ##class(Strix.Testing.Support).RemoveClass(ClassName)
+	
+	; Test normal %Library collections
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(##class(%ListOfDataTypes).%New())
+	Do ..AssertEqual(Copy.%ClassName(), "%ListOfDataTypes", "Get proper collection type for property a.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(##class(%ArrayOfDataTypes).%New())
+	Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfDataTypes", "Get proper collection type for property b.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(##class(%ListOfObjects).%New())
+	Do ..AssertEqual(Copy.%ClassName(), "%ListOfObjects", "Get proper collection type for property c.")
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(##class(%ArrayOfObjects).%New())
+	Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfObjects", "Get proper collection type for property d.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
 // ===== Helpers
 
 ]]></Content>
@@ -158,10 +208,10 @@ on Oref.</Description>
 <Description>
 Create a class with the specified properties</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Properties:%String="",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
+<FormalSpec>ClassName:%String,Properties:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject", .ClassDef)
+	Set Status = ##class(Strix.Testing.Support).CreateClass(ClassName, "%RegisteredObject", .ClassDef)
 	If 'Status Quit Status
 	
 	If Properties '= "" {
@@ -194,7 +244,7 @@ Code to run before any test in this class is executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Type = ..#TestClassName
-	Set Status = ..CreateClass("a:%String:list,b:%String:list,c:"_Type_":list,d:"_Type_":list")
+	Set Status = ..CreateClass(Type, "a:%String:list,b:%String:list,c:"_Type_":list,d:"_Type_":list")
 	If 'Status Quit Status
 	Quit $$$OK
 ]]></Implementation>

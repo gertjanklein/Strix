@@ -31,19 +31,7 @@ to be the same object to qualify.</Description>
 	
 	; Determine type and return type
 	
-	If Items.%PackageName() = "%Collection" {
-		; %Collection classes need a containing ("parent") object
-		If Items.%ClassName() [ "OfDT" {
-			Set Result = ##class(%ListOfDataTypes).%New()
-		} Else {
-			Set Result = ##class(%ListOfObjects).%New()
-		}
-		
-	} Else {
-		; Create a new list of the same type
-		Set Result = Items.%New()
-		
-	}
+	Set Result = ..GetCopy(Items)
 	
 	; Find elements present in all lists
 	
@@ -67,6 +55,38 @@ to be the same object to qualify.</Description>
 	}
 	
 	Quit Result
+]]></Implementation>
+</Method>
+
+<Method name="GetCopy">
+<Description>
+Returns an empty copy of a collection object, of the same type as
+the input collection, but one that can exist stand-alone. (The
+%Collection classes can only exists as properties of an object.)
+The collection contents are not copied.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input:%Collection.AbstractIterator</FormalSpec>
+<ReturnType>%Collection.AbstractIterator</ReturnType>
+<Implementation><![CDATA[
+	; Not a %Collection-type property: return a new instance of the same type
+	If Input.%PackageName() '= "%Collection" Quit Input.%New()
+	
+	Set Name = Input.%ClassName()
+	
+	If Name = "ListOfDT" Quit ##class(%ListOfDataTypes).%New()
+	If Name = "ListOfObj" Quit ##class(%ListOfObjects).%New()
+	
+	If Name = "ArrayOfDT" Quit ##class(%ArrayOfDataTypes).%New()
+	If Name = "ArrayOfObj" Quit ##class(%ArrayOfObjects).%New()
+	
+	If Name = "ListOfObjCN" Quit ##class(%ListOfObjectsWithClassName).%New()
+	If Name = "ArrayOfObjCN" Quit ##class(%ArrayOfObjectsWithClassName).%New()
+	
+	If Name = "ListOfStream" Quit ##class(%ListOfObjects).%New()
+	If Name = "ArrayOfStream" Quit ##class(%ArrayOfObjects).%New()
+	
+	; If none of the above matches, attempt %New and hope for the best
+	Quit Input.%New()
 ]]></Implementation>
 </Method>
 </Class>
