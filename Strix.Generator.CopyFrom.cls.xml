@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Generator.CopyFrom">
+<Abstract>1</Abstract>
+<TimeCreated>64702,37801.43184</TimeCreated>
+
+<Method name="CopyFrom">
+<Description>
+Copies properties (with the same name) from another object
+into this one. The other object doesn't have to have the same
+class; properties are matched by name.</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>Other:%RegisteredObject</FormalSpec>
+<Implementation><![CDATA[
+	Do %code.WriteLine(" Set Cls = Other.%ClassName(1)")
+	Set key = ""
+	For  {
+		#dim PropDef As %Dictionary.PropertyDefinition
+		Set PropDef = %class.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		If PropDef.Private Continue
+		
+		Set Name = PropDef.Name
+		If $Extract(Name) = "%" Continue
+		
+		Do %code.WriteLine(" If $$$comMemberDefined(Cls,""a"","""_Name_""") Set .."_Name_" = Other."_Name)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
