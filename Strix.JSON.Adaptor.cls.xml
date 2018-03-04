@@ -3,6 +3,7 @@
 <Class name="Strix.JSON.Adaptor">
 <Abstract>1</Abstract>
 <PropertyClass>Strix.JSON.PropertyParameters</PropertyClass>
+<Super>%Base</Super>
 <TimeCreated>64394,79428.069912</TimeCreated>
 
 <Parameter name="SkipUnknownObjects">
@@ -11,6 +12,12 @@ Whether unrecognised object-type properties generate a compile-time error
 or are simply ignored. </Description>
 <Type>BOOLEAN</Type>
 <Default>0</Default>
+</Parameter>
+
+<Parameter name="JSONSpec">
+<Description>
+Override specifications for properties inherited from superclasses.</Description>
+<Type>String</Type>
 </Parameter>
 
 <UDLText name="T">
@@ -24,7 +31,7 @@ or are simply ignored. </Description>
 <Description>
 Instantiate a new object, and loads its properties from the %DynamicObject.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Data:%DynamicObject,*Status:%Status</FormalSpec>
+<FormalSpec>Data:%DynamicObject,Spec:%String="",*Status:%Status</FormalSpec>
 <ReturnType>Strix.JSON.Adaptor</ReturnType>
 <Implementation><![CDATA[
 	Set Me = ..%New()
@@ -36,10 +43,10 @@ Instantiate a new object, and loads its properties from the %DynamicObject.</Des
 <Method name="JSONImport">
 <Description>
 Loads data into this object from the %DynamicObject passed in.</Description>
-<FormalSpec>Data:%DynamicObject</FormalSpec>
+<FormalSpec>Data:%DynamicObject,Spec:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set Status = ##class(Strix.JSON.IO).JSONImport($this, Data)
+	Set Status = ##class(Strix.JSON.IO).JSONImport($this, Data, Spec)
 	Quit Status
 ]]></Implementation>
 </Method>
@@ -47,10 +54,10 @@ Loads data into this object from the %DynamicObject passed in.</Description>
 <Method name="JSONExport">
 <Description>
 Creates a %DynamicObject from the data in this object.</Description>
-<FormalSpec>*Status:%Status</FormalSpec>
+<FormalSpec>Sparse:%Boolean=0,Spec:%String="",*Status:%Status</FormalSpec>
 <ReturnType>%DynamicObject</ReturnType>
 <Implementation><![CDATA[
-	Set Result = ##class(Strix.JSON.IO).JSONExport($this, .Status)
+	Set Result = ##class(Strix.JSON.IO).JSONExport($this, Sparse, Spec, .Status)
 	Quit Result
 ]]></Implementation>
 </Method>

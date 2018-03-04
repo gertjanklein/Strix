@@ -10,10 +10,13 @@
 Creates a %DynamicObject for the Caché object passed in. The Caché
 object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Object:Strix.JSON.Adaptor,*Status:%Status</FormalSpec>
+<FormalSpec>Object:Strix.JSON.Adaptor,Sparse:%Boolean=0,Spec:%String="",*Status:%Status</FormalSpec>
 <ReturnType>%DynamicObject</ReturnType>
 <Implementation><![CDATA[
 	Set Result = {}, Status = $$$OK
+	
+	; Get class-level and runtime I/O specs
+	Do ..GetSpec(Spec, Object.%GetParameter("JSONSpec"), .Specs)
 	
 	Do Object.GetPropertyInfo(.InfoArray)
 	For i = 1:1:InfoArray {
@@ -31,17 +34,17 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		
 		If Collection = "list" || IsRelationship {
 			Set List = $ZObjProperty(Object, Name)
-			Set Status = ..ListOut(PropInfo, List, .JSONList)
+			Set Status = ..ListOut(PropInfo, Sparse, List, .JSONList)
 			If 'Status Return Result
-			Do Result.%Set(JSONName, JSONList)
+			If JSONList '= "" Do Result.%Set(JSONName, JSONList)
 			Continue
 		}
 		
 		If Collection = "array" {
 			Set Array = $ZObjProperty(Object, Name)
-			Set Status = ..ArrayOut(PropInfo, List, .JSONObject)
+			Set Status = ..ArrayOut(PropInfo, Sparse, List, .JSONObject)
 			If 'Status Return Result
-			Do Result.%Set(JSONName, JSONObject)
+			If JSONObject '= "" Do Result.%Set(JSONName, JSONObject)
 			Continue
 			
 		}
@@ -53,15 +56,18 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		Set Value = $ZObjProperty(Object, Name)
 		If IsDatatype {
 			Set Value = ..ValueOut(Value, Type, .JSONType)
+			If Sparse, Value = "" Continue
 			Do Result.%Set(JSONName, Value, JSONType)
 			
 		} ElseIf IsStream {
 			Set Value = Value.Read()
+			If Sparse, Value = "" Continue
 			Do Result.%Set(JSONName, Value, "string")
 			
 		} ElseIf $IsObject(Value) {
-			Set Value = Value.JSONExport(.Status)
+			Set Value = Value.JSONExport(Sparse, Spec, .Status)
 			If 'Status Return $$$BuildErr("Error handling subobject {} of type {}:", Status, Name, Type)
+			If Sparse, Value = "" Continue
 			Do Result.%Set(JSONName, Value)
 			
 		}
@@ -76,10 +82,13 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 Loads data in a Caché object from a %DynamicObject. The Caché
 object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Object:Strix.JSON.Adaptor,Data:%DynamicObject</FormalSpec>
+<FormalSpec>Object:Strix.JSON.Adaptor,Data:%DynamicObject,Spec:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set ClassName = Object.%ClassName(1)
+	
+	; Get class-level and runtime I/O specs
+	Do ..GetSpec(Spec, Object.%GetParameter("JSONSpec"), .Specs)
 	
 	Do Object.GetPropertyInfo(.InfoArray)
 	For i = 1:1:InfoArray {
@@ -139,7 +148,7 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		} Else {
 			Set ObjectProp = $ZObjProperty(Object, Name)
 			If ObjectProp = "" {
-				Set $ZObjProperty(Object, Name) = $ZObjClassMethod(Type, "CreateFromJSON", Value, .Status)
+				Set $ZObjProperty(Object, Name) = $ZObjClassMethod(Type, "CreateFromJSON", Value, , .Status)
 				If 'Status Return $$$BuildErr("Error handling sub-object {} of type {}:", Status, Name, Type)
 				
 			} Else {
@@ -152,6 +161,40 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 	}
 	
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="GetSpec">
+<Description>
+Gets JSON I/O specifications.
+Merges them from two locations: the object parameter and
+a runtime override. Returns the data as an array, indexed
+by name, in output parameter ByName.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Override:%String,FromObject:%String,*ByName:%String</FormalSpec>
+<Implementation><![CDATA[
+	If FromObject '= "", Override '= "" {
+		Set Specs = FromObject_","_Override
+	} Else {
+		Set Specs = FromObject_Override
+	}
+	If Specs = "" Quit
+	
+	For i = 1:1:$Length(Specs, ",") {
+		Set Item = $Piece(Specs, ",", i)
+		Set Name = $Piece(Item, ":", 1)
+		Set Spec = $Piece(Item, ":", 2, *)
+		Set ByName(Name) = Spec
+	}
+	
+	Quit
 ]]></Implementation>
 </Method>
 
@@ -189,8 +232,8 @@ Loads items from the %DynamicArray (JSON list) into the Caché list.</Descriptio
 			Set Status = List.Insert(Stream)
 			
 		} Else {
-			Set ObjectProp = $ZObjClassMethod(Type, "CreateFromJSON", Value, .Status)
-			If 'Status Return $$$BuildErr("Error handling sub-object {} of type {}:", Status, Name, Type)
+			Set ObjectProp = $ZObjClassMethod(Type, "CreateFromJSON", Value, , .Status)
+			If 'Status Return $$$BuildErr("Error handling sub-object {} of type {}:", Status, Key, Type)
 			Set Status = List.Insert(ObjectProp)
 			
 		}
@@ -228,7 +271,7 @@ Loads items from the %DynamicObject (JSON object) into the Caché array. The
 			Set Status = Array.SetAt(Value, Key)
 			
 		} Else {
-			Set ObjectProp = $ZObjClassMethod(Type, "CreateFromJSON", Value, .Status)
+			Set ObjectProp = $ZObjClassMethod(Type, "CreateFromJSON", Value, , .Status)
 			If 'Status Return $$$BuildErr("Error handling sub-object {} of type {}:", Status, Name, Type)
 			Set Status = Array.SetAt(Value, Key)
 			
@@ -288,9 +331,11 @@ appropriate Caché value, and checks whether it is valid for the Caché datatype
 <Description>
 Places items in the Caché list into a %DynamicArray.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>PropInfo:%List,List:%AbstractList,*Data:%DynamicArray</FormalSpec>
+<FormalSpec>PropInfo:%List,Sparse:%Boolean,List:%AbstractList,*Data:%DynamicArray</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	If Sparse, 'List.Count() Set Data = "" Quit $$$OK
+	
 	Set Data = []
 	
 	Set Type = $List(PropInfo, 4)
@@ -309,7 +354,7 @@ Places items in the Caché list into a %DynamicArray.</Description>
 			Do Data.%Push(Value, "string")
 			
 		} Else {
-			Set Value = Value.JSONExport(.Status)
+			Set Value = Value.JSONExport(Sparse, , .Status)
 			If 'Status Return $$$BuildErr("Error handling object at index {} of type {}:", Status, i, Type)
 			Do Data.%Push(Value)
 			
@@ -325,9 +370,11 @@ Places items in the Caché list into a %DynamicArray.</Description>
 Places items in the Caché array into a %DynamicObject; the caché key will
 be used as the property name.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>PropInfo:%List,Array:%AbstractArray,*Data:%DynamicObject</FormalSpec>
+<FormalSpec>PropInfo:%List,Sparse:%Boolean,Array:%AbstractArray,*Data:%DynamicObject</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+	If Sparse, 'Array.Count() Set Data = "" Quit $$$OK
+	
 	Set Data = {}
 	
 	Set Type = $List(PropInfo, 4)
@@ -340,15 +387,18 @@ be used as the property name.</Description>
 		
 		If IsDatatype {
 			Set Value = ..ValueOut(Value, Type, .JSONType)
+			If Sparse, Value = "" Continue
 			Do Data.%Set(Key, Value, JSONType)
 			
 		} ElseIf IsStream {
 			Set Value = Value.Read()
+			If Sparse, Value = "" Continue
 			Do Data.%Set(Key, Value, "string")
 			
 		} Else {
-			Set Value = Value.JSONExport(.Status)
+			Set Value = Value.JSONExport(Sparse, , .Status)
 			If 'Status Return $$$BuildErr("Error handling object at index {} of type {}:", Status, i, Type)
+			If Sparse, Value = "" Continue
 			Do Data.%Set(Key, Value)
 			
 		}
