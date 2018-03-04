@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Tests.XMLToClass">
+<Description>
+Tests Strix.XML.ToClass.</Description>
+<Super>Strix.Testing.TestCase</Super>
+<TimeCreated>64594,31293.265299</TimeCreated>
+
+<Parameter name="TestClassPackage">
+<Description>
+Base package for created test classes</Description>
+<Default>TestXMLToClass</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Property name="TempFiles">
+<Description>
+Names of temporary files, to be cleaned up</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Tests
+
+]]></Content>
+</UDLText>
+
+<Method name="TestBasic">
+<Description>
+Test creating simple test class with one property</Description>
+<Implementation><![CDATA[
+	Set Xml = "<a><b>x</b></a>"
+	
+	Set FileName = ..TempFile(Xml)
+	
+	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
+	If '..AssertStatusOk(Status, "Create class from XML") Quit
+	If '..AssertEqual(ClassName, ..#TestClassPackage_".a", "Class should have expected name.") Quit
+	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
+	
+	Set PropExists = ..HasProperty(ClassName_"||b", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property b should be of type %String.")
+		Do ..AssertEqual(Collection, "", "Property b should have no collection.")
+	}
+	
+	;Check if parsed object outputs the same Xml.
+	Do ..CheckRoundTrip(ClassName, Xml)
+	
+	Do $System.OBJ.Delete(ClassName, "-d")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestBasicListProp">
+<Description>
+Test creating simple test class with one property of type list</Description>
+<Implementation><![CDATA[
+	Set Xml = "<a><b>x</b><b></b></a>"
+	
+	Set FileName = ..TempFile(Xml)
+	
+	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
+	If '..AssertStatusOk(Status, "Create class from XML") Quit
+	If '..AssertEqual(ClassName, ..#TestClassPackage_".a", "Class should have expected name.") Quit
+	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
+	
+	Set PropExists = ..HasProperty(ClassName_"||b", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property b should be of type %String.")
+		Do ..AssertEqual(Collection, "list", "Property b should have collection list.")
+	}
+	
+	;Check if parsed object outputs the same Xml.
+	Do ..CheckRoundTrip(ClassName, Xml)
+	
+	Do $System.OBJ.Delete(ClassName, "-d")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestPropWithAttr">
+<Description>
+Test creating simple test class with one property with just
+an attribute but no subelements: should create a class with
+a "content" property.</Description>
+<Implementation><![CDATA[
+	Set Xml = "<a><b id=""1"">x</b><b></b></a>"
+	
+	Set FileName = ..TempFile(Xml)
+	
+	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
+	If '..AssertStatusOk(Status, "Create class from XML") Quit
+	If '..AssertEqual(ClassName, ..#TestClassPackage_".a", "Class should have expected name.") Quit
+	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
+	
+	;Property b should be of type <package>.b
+	Set Classname2 = ..#TestClassPackage_".b"
+	
+	;Check a.b
+	Set PropExists = ..HasProperty(ClassName_"||b", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b should exist.") {
+		Do ..AssertEqual(Type, Classname2, "Property b should be a subclass.")
+		Do ..AssertEqual(Collection, "list", "Property b should have collection list.")
+		Do ..AssertEqual($Get(Parameters("XMLPROJECTION")), "ELEMENT", "Property b should have proper XMLPROJECTION.")
+	}
+	
+	;Check a.b.id
+	Set PropExists = ..HasProperty(Classname2_"||id", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b.id should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property id should have type %String.")
+		Do ..AssertEqual(Collection, "", "Property id should have no collection.")
+		Do ..AssertEqual($Get(Parameters("XMLPROJECTION")), "ATTRIBUTE", "Property id should have proper XMLPROJECTION.")
+	}
+	
+	;Check a.b.content
+	Set PropExists = ..HasProperty(Classname2_"||content", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b.content should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property b.content should have type %String.")
+		Do ..AssertEqual(Collection, "", "Property b.content should have no collection.")
+		Do ..AssertEqual($Get(Parameters("XMLPROJECTION")), "CONTENT", "Property b.content should have proper XMLPROJECTION.")
+	}
+	
+	;Check if parsed object outputs the same Xml.
+	Do ..CheckRoundTrip(ClassName, Xml)
+	
+	Do $System.OBJ.Delete(ClassName_","_Classname2, "-d")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestXmlSeq">
+<Description>
+Test XML sequence off if needed</Description>
+<Implementation><![CDATA[
+	Set Xml = "<a><b>x</b><a>y</a><b>z</b></a>"
+	
+	Set FileName = ..TempFile(Xml)
+	
+	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
+	If '..AssertStatusOk(Status, "Create class from XML") Quit
+	If '..AssertEqual(ClassName, ..#TestClassPackage_".a", "Class should have expected name.") Quit
+	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
+	
+	;Make sure XMLSEQUENCE turned off
+	If ..Assert(..HasParameter(ClassName_"||XMLSEQUENCE", .Value), "Class should have XMLSEQUENCE parameter.") {
+		Do ..AssertEqual(Value, 0, "XMLSEQUENCE parameter value should be 0")
+	}
+	
+	Set CheckContent = 1
+	
+	;Test property a
+	Set PropExists = ..HasProperty(ClassName_"||a", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property a should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property a should be of type %String.")
+		Do ..AssertEqual(Collection, "", "Property a should have no collection.")
+		
+	} Else { Set CheckContent = 0 }
+	
+	;Test property b
+	Set PropExists = ..HasProperty(ClassName_"||b", .Type, .Collection, .Parameters)
+	If ..AssertTrue(PropExists, "Property b should exist.") {
+		Do ..AssertEqual(Type, "%String", "Property b should be of type %String.")
+		Do ..AssertEqual(Collection, "list", "Property b should have collection list.")
+		
+	} Else { Set CheckContent = 0 }
+	
+	If CheckContent {
+		;This Xml doesn't roundtrip, so check contents through object
+		If ..GetObject(ClassName, Xml, .Obj) {
+			Do ..AssertEqual(Obj.a, "y", "Obj.a should have proper value.")
+			If ..AssertEqual(Obj.b.Count(), 2, "Obj.b should have 2 values.") {
+				Do ..AssertEqual(Obj.b.GetAt(1), "x", "Obj.b[1] should have proper value.")
+				Do ..AssertEqual(Obj.b.GetAt(2), "z", "Obj.b[2] should have proper value.")
+			}
+		}
+	}
+	
+	Do $System.OBJ.Delete(ClassName, "-d")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestMembers">
+<Description>
+Test members: "collection of things" configuration setting</Description>
+<Implementation><![CDATA[
+	Set Xml = "<main><m1><p1>m1-1.p1</p1><p2>m1-1.p2</p2></m1><m2><p1>m2.p1</p1><p2>m2.p2</p2></m2><m1><p1>m1-2.p1</p1></m1></main>"
+	
+	Set FileName = ..TempFile(Xml)
+	
+	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
+	If '..AssertStatusOk(Status, "Create class from XML") Quit
+	If '..AssertEqual(ClassName, ..#TestClassPackage_".main", "Main class should have expected name.") Quit
+	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
+	
+	
+	If '..GetObject(ClassName, Xml, .Obj) Quit
+	;b
+	
+	;Do $System.OBJ.Delete(ClassName, "-d")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="ClassExists">
+<Description>
+Checks whether the specified class exists.</Description>
+<FormalSpec>Name:%String,Package:%String=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Name '[ "." {
+		If Package = "" Set Package = ..#TestClassPackage
+		Set Name = Package_"."_Name
+	}
+	Quit ##class(%Dictionary.ClassDefinition).%ExistsId(Name)
+]]></Implementation>
+</Method>
+
+<Method name="HasProperty">
+<Description>
+Checks whether a property exists, returning some information about it
+if it does.</Description>
+<FormalSpec>PropertyId:%String,*Type:%String,*Collection:%String,*Parameters:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Kill Type, Collection, Parameters
+	
+	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(PropertyId)
+	If '$IsObject(Def) Quit 0
+	Set Type = Def.Type
+	Set Collection = Def.Collection
+	Set Key = ""
+	For  {
+		Set Value = Def.Parameters.GetNext(.Key)
+		If Key = "" Quit
+		Set Parameters(Key) = Value
+	}
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="HasParameter">
+<Description>
+Checks whether a class parameter exists, returning its value
+if it does.</Description>
+<FormalSpec>ParameterId:%String,*Value:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set Def = ##class(%Dictionary.ParameterDefinition).%OpenId(ParameterId)
+	If '$IsObject(Def) Quit 0
+	Set Value = Def.Default
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="GetObject">
+<Description>
+Reads the Xml into an object of the specified class, and returns the object.</Description>
+<FormalSpec>ClassName:%String,Xml:%String,*Object:%XML.Adaptor</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $System.OBJ.Compile(ClassName, "crbuk-d")
+	If '..AssertStatusOk(Status, "Class {} should compile without error.", ClassName) Quit 0
+	
+	Set Reader = ##class(%XML.Reader).%New()
+	Set Status = Reader.OpenString(Xml)
+	If '..AssertStatusOk(Status, "XML reader should parse original XML.") Quit 0
+	Do Reader.CorrelateRoot(ClassName)
+	
+	If '..AssertTrue(Reader.Next(.Object, .Status), "XML Reader should find object in XML.") Quit 0
+	If '..AssertStatusOk(Status, "XML reader return ok status from parsing XML.") Quit 0
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="CheckRoundTrip">
+<Description>
+Check if provided Xml roundtrips properly.</Description>
+<FormalSpec>ClassName:%String,Xml:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim Obj As %XML.Adaptor
+	If '..GetObject(ClassName, Xml, .Obj) Quit 0
+	
+	Set Status = Obj.XMLExportToString(.Output)
+	If '..AssertStatusOk(Status, "Created object should be able to output XML.") Quit 0
+	
+	If '..AssertEqual(Output, Xml, "Re-created XML should equal original XML.") Quit 0
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="TempFile">
+<Description>
+Creates a temporary file with the Xml passed in, and returns its name.</Description>
+<FormalSpec>Xml:%String</FormalSpec>
+<ReturnType>%FileCharacterStream</ReturnType>
+<Implementation><![CDATA[
+	Set Name = ##class(%File).TempFilename("temp.xml")
+	Set File = ##class(%FileCharacterStream).%New()
+	Set File.Filename = Name
+	Do File.Write(Xml)
+	Set Status = File.%Save()
+	Do ..TempFiles.Insert(Name)
+	Quit Name
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Cleanup code.
+
+]]></Content>
+</UDLText>
+
+<Method name="TearDown">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Remove generated classes
+	;Set Status = $System.OBJ.DeletePackage(..#TestClassPackage, "-d")
+	;If 'Status Quit Status
+	
+	;Delete temporary files
+	For i = 1:1:..TempFiles.Count() {
+		Set FileName = ..TempFiles.GetAt(i)
+		Do ##class(%File).Delete(FileName)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
