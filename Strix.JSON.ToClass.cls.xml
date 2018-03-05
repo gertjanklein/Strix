@@ -133,7 +133,7 @@ Implementation of the JSON to class code.</Description>
 	If 'sc Quit sc
 	
 	Set sc = $System.OBJ.Compile(ClassName, "ck-drb")
-	If 'sc Quit $$$BuildStatus("Error compiling class '"_ClassName_"':", Status)
+	If 'sc Quit $$$BuildStatus("Error compiling class '{}:", Status, ClassName)
 	
 	Kill @TopNode
 	
@@ -282,8 +282,13 @@ Creates the parse tree subnode for the given JSON array.</Description>
 			Set @Node@(1) = Type_":"_@Node@(1)
 		} Else {
 			If PrevType '= Type {
-				Set Msg = "Processing failed at {}: inconsistent data in array ({}/{}) not supported."
-				Return $$$BuildStatus(Msg, Node, PrevType, Type)
+				; Allow "downcasting" number to string
+				If PrevType = "number", Type = "string" {
+					Set PrevType = "string"
+				} ElseIf (PrevType '= "string") || (Type '= "number") {
+					Set Msg = "Processing failed at {}: inconsistent data in array ({}/{}) not supported."
+					Return $$$BuildStatus(Msg, , Node, PrevType, Type)
+				}
 			}
 		}
 		
@@ -348,7 +353,7 @@ Helper: creates and returns a class definition object.</Description>
 <Implementation><![CDATA[
 	If ##class(%Dictionary.ClassDefinition).%ExistsId(ClassName) {
 		Set sc = ##class(%Dictionary.ClassDefinition).%DeleteId(ClassName)
-		If 'sc Quit $$$BuildStatus("Error deleting existing class '"_ClassName_"'", sc)
+		If 'sc Quit $$$BuildStatus("Error deleting existing class '{}'", sc, ClassName)
 	}
 	
 	; Prevent unwanted "[ Inheritance = right ]" by specifying
