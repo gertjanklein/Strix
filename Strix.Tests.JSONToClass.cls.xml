@@ -215,7 +215,7 @@ Test creating single sub-object</Description>
 Tests whether mixed datatype, but all string or number,
 are accepted in a list.</Description>
 <Implementation><![CDATA[
-	Set JSON = { "a": ["a", 2] }
+	Set JSON = { "a": [1, "a"] }
 	
 	;Create class
 	
@@ -242,7 +242,7 @@ are accepted in a list.</Description>
 	; Make sure the data is what we expect: strings
 	
 	Set Result = Out.%ToJSON()
-	Set Expected = { "a": ["a", "2"] }.%ToJSON()
+	Set Expected = { "a": ["1", "a"] }.%ToJSON()
 	
 	Do ..AssertEqual(Result, Expected, "JSON should have all values as string.")
 	

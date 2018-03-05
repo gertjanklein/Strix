@@ -285,6 +285,7 @@ Creates the parse tree subnode for the given JSON array.</Description>
 				; Allow "downcasting" number to string
 				If PrevType = "number", Type = "string" {
 					Set PrevType = "string"
+					Set $Piece(@Node@(1), ":") = Type
 				} ElseIf (PrevType '= "string") || (Type '= "number") {
 					Set Msg = "Processing failed at {}: inconsistent data in array ({}/{}) not supported."
 					Return $$$BuildStatus(Msg, , Node, PrevType, Type)
