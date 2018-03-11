@@ -16,9 +16,16 @@ values to a %DynamicObject when opening an existing object.
 %DynamicArray is treated the same as %DynamicObject.</Description>
 <Type>STRING</Type>
 <Constraint>,JSON,Str,AsIs</Constraint>
-<Default>Str</Default>
+<Default>JSON</Default>
 <Flags>ENUMEDIT</Flags>
 </Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
 
 <Method name="IsValid">
 <Description>
