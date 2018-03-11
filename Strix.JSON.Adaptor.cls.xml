@@ -2,6 +2,7 @@
 <Export generator="Cache" version="25">
 <Class name="Strix.JSON.Adaptor">
 <Abstract>1</Abstract>
+<IncludeGenerator>Strix</IncludeGenerator>
 <PropertyClass>Strix.JSON.PropertyParameters</PropertyClass>
 <Super>%Base</Super>
 <TimeCreated>64394,79428.069912</TimeCreated>
@@ -103,7 +104,7 @@ data from/to JSON.</Description>
 	
 	If 'TempList.Count() Quit $$$OK
 	
-	Set Line = $Char(9)_";Name, JSON name, JSONIO, Type, Collection, IsDatatype, IsStream, IsRelationship, IsAdaptor"
+	Set Line = $Char(9)_";Name, JSON name, JSONIO, Type, Collection, IsDatatype, IsStream, IsRelationship, IsAdaptor, IsJSONProp"
 	Do %code.WriteLine(Line)
 	
 	;Sort in order of appearance in the class definition
@@ -124,12 +125,25 @@ data from/to JSON.</Description>
 		;Relationship only loaded from many/children side to prevent infinite loop
 		If IsRelationship, Collection = "" Continue
 		
-		Set IsDatatype = ##class(Strix.Generator.Utilities).ClassIsDataType(Type)
-		Try { Set IsStream = $ZObjClassmethod(Type, "%Extends", "%Stream.Object") } Catch { Set IsStream = 0 }
-		
-		Set IsAdaptor = 0
-		If 'IsDatatype, 'IsStream {
-			Try { Set IsAdaptor = $ZObjClassmethod(Type, "%Extends", "Strix.JSON.Adaptor") } Catch { }
+		If Type = "Strix.JSON.Property" {
+			If Collection '= "" {
+				;Property methods of Strix.JSON.Property not usable in lists/arrays
+				Set Msg = "Class {}, property {}: collection '{}' not supported for type {}."
+				Return $$$BuildStatus(Msg, , %compiledclass.Name, Name, Collection, Type)
+			}
+			Set IsJSONProp = 1, IsDatatype = 0, IsStream = 0, IsAdaptor = 0
+			
+		} ElseIf ##class(Strix.Generator.Utilities).ClassIsDataType(Type) {
+			Set IsJSONProp = 0, IsDatatype = 1, IsStream = 0, IsAdaptor = 0
+			
+		} Else {
+			Set IsJSONProp = 0, IsDatatype = 0
+			
+			Try { Set IsStream = $ZObjClassmethod(Type, "%Extends", "%Stream.Object") } Catch { Set IsStream = 0 }
+			
+			If 'IsStream {
+				Try { Set IsAdaptor = $ZObjClassmethod(Type, "%Extends", "Strix.JSON.Adaptor") } Catch { Set IsAdaptor = 0 }
+			}
 		}
 		
 		Set Line = $Char(9)_"Set Info($Increment(Info)) = $lb("
@@ -142,6 +156,7 @@ data from/to JSON.</Description>
 		Set Line = Line_","_+IsStream
 		Set Line = Line_","_+IsRelationship
 		Set Line = Line_","_+IsAdaptor
+		Set Line = Line_","_+IsJSONProp
 		Set Line = Line_")"
 		Do %code.WriteLine(Line)
 	}

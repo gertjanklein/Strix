@@ -20,7 +20,7 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 	
 	Do Object.GetPropertyInfo(.InfoArray)
 	For i = 1:1:InfoArray {
-		;Name, JSON name, JSONIO, Type, Collection, IsDatatype, IsStream, IsRelationship, IsAdaptor
+		;Name, JSON name, JSONIO, Type, Collection, IsDatatype, IsStream, IsRelationship, IsAdaptor, IsJSONProp
 		Set PropInfo = InfoArray(i)
 		
 		Set JSONIO = $List(PropInfo, 3)
@@ -52,6 +52,13 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		Set Type = $List(PropInfo, 4)
 		Set IsDatatype = $List(PropInfo, 6)
 		Set IsStream = $List(PropInfo, 7)
+		Set IsJSONProp = $List(PropInfo, 10)
+		
+		If IsJSONProp {
+			Set Value = $ZObjMethod(Object, Name_"AsObject")
+			Do Result.%Set(JSONName, Value)
+			Continue
+		}
 		
 		Set Value = $ZObjProperty(Object, Name)
 		If IsDatatype {
@@ -132,6 +139,7 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		Set Type = $List(PropInfo, 4)
 		Set IsDatatype = $List(PropInfo, 6)
 		Set IsStream = $List(PropInfo, 7)
+		Set IsJSONProp = $List(PropInfo, 10)
 		
 		Set Value = Data.%Get(JSONName)
 		Set JSONType = Data.%GetTypeOf(JSONName)
@@ -139,6 +147,9 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 		If IsDatatype {
 			Set Value = ..ValueIn(ClassName, PropInfo, Value, .Status)
 			If 'Status Return Status
+			Set $ZObjProperty(Object, Name) = Value
+			
+		} ElseIf IsJSONProp {
 			Set $ZObjProperty(Object, Name) = Value
 			
 		} ElseIf IsStream {
