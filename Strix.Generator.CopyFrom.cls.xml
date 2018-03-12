@@ -20,11 +20,20 @@ class; properties are matched by name.</Description>
 		If key = "" Quit
 		
 		If PropDef.Private Continue
+		If PropDef.ReadOnly Continue
+		If PropDef.Relationship Continue
 		
 		Set Name = PropDef.Name
 		If $Extract(Name) = "%" Continue
 		
-		Do %code.WriteLine(" If $$$comMemberDefined(Cls,""a"","""_Name_""") Set .."_Name_" = Other."_Name)
+		If PropDef.Collection = "" {
+			Do %code.WriteLine(" If $$$comMemberDefined(Cls, $$$cCLASSproperty, """_Name_""") Set .."_Name_" = Other."_Name)
+		} Else {
+			Do %code.WriteLine(" If $$$comMemberDefined(Cls, $$$cCLASSproperty, """_Name_""") {")
+			Do %code.WriteLine("   Do .."_Name_".Clear() Set k = """"")
+			Do %code.WriteLine("   For { Set val = Other."_Name_".GetNext(.k) Quit:k=""""  Do .."_Name_".SetAt(val, k) }")
+			Do %code.WriteLine(" }")
+		}
 	}
 	
 	Quit $$$OK
