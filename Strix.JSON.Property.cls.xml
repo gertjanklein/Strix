@@ -2,21 +2,21 @@
 <Export generator="Cache" version="25">
 <Class name="Strix.JSON.Property">
 <IncludeCode>Strix</IncludeCode>
+<IncludeGenerator>Strix</IncludeGenerator>
 <Super>%DataType</Super>
 <TimeCreated>64714,55414.338999</TimeCreated>
 
 <Parameter name="Conversion">
 <Description>
 Specifies what conversion to perform on values, if any.
-. JSON: convert JSON strings to %DynamicObject
-. Str: Convert %DynamicObject to their equivalent string
-. AsIs: Do no conversion.
+. JSON: convert JSON strings to %DynamicObject (on set and open)
+. Str: Convert %DynamicObject to their equivalent string (on set)
+. (empty): Do no conversion.
 Properties with Conversion set to JSON will reconvert stored
 values to a %DynamicObject when opening an existing object.
 %DynamicArray is treated the same as %DynamicObject.</Description>
 <Type>STRING</Type>
-<Constraint>,JSON,Str,AsIs</Constraint>
-<Default>JSON</Default>
+<Constraint>,JSON,Str</Constraint>
 <Flags>ENUMEDIT</Flags>
 </Parameter>
 
@@ -54,24 +54,33 @@ Setter implements type conversion, if needed.</Description>
 <CodeMode>objectgenerator</CodeMode>
 <FormalSpec>%val</FormalSpec>
 <NoContext>1</NoContext>
-<ReturnType>%String</ReturnType>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Name = %property
 	
 	; If name is empty we're compiling this class
 	If Name = "" Quit $$$OK
 	
-	If %parameter("Conversion")="Str" {
+	; If no conversion requested, we don't need a setter
+	Set Conversion = $Get(%parameter("Conversion"))
+	If (Conversion = "") Quit $$$OK
+	
+	; Custom setter is only possible on non-collection properties
+	If $$$comMemberKeyGet(%class.Name, $$$cCLASSproperty, Name, $$$cPROPruntimetype) [ "%Collection" {
+		Set Msg = "Property {}: conversion ({}) not possible for collection properties."
+		Quit $$$BuildStatus(Msg, , Name, Conversion)
+	}
+	
+	If Conversion = "Str" {
 		; Convert to string
 		Set Value = "$s($isobject(%val):%val.%ToJSON(),1:%val)"
 		
-	} ElseIf %parameter("Conversion")="JSON" {
+	} ElseIf Conversion = "JSON" {
 		; Convert to JSON object, if possible
 		Set Value = "$s(%val="""":"""",""[{""[$e(%val):##class(%DynamicAbstractObject).%FromJSON(%val),1:%val)"
 		
 	} Else {
-		; Don't change anything here
-		Set Value = "%val"
+		Quit $$$BuildStatus("Property {}: unknown Conversion '{}'.", , Name, Conversion)
 		
 	}
 	

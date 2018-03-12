@@ -16,7 +16,8 @@ Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Do $ZObjClassMethod(..#TestClassName, "%KillExtent")
-	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	Do ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -31,14 +32,15 @@ Code to run after all tests in this class have been executed.</Description>
 <Description>
 Test basic JSON conversion</Description>
 <Implementation><![CDATA[
-	If '..AssertStatusOk(..CreateClass("a,b:JSON,c:Str,d:AsIs")) Quit
+	If '..AssertStatusOk(..CreateClass("a,b:JSON,c:Str")) Quit
 	
 	
 	; =====
 	; Create object, store object values, check
 	
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
-	Set Obj.a = {}, Obj.b = {}, Obj.c = {}, Obj.d = {}
+	Set Obj.a = {}, Obj.b = {}, Obj.c = {}
+	
 	
 	If ..Assert($IsObject(Obj.a), "Property a should still be a dynamic object.") {
 		Do ..AssertEqual(Obj.a.%ToJSON(), "{}", "Dynamic object (a) should equal original value.")
@@ -46,10 +48,7 @@ Test basic JSON conversion</Description>
 	If ..Assert($IsObject(Obj.b), "Property b should be a dynamic object.") {
 		Do ..AssertEqual(Obj.b.%ToJSON(), "{}", "Dynamic object (b) should equal original value.")
 	}
-	Do ..AssertEqual(Obj.c, "{}", "Explicit convert to string (a) should work.")
-	If ..Assert($IsObject(Obj.d), "Property d should still be a dynamic object.") {
-		Do ..AssertEqual(Obj.d.%ToJSON(), "{}", "Dynamic object (d) should equal original value.")
-	}
+	Do ..AssertEqual(Obj.c, "{}", "Property c should be converted to a string.")
 	
 	; Save, reload, check again
 	
@@ -57,14 +56,11 @@ Test basic JSON conversion</Description>
 		Set Id = Obj.%Id() Kill Obj Set Obj = $ZObjClassMethod(..#TestClassName, "%OpenId", Id, , .Status)
 		If '..AssertStatusOk(Status, "Obj should re-open.") Quit
 		
-		If ..Assert($IsObject(Obj.a), "Property a should be a dynamic object after reload.") {
-			Do ..AssertEqual(Obj.a.%ToJSON(), "{}", "Dynamic object (a) should equal original value after reload.")
-		}
+		Do ..AssertEqual(Obj.a, "{}", "Property a should be a string after reload.")
 		If ..Assert($IsObject(Obj.b), "Property b should be a dynamic object after reload.") {
 			Do ..AssertEqual(Obj.b.%ToJSON(), "{}", "Dynamic object (b) should equal original value after reload.")
 		}
-		Do ..AssertEqual(Obj.c, "{}", "Property (c) should be a string after reload.")
-		Do ..AssertEqual(Obj.d, "{}", "Property d should remain a string after reload.")
+		Do ..AssertEqual(Obj.c, "{}", "Property (c) should remain a string after reload.")
 	}
 	
 	
@@ -72,16 +68,13 @@ Test basic JSON conversion</Description>
 	; Create object, store string values, check
 	
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
-	Set Obj.a = "{}", Obj.b = "{}", Obj.c = "{}", Obj.d = "{}"
+	Set Obj.a = "{}", Obj.b = "{}", Obj.c = "{}"
 	
-	If ..Assert($IsObject(Obj.a), "Property a should be converted to a dynamic object.") {
-		Do ..AssertEqual(Obj.a.%ToJSON(), "{}", "Dynamic object (a) should equal original value.")
-	}
+	Do ..AssertEqual(Obj.a, "{}", "Property a should remain a string.")
 	If ..Assert($IsObject(Obj.b), "Property b should be converted to a dynamic object.") {
 		Do ..AssertEqual(Obj.b.%ToJSON(), "{}", "Dynamic object (b) should equal original value.")
 	}
 	Do ..AssertEqual(Obj.c, "{}", "Property c should remain a string.")
-	Do ..AssertEqual(Obj.d, "{}", "Property d should remain a string.")
 	
 	; Save, reload, check again
 	
@@ -89,14 +82,11 @@ Test basic JSON conversion</Description>
 		Set Id = Obj.%Id() Kill Obj Set Obj = $ZObjClassMethod(..#TestClassName, "%OpenId", Id, , .Status)
 		If '..AssertStatusOk(Status, "Obj should re-open.") Quit
 		
-		If ..Assert($IsObject(Obj.a), "Property a should be a dynamic object after reload.") {
-			Do ..AssertEqual(Obj.a.%ToJSON(), "{}", "Dynamic object a should equal original value after reload.")
-		}
+		Do ..AssertEqual(Obj.a, "{}", "Property a should remain a string after reload.")
 		If ..Assert($IsObject(Obj.b), "Property b should be a dynamic object after reload.") {
 			Do ..AssertEqual(Obj.b.%ToJSON(), "{}", "Dynamic object b should equal original value after reload.")
 		}
 		Do ..AssertEqual(Obj.c, "{}", "Property c should remain a string after reload.")
-		Do ..AssertEqual(Obj.d, "{}", "Property d should remain a string after reload.")
 	}
 	
 	
@@ -104,12 +94,11 @@ Test basic JSON conversion</Description>
 	; Create object, store empty values, check
 	
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
-	Set Obj.a = "", Obj.b = "", Obj.c = "", Obj.d = ""
+	Set Obj.a = "", Obj.b = "", Obj.c = ""
 	
 	Do ..AssertEqual(Obj.a, "", "Property a should be an empty string.")
 	Do ..AssertEqual(Obj.b, "", "Property b should be an empty string.")
 	Do ..AssertEqual(Obj.c, "", "Property c should be an empty string.")
-	Do ..AssertEqual(Obj.d, "", "Property d should be an empty string.")
 	
 	; Save, reload, check again
 	
@@ -120,7 +109,6 @@ Test basic JSON conversion</Description>
 		Do ..AssertEqual(Obj.a, "", "Property a should remain an empty string after reload.")
 		Do ..AssertEqual(Obj.b, "", "Property b should remain an empty string after reload.")
 		Do ..AssertEqual(Obj.c, "", "Property c should remain an empty string after reload.")
-		Do ..AssertEqual(Obj.d, "", "Property d should remain an empty string after reload.")
 	}
 	
 	Quit
