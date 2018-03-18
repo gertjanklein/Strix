@@ -141,59 +141,6 @@ a "content" property.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="TestXmlSeq">
-<Description>
-Test XML sequence off if needed</Description>
-<Implementation><![CDATA[
-	Set Xml = "<a><b>x</b><a>y</a><b>z</b></a>"
-	
-	Set FileName = ..TempFile(Xml)
-	
-	Set Status = ##class(Strix.XML.ToClass).Create(FileName, ..#TestClassPackage, .ClassName)
-	If '..AssertStatusOk(Status, "Create class from XML") Quit
-	If '..AssertEqual(ClassName, ..#TestClassPackage_".a", "Class should have expected name.") Quit
-	If '..AssertTrue(..ClassExists(ClassName), "Generated class should exist.") Quit
-	
-	;Make sure XMLSEQUENCE turned off
-	If ..Assert(..HasParameter(ClassName_"||XMLSEQUENCE", .Value), "Class should have XMLSEQUENCE parameter.") {
-		Do ..AssertEqual(Value, 0, "XMLSEQUENCE parameter value should be 0")
-	}
-	
-	Set CheckContent = 1
-	
-	;Test property a
-	Set PropExists = ..HasProperty(ClassName_"||a", .Type, .Collection, .Parameters)
-	If ..AssertTrue(PropExists, "Property a should exist.") {
-		Do ..AssertEqual(Type, "%String", "Property a should be of type %String.")
-		Do ..AssertEqual(Collection, "", "Property a should have no collection.")
-		
-	} Else { Set CheckContent = 0 }
-	
-	;Test property b
-	Set PropExists = ..HasProperty(ClassName_"||b", .Type, .Collection, .Parameters)
-	If ..AssertTrue(PropExists, "Property b should exist.") {
-		Do ..AssertEqual(Type, "%String", "Property b should be of type %String.")
-		Do ..AssertEqual(Collection, "list", "Property b should have collection list.")
-		
-	} Else { Set CheckContent = 0 }
-	
-	If CheckContent {
-		;This Xml doesn't roundtrip, so check contents through object
-		If ..GetObject(ClassName, Xml, .Obj) {
-			Do ..AssertEqual(Obj.a, "y", "Obj.a should have proper value.")
-			If ..AssertEqual(Obj.b.Count(), 2, "Obj.b should have 2 values.") {
-				Do ..AssertEqual(Obj.b.GetAt(1), "x", "Obj.b[1] should have proper value.")
-				Do ..AssertEqual(Obj.b.GetAt(2), "z", "Obj.b[2] should have proper value.")
-			}
-		}
-	}
-	
-	Do $System.OBJ.Delete(ClassName, "-d")
-	
-	Quit
-]]></Implementation>
-</Method>
-
 <Method name="TestMembers">
 <Description>
 Test members: "collection of things" configuration setting</Description>

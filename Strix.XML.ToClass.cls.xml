@@ -25,7 +25,9 @@ Property Members As list of <element>Member(XMLPROJECTION="ELEMENT");
 
 --
 
-Classes of same name at different level should have different Caché name.
+Make XMLUSEEMPTYELEMENT configurable. This is useful, if the input has
+them, for roundtrip testing.
+
 
 */
 ]]></Content>
@@ -137,7 +139,6 @@ Names of created classes</Description>
 	Set Data = @Node
 	Set Properties = $lg(Data, 1)
 	Set Attributes = $lg(Data, 2)
-	Set NoXMLSeq = $lg(Data, 4)
 	
 	Set ClassName = ..GetClassName(Path, .ClassXMLName)
 	
@@ -153,11 +154,9 @@ Names of created classes</Description>
 	Set ClassDef = ##class(%Dictionary.ClassDefinition).%New(ClassName, 25)
 	Set ClassDef.Super = "%SerialObject,%XML.Adaptor"
 	
-	If NoXMLSeq {
-		#dim ParmDef As %Dictionary.ParameterDefinition
-		Set ParmDef = ..AddParameter(ClassDef, "XMLSEQUENCE", 0, .sc)
+	If 0 { ;TBD: make this configurable
+		Set sc = ..AddParameter(ClassDef, "XMLUSEEMPTYELEMENT", 1, .sc)
 		If 'sc Quit ..HandleError("Error adding parameter", sc)
-		Set ParmDef.SequenceNumber = $Increment(SeqNr)
 	}
 	
 	If ..XmlName || ($Piece(ClassName, ".", *) '= ClassXMLName) {
@@ -219,7 +218,7 @@ Names of created classes</Description>
 		}
 		
 		; Don't set maxlen on non-datatype property
-		If SetMaxlen, 'IsClass Do PropDef.Parameters.SetAt("", "MAXLEN")
+		If SetMaxlen, PropType = "%String" Do PropDef.Parameters.SetAt("", "MAXLEN")
 	}
 	
 	; Special case: if this class has only attributes, it may need
@@ -435,11 +434,13 @@ proxy classes with.</Description>
 	
 	/*
 	Structure:
-	 Tree("s",PropName) = $lb(propertynames, attributenames, islist, noxmlseq)
+	 Tree("s",PropName,PropName,...) = $lb(propertynames, attributenames, islist, , lastparentseq)
 	Values:
 	 Tree("v",path,value)=""
 	Context:
 	 Tree("c",path)=lastelement
+	Sequence (list detection):
+	 Tree("q",path)=seqnr
 	*/
 	
 	Set PrevParent = "", LastElementName = ""
@@ -456,8 +457,40 @@ proxy classes with.</Description>
 				} Else {
 					Set ^||Parser(..NodeIdx, "s", Name) = ""
 				}
+				Set ^||Parser(..NodeIdx, "q", Path) = 1
 				Continue
 			}
+			
+			
+			; Sequence number: if an element occurs more than once we detect that here
+			If $Increment(^||Parser(..NodeIdx, "q", Path)) {}
+			Set ParentPath = $Piece(Path, "/", 1, *-1)
+			Set CurrentParentSeq = ^||Parser(..NodeIdx, "q", ParentPath)
+			
+			; Get reference to current and parent nodes
+			Set Exists = ..GetNodeRef(Path, .ParentNodeRef, .NodeRef)
+			
+			; Check attributes
+			If Reader.HasAttributes Do ..HandleAttributes(Reader, NodeRef)
+			
+			
+			If Exists {
+				; Seen this node before.
+				
+				; Get sequence of parent we saw this node in the previous time, and update
+				Set PrevParentSeq = $lg(@NodeRef, 5)
+				Set $li(@NodeRef, 5) = CurrentParentSeq
+				
+				; Two instances in the same parent mean a list
+				If CurrentParentSeq = PrevParentSeq Set $List(@NodeRef, 3) = 1
+				Continue
+				
+			}
+			
+			; === New node
+			
+			; Record current parent
+			Set $List(@NodeRef, 5) = CurrentParentSeq
 			
 			
 			;== Check for/get the previous element at this level
@@ -466,35 +499,6 @@ proxy classes with.</Description>
 			Set PrevName = $Get(^||Parser(..NodeIdx, "c", Parent))
 			Set ^||Parser(..NodeIdx, "c", Parent) = Name
 			Kill Parent
-			
-			
-			;== Get reference to current and parent nodes
-			
-			Set Exists = ..GetNodeRef(Path, .ParentNodeRef, .NodeRef)
-			If 'Exists Set @NodeRef = ""
-			
-			If Reader.HasAttributes Do ..HandleAttributes(Reader, NodeRef)
-			
-			If Exists {
-				If $Data(@NodeRef) \ 10 {
-					;This node has subnodes and we've seen it before, it is a list.
-					Set $List(@NodeRef, 3) = 1
-					;If the previous element is not this one, turn off sequence in parent
-					If PrevName '= "", PrevName '= Name Set $List(@ParentNodeRef, 4) = 1
-					
-				} ElseIf PrevName = Name {
-					;This name occurs more than once in sequence: it is a list
-					Set $List(@NodeRef, 3) = 1
-					
-				} ElseIf $Data(@NodeRef), PrevName '= "" {
-					;This (datatype: no subnodes) name was seen before; make it a list and
-					;turn off xml sequence
-					Set $List(@NodeRef, 3) = 1
-					Set $List(@ParentNodeRef, 4) = 1
-					
-				}
-				Continue
-			}
 			
 			
 			;== Check parent
@@ -512,16 +516,14 @@ proxy classes with.</Description>
 			
 			;== Determine where this property belongs
 			
-			;If no data elements at this level before this one, insert in front
+			; If no data elements in this parent before this one, insert in front
 			If PrevName = "" {
 				Set PropList = Name_","_PropList
 				Set $List(@ParentNodeRef, 1) = PropList
-				;We can't be sure we know the correct sequence
-				Set $List(@ParentNodeRef, 4) = 1
 				Continue
 			}
 			
-			;Find previous element in property list
+			; Find previous element in property list
 			For i = 1:1:$Length(PropList, ",") {
 				If $Piece(PropList, ",", i) = PrevName {
 					Set Before = $Piece(PropList, ",", 1, i)
@@ -530,13 +532,9 @@ proxy classes with.</Description>
 				}
 			}
 			
-			;Insert property after the previous name at this level
+			; Insert property after the previous name at this level
 			Set PropList = Before_","_Name
-			If After '= "" {
-				Set PropList = PropList_","_After
-				;We can't be sure we know the correct sequence
-				Set $List(@ParentNodeRef, 4) = 1
-			}
+			If After '= "" Set PropList = PropList_","_After
 			
 			Set $List(@ParentNodeRef, 1) = PropList
 			
@@ -604,8 +602,8 @@ under @AttributeName in the value node.</Description>
 <Method name="GetNodeRef">
 <Description>
 Returns a reference to the current and parent nodes in the structure
-tree for the given path, in output parameters. Return value is whether
-the node exists.</Description>
+tree for the given path, in output parameters. Return value is the
+last sequence number for this element, or "" if this is a new one.</Description>
 <FormalSpec>Path:%String,*ParentNodeRef:%String,*NodeRef:%String</FormalSpec>
 <ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
@@ -621,9 +619,9 @@ the node exists.</Description>
 	Set NodeRef = $Name(@ParentNodeRef@(Name))
 	
 	;Check and return whether it exists
-	Set Exists = $Data(@NodeRef)
+	Set LastSeq = $ListGet($Get(@NodeRef), 5)
 	
-	Quit Exists
+	Quit LastSeq
 ]]></Implementation>
 </Method>
 
