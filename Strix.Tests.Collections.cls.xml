@@ -171,6 +171,39 @@ on Oref.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="TestGetCopyWithContents">
+<Description>
+Simple test to make sure contents is copied without error.</Description>
+<Implementation><![CDATA[
+	Set Inst = $ZObjClassMethod(..#TestClassName, "%New")
+	Do Inst.a.Insert("value")
+	Do Inst.e.SetAt("value", "key")
+	
+	; Test copying of list contents
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.a, 1, .sc)
+	If ..AssertStatusOk(sc, "Create copy should not return an error.") {
+		Do ..AssertEqual(Copy.%ClassName(), "%ListOfDataTypes", "Get the right collection type for property a.")
+		Do ..AssertEqual(Copy.Count(), 1, "Copy of property a should have one value.")
+		Set Value = Copy.GetAt(1)
+		Do ..AssertEqual(Value, "value", "Copy of property a should have the right value.")
+	}
+	
+	; Test copying of array contents
+	
+	Set Copy = ##class(Strix.Lib.Collections).GetCopy(Inst.e, 1, .sc)
+	If ..AssertStatusOk(sc, "Create copy should not return an error.") {
+		Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfDataTypes", "Get the right collection type for property e.")
+		Do ..AssertEqual(Copy.Count(), 1, "Copy of property e should have one value.")
+		Set Key = "", Value = Copy.GetNext(.Key)
+		Do ..AssertEqual(Key, "key", "Copy of property e should have the right key.")
+		Do ..AssertEqual(Value, "value", "Copy of property e should have the right value.")
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers
@@ -244,7 +277,7 @@ Code to run before any test in this class is executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Type = ..#TestClassName
-	Set Status = ..CreateClass(Type, "a:%String:list,b:%String:list,c:"_Type_":list,d:"_Type_":list")
+	Set Status = ..CreateClass(Type, "a:%String:list,b:%String:list,c:"_Type_":list,d:"_Type_":list,e:%String:array")
 	If 'Status Quit Status
 	Quit $$$OK
 ]]></Implementation>
@@ -254,7 +287,9 @@ Code to run before any test in this class is executed.</Description>
 <Description>
 Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+<Implementation><![CDATA[
+	Do ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>
