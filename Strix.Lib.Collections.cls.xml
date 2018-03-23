@@ -63,30 +63,53 @@ to be the same object to qualify.</Description>
 Returns an empty copy of a collection object, of the same type as
 the input collection, but one that can exist stand-alone. (The
 %Collection classes can only exists as properties of an object.)
-The collection contents are not copied.</Description>
+The collection contents are not copied unless CopyContents is true.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%Collection.AbstractIterator</FormalSpec>
+<FormalSpec>Input:%Collection.AbstractIterator,CopyContents:%Boolean=0,*Status:%Status</FormalSpec>
 <ReturnType>%Collection.AbstractIterator</ReturnType>
 <Implementation><![CDATA[
-	; Not a %Collection-type property: return a new instance of the same type
-	If Input.%PackageName() '= "%Collection" Quit Input.%New()
+	Set Status = $$$OK
+	Set ReturnType = ""
 	
-	Set Name = Input.%ClassName()
+	If Input.%ClassName() = "%RelationshipObject" {
+		Set ReturnType = "%ListOfObjects"
+		
+	} ElseIf Input.%PackageName() = "%Collection" {
+		Set ReturnType = $Case(Input.%ClassName(),
+		  "ListOfDT": "%ListOfDataTypes",
+		  "ListOfObj": "%ListOfObjects",
+		  "ArrayOfDT": "%ArrayOfDataTypes",
+		  "ArrayOfObj": "%ArrayOfObjects",
+		  "ListOfObjCN": "%ListOfObjectsWithClassName",
+		  "ArrayOfObjCN": "%ArrayOfObjectsWithClassName",
+		  "ListOfStream": "%ListOfObjects",
+		  "ArrayOfStream": "%ArrayOfObjects"
+		)
+		
+	} Else {
+		; %ListOfXxx, %ArrayOfXxx
+		Set ReturnType = Input.%ClassName(1)
+		
+	}
 	
-	If Name = "ListOfDT" Quit ##class(%ListOfDataTypes).%New()
-	If Name = "ListOfObj" Quit ##class(%ListOfObjects).%New()
+	Set Copy = $ZObjClassMethod(ReturnType, "%New")
 	
-	If Name = "ArrayOfDT" Quit ##class(%ArrayOfDataTypes).%New()
-	If Name = "ArrayOfObj" Quit ##class(%ArrayOfObjects).%New()
+	If CopyContents {
+		Set Key = ""
+		For  {
+			Set Value = Input.GetNext(.Key)
+			If Key = "" Quit
+			
+			; Lists should allow SetAt(..., max+1), but don't.
+			If Copy.%Extends("%Collection.AbstractList") {
+				Set Status = Copy.Insert(Value)
+			} Else {
+				Set Status = Copy.SetAt(Value, Key)
+			}
+		}
+	}
 	
-	If Name = "ListOfObjCN" Quit ##class(%ListOfObjectsWithClassName).%New()
-	If Name = "ArrayOfObjCN" Quit ##class(%ArrayOfObjectsWithClassName).%New()
-	
-	If Name = "ListOfStream" Quit ##class(%ListOfObjects).%New()
-	If Name = "ArrayOfStream" Quit ##class(%ArrayOfObjects).%New()
-	
-	; If none of the above matches, attempt %New and hope for the best
-	Quit Input.%New()
+	Quit Copy
 ]]></Implementation>
 </Method>
 </Class>
