@@ -410,6 +410,11 @@ data.</Description>
 	Set Option = $Order(Chk(""))
 	If Option '= "", $Order(Chk(Option)) = "" Quit Option
 	
+	;If %Integer is valid, %Float is too, but not the other way around
+	If $Data(Chk("%Integer")) Quit "%Integer"
+	
+	;If multiple options left here, default to string.
+	
 	Quit "%String"
 ]]></Implementation>
 </Method>
