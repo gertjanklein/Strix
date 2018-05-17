@@ -33,6 +33,20 @@ by that name already exists, it is deleted.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="SetClassParameter">
+<Description>
+Adds or updates a class parameter with the given value</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim pd As %Dictionary.ParameterDefinition
+	Set pd = ##class(Strix.Generator.Utilities).GetInCollection(ClassDef.Parameters, Name, 1, .Status)
+	Set pd.Default = Value
+	Quit Status
+]]></Implementation>
+</Method>
+
 <Method name="AddProperty">
 <Description>
 Adds a new property to an existing class definition.</Description>
