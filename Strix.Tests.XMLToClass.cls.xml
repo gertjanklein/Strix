@@ -119,7 +119,7 @@ a "content" property.</Description>
 	;Check a.b.id
 	Set PropExists = ..HasProperty(Classname2_"||id", .Type, .Collection, .Parameters)
 	If ..AssertTrue(PropExists, "Property b.id should exist.") {
-		Do ..AssertEqual(Type, "%String", "Property id should have type %String.")
+		Do ..AssertEqual(Type, "%Integer", "Property id should have type %Integer.")
 		Do ..AssertEqual(Collection, "", "Property id should have no collection.")
 		Do ..AssertEqual($Get(Parameters("XMLPROJECTION")), "ATTRIBUTE", "Property id should have proper XMLPROJECTION.")
 	}
