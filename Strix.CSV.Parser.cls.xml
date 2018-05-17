@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Class name="Strix.Lib.CSV">
+<Class name="Strix.CSV.Parser">
 <Description>
 A class to parse CSV data formatted according to RFC4180.
 Provides a resultset-like interface.</Description>
@@ -82,7 +82,7 @@ Optional mapping of column name to column index</Description>
 Returns an instance of this class with some properties setup.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Input:%AbstractStream,Separator:%String=",",SkipCount:%Integer=0,ColumnNames:%String</FormalSpec>
-<ReturnType>Strix.Lib.CSV</ReturnType>
+<ReturnType>Strix.CSV.Parser</ReturnType>
 <Implementation><![CDATA[
 	Set Me = ..%New()
 	Set Me.Input = Input
@@ -91,6 +91,7 @@ Returns an instance of this class with some properties setup.</Description>
 	If SkipCount = 1, '$Data(ColumnNames) Set Me.NamesFromFirstRow = 1
 	If $Get(ColumnNames) '= "" Do Me.SetColumnNames(ColumnNames)
 	Quit Me
+
 ]]></Implementation>
 </Method>
 
@@ -116,6 +117,7 @@ Get the next record. Returns 0 if no more records available.</Description>
 	If 'ok Quit 0
 	
 	Quit 1
+
 ]]></Implementation>
 </Method>
 
@@ -127,7 +129,10 @@ that wasn't present in the input.</Description>
 <CodeMode>expression</CodeMode>
 <FormalSpec>ColumnNr:%Integer,Default:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[$Get(i%Data(ColumnNr), Default)
+<Implementation><![CDATA[
+$Get(i%Data(ColumnNr), Default)
+
+
 ]]></Implementation>
 </Method>
 
@@ -142,6 +147,7 @@ supplied for it, returns the default value.</Description>
 	Set ColumnNr = $Get(..Names(ColumnName))
 	If ColumnNr = "" Quit Default
 	Quit $Get(..Data(ColumnNr), Default)
+
 ]]></Implementation>
 </Method>
 
@@ -155,6 +161,7 @@ Returns the row as a list.</Description>
 		Set List = List_$ListBuild(..Data(i))
 	}
 	Quit List
+
 ]]></Implementation>
 </Method>
 
@@ -174,6 +181,7 @@ string, the separator defaults to ..Separator but can be overridden.</Descriptio
 	}
 	
 	Quit
+
 ]]></Implementation>
 </Method>
 
@@ -297,6 +305,7 @@ parameter Status.</Description>
 	}
 	
 	Quit 1
+
 ]]></Implementation>
 </Method>
 </Class>
