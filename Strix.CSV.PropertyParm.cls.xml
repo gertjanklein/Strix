@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.CSV.PropertyParm">
+<Abstract>1</Abstract>
+<TimeCreated>64771,47207.427476</TimeCreated>
+
+<Parameter name="ColumnHeader">
+<Description>
+The column header in the CSV file; used to load
+the property from</Description>
+<Type>%String</Type>
+</Parameter>
+</Class>
+</Export>

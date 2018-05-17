@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.CSV.Adaptor">
+<Abstract>1</Abstract>
+<IncludeCode>Strix</IncludeCode>
+<IncludeGenerator>Strix</IncludeGenerator>
+<PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
+<Super>%SerialObject</Super>
+<TimeCreated>64771,47169.904165</TimeCreated>
+
+<Parameter name="True">
+<Description>
+For boolean properties: "true" values</Description>
+<Default>1,yes</Default>
+</Parameter>
+
+<Parameter name="False">
+<Description>
+For boolean properties: "false" values</Description>
+<Default>0,no</Default>
+</Parameter>
+
+<Parameter name="DateExpression">
+<Description>
+Expression to use to convert dates to logical format.
+The value from the CSV file is present in variable "v".</Description>
+<Default>$ZDateH(v,3)</Default>
+</Parameter>
+
+<Parameter name="NumericExpression">
+<Description>
+Expression to use to convert numeric values to logical format.
+The value from the CSV file is present in variable "v".</Description>
+<Default>+v</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="LoadCSVData">
+<Description>
+Loads the object from the data in Data (indexed by column header).</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.PropertyDefinition
+		Set pd = %class.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Header = pd.Parameters.GetAt("ColumnHeader")
+		If Header = "" Continue
+		
+		Set Name = pd.Name, Type = $$$DenormalizeClassname(pd.Type)
+		
+		Set Code = "v"
+		If Type = "%Boolean" {
+			Set Trues = $ListFromString($$$GetClassParameter(%compiledclass.Name, "True"))
+			Set Falses = $ListFromString($$$GetClassParameter(%compiledclass.Name, "False"))
+			Set Code = "$Case(v"
+			For i = 1:1:$ListLength(Trues) Set Code = Code_","""_$List(Trues, i)_""":1"
+			For i = 1:1:$ListLength(Falses) Set Code = Code_","""_$List(Falses, i)_""":0"
+			Set Code = Code_",:v)"
+			
+		} ElseIf Type = "%Date" {
+			Set Code = $$$GetClassParameter(%compiledclass.Name, "DateExpression")
+			
+		} ElseIf Type = "%Numeric" {
+			Set Code = $$$GetClassParameter(%compiledclass.Name, "NumericExpression")
+			
+		}
+		
+		Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
+		Do %code.WriteLine($Char(9)_Code)
+	}
+	Do %code.WriteLine($Char(9)_"Quit $$$OK")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CheckCSVColumns">
+<Description>
+Compares the column headers present in Columns with the specifications
+in the properties of this class. Returns comma-separated lists of:
+- Missing: headers defined in a property but not in the Columns array
+- Unused: headers in the Columns array for which no property is defined
+The return value is true if all property-defined headers are present,
+false otherwise.</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Columns:%String,*Missing:%String,*Unused:%String]]></FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Do %code.WriteLine($Char(9)_"Set (Missing, Unused) = """"")
+	Do %code.WriteLine($Char(9)_"Merge Test = Columns")
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.PropertyDefinition
+		Set pd = %class.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Header = pd.Parameters.GetAt("ColumnHeader")
+		If Header = "" Continue
+		If $Data(Headers(Header)) Continue
+		Set Headers(Header) = ""
+		
+		Do %code.WriteLine($Char(9)_"Set v = """_Header_""" If $Data(Columns(v)) { Kill Test(v) } Else { Set Missing = Missing_$lb(v) }")
+	}
+	
+	Do %code.WriteLine($Char(9)_"If Missing '= """" Set Missing = $ListToString(Missing)")
+	
+	Do %code.WriteLine($Char(9)_"Set v = """" For  { Set v=$Order(Test(v)) Quit:v=""""  Set Unused=Unused_$lb(v) }")
+	Do %code.WriteLine($Char(9)_"If Unused '= """" Set Unused = $ListToString(Unused)")
+	
+	Do %code.WriteLine($Char(9)_"Quit Missing = """"")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<StreamLocation>^Strix.CSV.AdaptorS</StreamLocation>
+</Storage>
+</Class>
+</Export>

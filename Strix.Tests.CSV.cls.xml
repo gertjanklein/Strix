@@ -6,6 +6,10 @@ Tests Strix.CSV.Parser.</Description>
 <Super>Strix.Testing.TestCase</Super>
 <TimeCreated>64594,31293.265299</TimeCreated>
 
+<Parameter name="TestClassName">
+<Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
+</Parameter>
+
 <Property name="Stream">
 <Description>
 Stream to use as input to parser</Description>
@@ -303,6 +307,97 @@ Test GetAsList</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="TestAdaptor">
+<Description>
+Basic test of retrieving a Strix.CSV.Adaptor object from the parser.</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.CSV.Parser
+	
+	Set Status = ..CreateClass("PropA::a,PropB::b,PropC::c")
+	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
+	
+	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
+	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
+	Set p.AdaptorClassName = ..#TestClassName
+	
+	If '..Assert(p.Next(.Status), "First record should be found.") Quit
+	Set Obj = p.GetObject(.Status)
+	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
+	Do ..AssertEqual(Obj.PropA, 1, "Property a should be loaded.")
+	Do ..AssertEqual(Obj.PropB, 2, "Property b should be loaded.")
+	Do ..AssertEqual(Obj.PropC, 3, "Property c should be loaded.")
+	
+	If '..Assert(p.Next(.Status), "Second record should be found.") Quit
+	Set Obj = p.GetObject(.Status)
+	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
+	Do ..AssertEqual(Obj.PropA, 4, "Property a should be loaded.")
+	Do ..AssertEqual(Obj.PropB, 5, "Property b should be loaded.")
+	Do ..AssertEqual(Obj.PropC, 6, "Property c should be loaded.")
+	
+	If '..Assert('p.Next(.Status), "No next row should be found.") Quit
+	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestAdaptorDataType">
+<Description>
+Test default adaptor datatype conversions</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.CSV.Parser
+	
+	Set Status = ..CreateClass("PropA:%Date:a,PropB:%Boolean:b,PropC:%Numeric:c")
+	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
+	
+	Do ..MakeStream("a,b,c", "1961-06-22,yes,1.000")
+	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
+	Set p.AdaptorClassName = ..#TestClassName
+	
+	If '..Assert(p.Next(.Status), "Record should be found.") Quit
+	Set Obj = p.GetObject(.Status)
+	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
+	Do ..AssertEqual(Obj.PropA, 44002, "Property a should be converted.")
+	Do ..AssertEqual(Obj.PropB, 1, "Property b should be converted.")
+	Do ..AssertEqual(Obj.PropC, 1, "Property c should be converted.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestAdaptorDataTypeExpression">
+<Description>
+Test datatype conversion override by subclassing and changing parameter</Description>
+<Implementation><![CDATA[
+	#dim cd As %Dictionary.ClassDefinition
+	Set Status = ..CreateClass("PropA:%Date:a", .cd)
+	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
+	Do ##class(Strix.Testing.Support).SetClassParameter(cd, "DateExpression", "$ZDateH($Translate(v,""-"",""/""),4)")
+	Set Status = ##class(Strix.Testing.Support).SaveAndCompile(cd)
+	If '..AssertStatusOk(Status, "Should be able to update test class.") Quit
+	
+	#dim p As Strix.CSV.Parser
+	
+	Do ..MakeStream("a", "22-06-1961")
+	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
+	Set p.AdaptorClassName = ..#TestClassName
+	
+	If '..Assert(p.Next(.Status), "Record should be found.") Quit
+	Set Obj = p.GetObject(.Status)
+	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
+	Do ..AssertEqual(Obj.PropA, 44002, "Property should be converted.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
 // ===== Helpers
 
 ]]></Content>
@@ -319,6 +414,37 @@ Test GetAsList</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="CreateClass">
+<Description>
+Create a class with the specified properties</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Properties:%String="",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject,Strix.CSV.Adaptor", .ClassDef)
+	If 'Status Quit Status
+	
+	If Properties '= "" {
+		For i = 1:1:$Length(Properties, ",") {
+			Set Def = $Piece(Properties, ",", i)
+			Set Name = $Piece(Def, ":", 1)
+			Set Type = $Piece(Def, ":", 2)
+			If Type = "" Set Type = "%String"
+			Set ColumnHeader = $Piece(Def, ":", 3)
+			
+			#dim pd As %Dictionary.PropertyDefinition
+			Set pd = ##class(Strix.Testing.Support).AddProperty(ClassDef, Name, Type)
+			Do pd.Parameters.SetAt(ColumnHeader, "ColumnHeader")
+		}
+	}
+	
+	Set Status = ##class(Strix.Testing.Support).SaveAndCompile(ClassDef)
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Cleanup code.
@@ -327,8 +453,10 @@ Test GetAsList</Description>
 </UDLText>
 
 <Method name="TearDown">
+<Description>
+Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
+<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
 ]]></Implementation>
 </Method>
 </Class>

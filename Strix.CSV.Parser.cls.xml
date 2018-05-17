@@ -42,6 +42,13 @@ Whether to take column names from the first row</Description>
 <InitialExpression>0</InitialExpression>
 </Property>
 
+<Property name="AdaptorClassName">
+<Description>
+If an adaptor class exists for this CSV, specify the name here
+so ..GetObject works.</Description>
+<Type>%String</Type>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ----- State
@@ -56,16 +63,23 @@ if any.</Description>
 <Type>%Integer</Type>
 </Property>
 
-<Property name="Data">
+<Property name="Names">
 <Description>
-The data, indexed by column number</Description>
+Optional mapping of column name to column index</Description>
 <Type>%String</Type>
 <MultiDimensional>1</MultiDimensional>
 </Property>
 
-<Property name="Names">
+<Property name="Data">
 <Description>
-Optional mapping of column name to column index</Description>
+The data indexed by column number</Description>
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+</Property>
+
+<Property name="DataByName">
+<Description>
+The data indexed by column name</Description>
 <Type>%String</Type>
 <MultiDimensional>1</MultiDimensional>
 </Property>
@@ -91,7 +105,6 @@ Returns an instance of this class with some properties setup.</Description>
 	If SkipCount = 1, '$Data(ColumnNames) Set Me.NamesFromFirstRow = 1
 	If $Get(ColumnNames) '= "" Do Me.SetColumnNames(ColumnNames)
 	Quit Me
-
 ]]></Implementation>
 </Method>
 
@@ -104,20 +117,29 @@ Get the next record. Returns 0 if no more records available.</Description>
 	For  {
 		Set ok = ..GetRecord(.Status)
 		If 'ok Quit
+		
+		; Got record; load names if needed
+		
 		Set ..RecordNr = ..RecordNr + 1
-		If ..RecordNr = 1, ..NamesFromFirstRow {
-			For ColumnNr = 1:1:..Data {
-				Set ColumnName = $ZStrip(..Data(ColumnNr), "<>W")
-				If ColumnName = "" Continue
-				Set ..Names(ColumnName) = ColumnNr
-			}
+		If ..RecordNr = 1, ..NamesFromFirstRow Do ..SetColumnNamesFromData()
+		If ..RecordNr '> ..SkipCount Continue
+		
+		; Load ..DataByName
+		
+		Kill ..DataByName
+		Set Name = ""
+		For  {
+			Set Name = $Order(..Names(Name), 1, Index)
+			If Name = "" Quit
+			If '$Data(..Data(Index)) Continue
+			Set ..DataByName(Name) = ..Data(Index)
 		}
-		If ..RecordNr > ..SkipCount Quit
+		
+		Quit
 	}
 	If 'ok Quit 0
 	
 	Quit 1
-
 ]]></Implementation>
 </Method>
 
@@ -129,10 +151,7 @@ that wasn't present in the input.</Description>
 <CodeMode>expression</CodeMode>
 <FormalSpec>ColumnNr:%Integer,Default:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-$Get(i%Data(ColumnNr), Default)
-
-
+<Implementation><![CDATA[$Get(i%Data(ColumnNr), Default)
 ]]></Implementation>
 </Method>
 
@@ -147,13 +166,12 @@ supplied for it, returns the default value.</Description>
 	Set ColumnNr = $Get(..Names(ColumnName))
 	If ColumnNr = "" Quit Default
 	Quit $Get(..Data(ColumnNr), Default)
-
 ]]></Implementation>
 </Method>
 
 <Method name="GetAsList">
 <Description>
-Returns the row as a list.</Description>
+Returns the row as a %List.</Description>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
 	Set List = ""
@@ -161,9 +179,36 @@ Returns the row as a list.</Description>
 		Set List = List_$ListBuild(..Data(i))
 	}
 	Quit List
-
 ]]></Implementation>
 </Method>
+
+<Method name="GetObject">
+<Description>
+If an adaptor class has been created for this CSV (and ..AdaptorClassName
+has been set), this method returns an instance of that class for the
+current record.</Description>
+<FormalSpec>*Status:%Status</FormalSpec>
+<ReturnType>Strix.CSV.Adaptor</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	
+	#dim Adaptor As Strix.CSV.Adaptor
+	Set Adaptor = $ZObjClassMethod(..AdaptorClassName, "%New")
+	If Adaptor = "" Quit $$$BuildStatus("Error creating instance of '{}':", $Get(%objlasterror), ..AdaptorClassName)
+	
+	Merge Data = ..DataByName
+	Set Status = Adaptor.LoadCSVData(.Data)
+	
+	Quit Adaptor
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
 
 <Method name="SetColumnNames">
 <Description>
@@ -181,7 +226,19 @@ string, the separator defaults to ..Separator but can be overridden.</Descriptio
 	}
 	
 	Quit
+]]></Implementation>
+</Method>
 
+<Method name="SetColumnNamesFromData">
+<Description>
+Sets column names from the data in ..Data.</Description>
+<Implementation><![CDATA[
+	For ColumnNr = 1:1:..Data {
+		Set ColumnName = $ZStrip(..Data(ColumnNr), "<>W")
+		If ColumnName = "" Set ColumnName = "__"_ColumnNr
+		Set ..Names(ColumnName) = ColumnNr
+	}
+	Quit
 ]]></Implementation>
 </Method>
 
@@ -305,7 +362,6 @@ parameter Status.</Description>
 	}
 	
 	Quit 1
-
 ]]></Implementation>
 </Method>
 </Class>
