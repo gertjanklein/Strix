@@ -397,6 +397,36 @@ Test datatype conversion override by subclassing and changing parameter</Descrip
 ]]></Implementation>
 </Method>
 
+<Method name="TestCustomConvert">
+<Implementation><![CDATA[
+	#dim cd As %Dictionary.ClassDefinition
+	Set Status = ..CreateClass("PropA:%Date:a,PropB::b", .cd)
+	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
+	#dim md As %Dictionary.MethodDefinition
+	Set md = ##class(Strix.Generator.Utilities).GetInCollection(cd.Methods, "ConvertCSVValue", 1, .Status)
+	Set md.FormalSpec = "ColumnHeader:%String,Value:%String,&Converted:%String"
+	Set md.ReturnType = "%Status"
+	Do md.Implementation.WriteLine(" If ColumnHeader = ""a"" Set Converted=Converted+1")
+	Do md.Implementation.WriteLine(" Quit $$$OK")
+	Set Status = ##class(Strix.Testing.Support).SaveAndCompile(cd)
+	If '..AssertStatusOk(Status, "Should be able to update test class.") Quit
+	
+	Do ..MakeStream("a,b", "1961-06-22,don't change me")
+	
+	#dim p As Strix.CSV.Parser
+	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
+	Set p.AdaptorClassName = ..#TestClassName
+	
+	If '..Assert(p.Next(.Status), "Record should be found.") Quit
+	Set Obj = p.GetObject(.Status)
+	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
+	Do ..AssertEqual(Obj.PropA, 44003, "Property should be converted.")
+	Do ..AssertEqual(Obj.PropB, "don't change me", "Property should be unchanged.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers
@@ -458,8 +488,8 @@ Create a class with the specified properties</Description>
 Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-	If 'Status Quit Status
+	;Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	;If 'Status Quit Status
 	
 	Quit $$$OK
 ]]></Implementation>

@@ -56,6 +56,11 @@ Loads the object from the data in Data (indexed by column header).</Description>
 <FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	; Check if we have a non-abstract conversion function
+	#dim md As %Dictionary.MethodDefinition
+	Set md = ##class(Strix.Generator.Utilities).GetInCollection(%class.Methods, "ConvertCSVValue", 0)
+	Set Convert = $IsObject(md) && 'md.Abstract
+	
 	Set key = ""
 	For  {
 		#dim pd As %Dictionary.PropertyDefinition
@@ -87,12 +92,31 @@ Loads the object from the data in Data (indexed by column header).</Description>
 			
 		}
 		
-		Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
+		If Convert {
+			Set Code = "Set v=Data("""_Header_""") If v'="""" Set v2="_Code_",sc=..ConvertCSVValue("""_Header_""",v,.v2),.."_Name_"=v2"
+			Set Code = Code_" If 'sc Quit sc"
+		} Else {
+			Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
+		}
+		
 		Do %code.WriteLine($Char(9)_Code)
 	}
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ConvertCSVValue">
+<Description>
+Callback to convert the value from the CSV file to logical value.
+The column header, original value, and default converted value
+are passed in. The converted value is passed in ByRef and can
+be changed. Errors can be returned as a %Status return value.</Description>
+<Abstract>1</Abstract>
+<FormalSpec><![CDATA[ColumnHeader:%String,Value:%String,&Converted:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
 </Method>
 
