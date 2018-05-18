@@ -488,9 +488,8 @@ Create a class with the specified properties</Description>
 Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	;Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-	;If 'Status Quit Status
-	
+	Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	If 'Status Quit Status
 	Quit $$$OK
 ]]></Implementation>
 </Method>
