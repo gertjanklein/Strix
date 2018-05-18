@@ -27,10 +27,18 @@ The value from the CSV file is present in variable "v".</Description>
 <Default>$ZDateH(v,3)</Default>
 </Parameter>
 
+<Parameter name="TimeExpression">
+<Description>
+Expression to use to convert times to logical format.
+The value from the CSV file is present in variable "v".</Description>
+<Default>$ZTimeH(v,1)</Default>
+</Parameter>
+
 <Parameter name="NumericExpression">
 <Description>
-Expression to use to convert numeric values to logical format.
-The value from the CSV file is present in variable "v".</Description>
+Expression to use to convert numeric (floating point) values
+to logical format. The value from the CSV file is present in
+variable "v".</Description>
 <Default>+v</Default>
 </Parameter>
 
@@ -71,7 +79,10 @@ Loads the object from the data in Data (indexed by column header).</Description>
 		} ElseIf Type = "%Date" {
 			Set Code = %parameter("DateExpression")
 			
-		} ElseIf Type = "%Numeric" {
+		} ElseIf Type = "%Time" {
+			Set Code = %parameter("TimeExpression")
+			
+		} ElseIf $lf($lfs("%Numeric,%Float,%Double"), Type) {
 			Set Code = %parameter("NumericExpression")
 			
 		}

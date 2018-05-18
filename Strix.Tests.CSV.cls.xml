@@ -352,10 +352,10 @@ Test default adaptor datatype conversions</Description>
 <Implementation><![CDATA[
 	#dim p As Strix.CSV.Parser
 	
-	Set Status = ..CreateClass("PropA:%Date:a,PropB:%Boolean:b,PropC:%Numeric:c")
+	Set Status = ..CreateClass("PropA:%Date:a,PropB:%Boolean:b,PropC:%Numeric:c,PropD:%Time:d")
 	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
 	
-	Do ..MakeStream("a,b,c", "1961-06-22,yes,1.000")
+	Do ..MakeStream("a,b,c,d", "1961-06-22,yes,1.000,12:13:22")
 	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
 	Set p.AdaptorClassName = ..#TestClassName
 	
@@ -365,6 +365,7 @@ Test default adaptor datatype conversions</Description>
 	Do ..AssertEqual(Obj.PropA, 44002, "Property a should be converted.")
 	Do ..AssertEqual(Obj.PropB, 1, "Property b should be converted.")
 	Do ..AssertEqual(Obj.PropC, 1, "Property c should be converted.")
+	Do ..AssertEqual(Obj.PropD, 44002, "Property d should be converted.")
 	
 	Quit
 ]]></Implementation>
