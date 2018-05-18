@@ -61,18 +61,18 @@ Loads the object from the data in Data (indexed by column header).</Description>
 		
 		Set Code = "v"
 		If Type = "%Boolean" {
-			Set Trues = $ListFromString($$$GetClassParameter(%compiledclass.Name, "True"))
-			Set Falses = $ListFromString($$$GetClassParameter(%compiledclass.Name, "False"))
+			Set Trues = $ListFromString(%parameter("True"))
+			Set Falses = $ListFromString(%parameter("False"))
 			Set Code = "$Case(v"
 			For i = 1:1:$ListLength(Trues) Set Code = Code_","""_$List(Trues, i)_""":1"
 			For i = 1:1:$ListLength(Falses) Set Code = Code_","""_$List(Falses, i)_""":0"
 			Set Code = Code_",:v)"
 			
 		} ElseIf Type = "%Date" {
-			Set Code = $$$GetClassParameter(%compiledclass.Name, "DateExpression")
+			Set Code = %parameter("DateExpression")
 			
 		} ElseIf Type = "%Numeric" {
-			Set Code = $$$GetClassParameter(%compiledclass.Name, "NumericExpression")
+			Set Code = %parameter("NumericExpression")
 			
 		}
 		
