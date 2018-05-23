@@ -208,17 +208,18 @@ Runs test methods in the specified subclass of Strix.Testing.TestCase</Descripti
 	Set sc = TestObject.Setup()
 	If 'sc Quit $$$BuildErr("Error running Setup", sc)
 	
+	Set FailedMethods = ""
 	#dim MethodNames As %ListOfDataTypes
 	For i = 1:1:MethodNames.Count() {
 		Set MethodName = MethodNames.GetAt(i)
 		If TestToRun '= "", TestToRun '= MethodName Continue
-		Set sc = ..RunMethod(TestObject, MethodName)
-		If 'sc Do ..RecordError("Error running test method '"_MethodName_"'", sc)
+		Do ..RunMethod(TestObject, MethodName, .Failures, .Errors)
+		If Failures + Errors Set FailedMethods = FailedMethods_$lb(MethodName)
 	}
 	
 	;Run teardown
 	Set ..CurrentTestMethod = "TearDown"
-	Set sc = TestObject.TearDown()
+	Set sc = TestObject.TearDown($lts(FailedMethods))
 	If 'sc Quit $$$BuildErr("Error running TearDown", sc)
 	
 	Quit $$$OK
@@ -228,8 +229,7 @@ Runs test methods in the specified subclass of Strix.Testing.TestCase</Descripti
 <Method name="RunMethod">
 <Description>
 Runs a single test method on the test object. Traps and returns any error.</Description>
-<FormalSpec>TestObject:Strix.Testing.TestCase,MethodName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
+<FormalSpec>TestObject:Strix.Testing.TestCase,MethodName:%String,*Failed:%Integer,*Errors:%Integer</FormalSpec>
 <Implementation><![CDATA[
 	Set $ZTrap = "Error"
 	
@@ -237,14 +237,22 @@ Runs a single test method on the test object. Traps and returns any error.</Desc
 	If ..CurrentTestClass = "" Set ..CurrentTestClass = TestObject.%ClassName(1)
 	Set ..Tests = ..Tests + 1
 	
+	Set CurrentFailed = ..Failed, CurrentErrors = ..Errors
 	Do $ZObjMethod(TestObject, MethodName)
+	Set Failed = ..Failed - CurrentFailed
+	Set Errors = ..Errors - CurrentErrors
 	
-	Quit $$$OK
+	Quit
 	
 	
 Error
 	Set $ZTrap = ""
-	Quit $$$BuildErr("Error trapped: "_$ZError, 1)
+	
+	Do ..RecordError("Error running test method '"_MethodName_"': "_$ZError)
+	Set Failed = ..Failed - CurrentFailed
+	Set Errors = ..Errors - CurrentErrors
+	
+	Quit
 ]]></Implementation>
 </Method>
 

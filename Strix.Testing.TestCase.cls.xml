@@ -30,7 +30,10 @@ Code to run before any test in this class is executed.</Description>
 
 <Method name="TearDown">
 <Description>
-Code to run after all tests in this class have been executed.</Description>
+Code to run after all tests in this class have been executed.
+Gets passed in a comma-separated list of methods with assertion
+failures or errors.</Description>
+<FormalSpec>FailedTests:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
