@@ -360,7 +360,8 @@ Writes test run results to the terminal</Description>
 	If $X Write !
 	Write !
 	
-	Write "Tests started at "_..TestRunStart_" and completed at "_..TestRunDone_".",!
+	Set Duration = $System.SQL.DATEDIFF("second", ..TestRunStart, ..TestRunDone)
+	Write "Tests started at "_$Piece(..TestRunStart, ".")_" and took "_Duration_" seconds.",!
 	Write "Ran "_..Tests_" tests in "_..TestCases_" testcases.",!
 	Write "A total of "_..Asserts_" assertions were successful; "_..Skipped_" were skipped.",!
 	Write "There were "_..Failed_" failed assertions and "_..Errors_" errors.",!
