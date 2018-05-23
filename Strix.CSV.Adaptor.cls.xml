@@ -11,13 +11,13 @@
 <Parameter name="True">
 <Description>
 For boolean properties: "true" values</Description>
-<Default>1,yes</Default>
+<Default>1,yes,true</Default>
 </Parameter>
 
 <Parameter name="False">
 <Description>
 For boolean properties: "false" values</Description>
-<Default>0,no</Default>
+<Default>0,no,false</Default>
 </Parameter>
 
 <Parameter name="DateExpression">
