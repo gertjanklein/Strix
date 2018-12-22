@@ -161,6 +161,11 @@ ul.Explain {
 ul.Explain li {
 	list-style-position: inside;
 }
+span.Origin {
+  font-size: 85%;
+  font-style: italic;
+	color: #006;
+}
 div.Summary {
 	margin: 1em 0;
 	padding: 3px 0.5em;

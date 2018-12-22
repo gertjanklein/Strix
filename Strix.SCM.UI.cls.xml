@@ -275,17 +275,17 @@ Displays the Edit Project page</Description>
 	For i = 1:1:$ListLength(SettingList) {
 		Set Item = $List(SettingList, i)
 		Set Name = $List(Item, 1), Type = $List(Item, 2), Origin = $List(Item, 3)
-		Set Description = ##class(Strix.SCM.Handler.Base).GetSettingDescription(Origin, Name)
+		Set Description = ##class(Strix.SCM.Handler.Base).GetSettingDescription(Origin, Name, 1)
 		Set Size = $Select(
 		  Type = "%Boolean": 5,
 		  1: 80
 		)
 		
 		&html<<tr>
-  <th>#(Name)#:</th>
+  <th>#(Name)#:<br><span class=Origin>#(Origin)#</span></th>
   <td>
     #(..TextInput("s:"_Name, Size))#
-    <p class=Explain>#(..EscapeHTML(Description))#</p>
+    <p class=Explain>#(Description)#</p>
   </td>
 </tr>>
 	}
