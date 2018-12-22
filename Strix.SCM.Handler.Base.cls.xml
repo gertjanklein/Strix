@@ -75,12 +75,18 @@ is returned as a %List with: name, type, origin</Description>
 <Description>
 Returns the (property) description for a specific setting,</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Setting:%String,*Status:%Status</FormalSpec>
+<FormalSpec>ClassName:%String,Setting:%String,AsHTML:%Boolean=1,*Status:%Status</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(ClassName_"||"_Setting, , .Status)
 	If 'Status Set Status = $$$BuildErr("Error opening definion for "_ClassName_":"_Setting_":", Status) Quit ""
-	Quit Def.Description
+	Set Desc = $ZStrip(Def.Description, "<>W")
+	If AsHTML {
+		Set Desc = $ZConvert(Desc, "O", "HTML")
+		Set Desc = $Replace(Desc, "\"_$Char(13,10), " ")
+		Set Desc = $Replace(Desc, $Char(13,10), "<br>"_$Char(13, 10))
+	}
+	Quit Desc
 ]]></Implementation>
 </Method>
 
