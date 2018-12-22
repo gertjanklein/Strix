@@ -53,6 +53,12 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 	$$$NormalizeType(Item)
 	Set ItemType = $$$ItemType(Item)
 	
+	If ItemType = "cls" {
+		;If this is a generated class, ignore it
+		If $$$defClassKeyGet($$$ItemName(Item),$$$cCLASSgeneratedby) '= "" Quit 0
+	}
+	
+	
 	;Treat BPL and DTL types as the classes they are
 	If "bpl,dtl" [ ItemType Set $$$ItemType(Item) = "cls"
 	
@@ -320,6 +326,7 @@ Determines all available classes</Description>
 	While rs.Next() {
 		If rs.Get("Hidden") Continue
 		If rs.Get("System") Continue
+		If rs.Get("Generated") Continue
 		
 		Set ClassName = rs.Get("Name")
 		
