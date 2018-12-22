@@ -17,11 +17,23 @@ Full path to release base directory; releases are created below it.</Description
 <Type>%String</Type>
 </Property>
 
+<Property name="ReleaseName">
+<Description>
+The name to use for the release directory. Default is R{rev}.\
+Available variables:
+{rev}: revision number
+{date}: date (format YYYY-MM-DD)</Description>
+<Type>%String</Type>
+</Property>
+
 <Property name="PostProcessors">
 <Description>
-ClassName:MethodName of a classmethod to call to post-process
-the release. Arguments passed in are the Project object, release
-number, and direcory of the release. Return value must be a %Status.</Description>
+Comma-separated list of release post-processors to run. Available \
+processors are:
+EnsProdDir: Moves Ensemble Production classes to a subdirectory "Productions".
+RemoveCfgFile: Removes the SCM configuration file from the release.
+RemoveEnsProd: Removes Ensemble Production classes from the export.
+Zip: Zips the release directory.</Description>
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="80"/>
 </Property>
@@ -285,8 +297,16 @@ and whether the item should be enabled or not.</Description>
 		If ErrorMsg '= "" Quit $$$OK
 	}
 	
+	;Determine release directory name:
+	Set Name = ..ReleaseName
+	If Name = "" Set Name = "R{rev}"
+	;Convert name to position 
+	Set Name = $Replace(Name, "{rev}", "{1}",,,1)
+	Set Name = $Replace(Name, "{date}", "{2}",,,1)
+	Set Name = $$$BuildStr(Name, Revision, $ZDate($Horolog, 3))
+	
 	;Determine directory for release
-	Set ReleasePath = ##class(%File).SubDirectoryName(..ReleasePath, "R"_Revision)
+	Set ReleasePath = ##class(%File).SubDirectoryName(..ReleasePath, Name)
 	
 	;Export from SCM
 	Write !,"== Exporting revision "_Revision_" to "_ReleasePath,!
