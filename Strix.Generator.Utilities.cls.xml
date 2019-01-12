@@ -7,6 +7,26 @@ Utility code for generator methods in other classes.</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>62935,33467.821661</TimeCreated>
 
+<Method name="GetClassDef">
+<Description>
+Helper: opens a class definition or returns a new one with the specified name.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String,*IsNew:%Boolean,*Status:%Status</FormalSpec>
+<ReturnType>%Dictionary.ClassDefinition</ReturnType>
+<Implementation><![CDATA[
+	If ##class(%Dictionary.ClassDefinition).%ExistsId(Name) {
+		Set ClassDef = ##class(%Dictionary.ClassDefinition).%OpenId(Name, , .Status)
+		Set IsNew = 0
+	} Else {
+		; Set classversion to 25 to prevent prodedureblock and inheritance
+		; getting old default values (off and right, respectively).
+		Set ClassDef = ##class(%Dictionary.ClassDefinition).%New(Name, 25)
+		Set IsNew = 1, Status = $$$OK
+	}
+	Quit ClassDef
+]]></Implementation>
+</Method>
+
 <Method name="GetInCollection">
 <Description>
 Returns an item, specified by name, from a relationship collection
