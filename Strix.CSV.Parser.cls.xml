@@ -266,7 +266,7 @@ parameter Status.</Description>
 	If 'Status Quit 0
 	If Line = "", ..Input.AtEnd Quit 0
 	
-	; If no quotes we can't span multiple lines
+	; If no quotes data can't span multiple lines or contain separator
 	
 	If Line '[ """" {
 		If Line = "" Quit 1
