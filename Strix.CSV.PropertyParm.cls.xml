@@ -4,11 +4,16 @@
 <Abstract>1</Abstract>
 <TimeCreated>64771,47207.427476</TimeCreated>
 
-<Parameter name="ColumnHeader">
+<Parameter name="CsvColumnHeader">
 <Description>
-The column header in the CSV file; used to load
-the property from</Description>
+The column header in the CSV</Description>
 <Type>%String</Type>
+</Parameter>
+
+<Parameter name="CsvColumn">
+<Description>
+The column index in the CSV</Description>
+<Type>%Integer</Type>
 </Parameter>
 </Class>
 </Export>

@@ -485,7 +485,7 @@ Create a class with the specified properties</Description>
 			
 			#dim pd As %Dictionary.PropertyDefinition
 			Set pd = ##class(Strix.Testing.Support).AddProperty(ClassDef, Name, Type)
-			Do pd.Parameters.SetAt(ColumnHeader, "ColumnHeader")
+			Do pd.Parameters.SetAt(ColumnHeader, "CsvColumnHeader")
 		}
 	}
 	
