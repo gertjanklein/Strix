@@ -474,6 +474,8 @@ Create a class with the specified properties</Description>
 <Implementation><![CDATA[
 	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject,Strix.CSV.Adaptor", .ClassDef)
 	If 'Status Quit Status
+	Set Status = ##class(Strix.Testing.Support).SetClassParameter(ClassDef, "PreferredLoader", "header")
+	If 'Status Quit Status
 	
 	If Properties '= "" {
 		For i = 1:1:$Length(Properties, ",") {

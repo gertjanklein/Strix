@@ -108,6 +108,17 @@ Returns an instance of this class with some properties setup.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="FromFile">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,Separator:%String=",",SkipCount:%Integer=0,ColumnNames:%String</FormalSpec>
+<ReturnType>Strix.CSV.Parser</ReturnType>
+<Implementation><![CDATA[
+	Set File = ##class(%FileCharacterStream).%New()
+	Set Status = File.LinkToFile(FileName)
+	Quit ..GetParser(File, Separator, SkipCount, .ColumnNames)
+]]></Implementation>
+</Method>
+
 <Method name="Next">
 <Description>
 Get the next record. Returns 0 if no more records available.</Description>
@@ -196,8 +207,14 @@ current record.</Description>
 	Set Adaptor = $ZObjClassMethod(..AdaptorClassName, "%New")
 	If Adaptor = "" Quit $$$BuildStatus("Error creating instance of '{}':", $Get(%objlasterror), ..AdaptorClassName)
 	
-	Merge Data = ..DataByName
-	Set Status = Adaptor.LoadCSVData(.Data)
+	Set Preferred = Adaptor.%GetParameter("PreferredLoader")
+	If Preferred = "header" {
+		Merge Data = ..DataByName
+		Set Status = Adaptor.LoadByHeader(.Data)
+	} Else {
+		Merge Data = ..Data
+		Set Status = Adaptor.LoadByIndex(.Data)
+	}
 	
 	Quit Adaptor
 ]]></Implementation>

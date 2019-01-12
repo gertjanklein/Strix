@@ -8,6 +8,22 @@
 <Super>%SerialObject</Super>
 <TimeCreated>64771,47169.904165</TimeCreated>
 
+<Parameter name="PreferredLoader">
+<Description>
+Which load method the parser should use: the one which expects
+data indexed by column header ("header"), or by column index ("index").</Description>
+<Constraint>header,index</Constraint>
+<Default>index</Default>
+<Flags>ENUM</Flags>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
 <Parameter name="True">
 <Description>
 For boolean properties: "true" values</Description>
@@ -49,7 +65,7 @@ variable "v".</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="LoadCSVData">
+<Method name="LoadByHeader">
 <Description>
 Loads the object from the data in Data (indexed by column header).</Description>
 <CodeMode>objectgenerator</CodeMode>
@@ -97,6 +113,64 @@ Loads the object from the data in Data (indexed by column header).</Description>
 			Set Code = Code_" If 'sc Quit sc"
 		} Else {
 			Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
+		}
+		
+		Do %code.WriteLine($Char(9)_Code)
+	}
+	Do %code.WriteLine($Char(9)_"Quit $$$OK")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadByIndex">
+<Description>
+Loads the object from the data in Data (indexed by column number).</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Check if we have a non-abstract conversion function
+	#dim md As %Dictionary.MethodDefinition
+	Set md = ##class(Strix.Generator.Utilities).GetInCollection(%class.Methods, "ConvertCSVValue", 0)
+	Set Convert = $IsObject(md) && 'md.Abstract
+	
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.PropertyDefinition
+		Set pd = %class.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Index = pd.Parameters.GetAt("CsvColumn")
+		If Index = "" Continue
+		
+		Set Name = pd.Name, Type = $$$DenormalizeClassname(pd.Type)
+		
+		Set Code = "v"
+		If Type = "%Boolean" {
+			Set Trues = $ListFromString(%parameter("True"))
+			Set Falses = $ListFromString(%parameter("False"))
+			Set Code = "$Case(v"
+			For i = 1:1:$ListLength(Trues) Set Code = Code_","""_$List(Trues, i)_""":1"
+			For i = 1:1:$ListLength(Falses) Set Code = Code_","""_$List(Falses, i)_""":0"
+			Set Code = Code_",:v)"
+			
+		} ElseIf Type = "%Date" {
+			Set Code = %parameter("DateExpression")
+			
+		} ElseIf Type = "%Time" {
+			Set Code = %parameter("TimeExpression")
+			
+		} ElseIf $lf($lfs("%Numeric,%Float,%Double"), Type) {
+			Set Code = %parameter("NumericExpression")
+			
+		}
+		
+		If Convert {
+			Set Code = "Set v=Data("_Index_") If v'="""" Set v2="_Code_",sc=..ConvertCSVValue("_Index_",v,.v2),.."_Name_"=v2"
+			Set Code = Code_" If 'sc Quit sc"
+		} Else {
+			Set Code = "Set v = Data("_Index_") If v '= """" Set .."_Name_" = "_Code
 		}
 		
 		Do %code.WriteLine($Char(9)_Code)
