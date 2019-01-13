@@ -91,6 +91,7 @@ in the CSV in file FileName.</Description>
 		Do PropDef.Parameters.SetAt(ColumnName, "CsvColumnHeader")
 		Do PropDef.Parameters.SetAt(i, "CsvColumn")
 		Set PropDef.SequenceNumber = i
+		Set PropDef.Type = "%String"
 	}
 	
 	Set Status = ClassDef.%Save()
