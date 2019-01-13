@@ -69,13 +69,17 @@ variable "v".</Description>
 <Description>
 Loads the object from the data in Data (indexed by column header).</Description>
 <CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<FormalSpec><![CDATA[&Data:%String,*Skip:%Boolean=0]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Check if we have a non-abstract conversion function
-	#dim md As %Dictionary.MethodDefinition
-	Set md = ##class(Strix.Generator.Utilities).GetInCollection(%class.Methods, "ConvertCSVValue", 0)
-	Set Convert = $IsObject(md) && 'md.Abstract
+	; If a non-abstract fixup method is present, call it.
+	If $$$HasConcreteMethod(%class.Name, "FixupColumns") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
+	; Check if we have a non-abstract conversion function (used below)
+	Set Convert = $$$HasConcreteMethod(%class.Name, "ConvertCSVValue")
 	
 	Set key = ""
 	For  {
@@ -130,10 +134,14 @@ Loads the object from the data in Data (indexed by column number).</Description>
 <FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Check if we have a non-abstract conversion function
-	#dim md As %Dictionary.MethodDefinition
-	Set md = ##class(Strix.Generator.Utilities).GetInCollection(%class.Methods, "ConvertCSVValue", 0)
-	Set Convert = $IsObject(md) && 'md.Abstract
+	; If a non-abstract fixup method is present, call it.
+	If $$$HasConcreteMethod(%class.Name, "FixupColumns") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
+	; Check if we have a non-abstract conversion function (used below)
+	Set Convert = $$$HasConcreteMethod(%class.Name, "ConvertCSVValue")
 	
 	Set key = ""
 	For  {
@@ -191,6 +199,20 @@ be changed. Errors can be returned as a %Status return value.</Description>
 <FormalSpec><![CDATA[ColumnHeader:%String,Value:%String,&Converted:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FixupColumns">
+<Description>
+Callback to adapt data before runing datatype conversions and
+storing in properties. Supports skipping the row or returning
+an error.</Description>
+<Abstract>1</Abstract>
+<FormalSpec><![CDATA[&Data:%String,*Skip:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Skip = 0
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
