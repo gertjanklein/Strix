@@ -69,17 +69,17 @@ variable "v".</Description>
 <Description>
 Loads the object from the data in Data (indexed by column header).</Description>
 <CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[&Data:%String,*Skip:%Boolean=0]]></FormalSpec>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	; If a non-abstract fixup method is present, call it.
-	If $$$HasConcreteMethod(%class.Name, "FixupColumns") {
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "FixupColumns") {
 		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
 		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
 	}
 	
 	; Check if we have a non-abstract conversion function (used below)
-	Set Convert = $$$HasConcreteMethod(%class.Name, "ConvertCSVValue")
+	Set Convert = ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "ConvertCSVValue")
 	
 	Set key = ""
 	For  {
@@ -135,13 +135,13 @@ Loads the object from the data in Data (indexed by column number).</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	; If a non-abstract fixup method is present, call it.
-	If $$$HasConcreteMethod(%class.Name, "FixupColumns") {
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "FixupColumns") {
 		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
 		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
 	}
 	
 	; Check if we have a non-abstract conversion function (used below)
-	Set Convert = $$$HasConcreteMethod(%class.Name, "ConvertCSVValue")
+	Set Convert = ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "ConvertCSVValue")
 	
 	Set key = ""
 	For  {
@@ -229,6 +229,8 @@ false otherwise.</Description>
 <FormalSpec><![CDATA[&Columns:%String,*Missing:%String,*Unused:%String]]></FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
+	If %class.Name = "Strix.CSV.Adaptor" Quit $$$OK
+	
 	Do %code.WriteLine($Char(9)_"Set (Missing, Unused) = """"")
 	Do %code.WriteLine($Char(9)_"Merge Test = Columns")
 	Set key = ""

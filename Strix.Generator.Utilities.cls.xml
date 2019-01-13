@@ -210,6 +210,19 @@ or a class definition object.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="HasConcreteMethod">
+<Description>
+Returns whether the given method is present and non-abstract.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.CompiledClass,MethodName:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set Method = ..GetInCollection(ClassDef.Methods, MethodName)
+	If Method = "" Quit 0
+	Quit 'Method.Abstract
+]]></Implementation>
+</Method>
+
 <Method name="IsDatatype">
 <Description>
 Attempts to determine if the given property is a datatype. Non-datatype
