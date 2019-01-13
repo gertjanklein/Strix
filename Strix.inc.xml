@@ -3,6 +3,8 @@
 <Routine name="Strix" type="INC"><![CDATA[
 #include %occErrors
 #include %occStatus
+#include %occReference
+#include %occKeyword
 
 
 #; Macros to get current class and method at compile time. From EnsUtil.inc.
