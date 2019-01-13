@@ -397,56 +397,6 @@ Test datatype conversion override by subclassing and changing parameter</Descrip
 ]]></Implementation>
 </Method>
 
-<Method name="TestCustomConvert">
-<Description>
-Test use of ConvertCSVValue method.</Description>
-<Implementation><![CDATA[
-	#dim cd As %Dictionary.ClassDefinition
-	Set Status = ..CreateClass("PropA:%Date:a,PropB::b", .cd)
-	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
-	#dim md As %Dictionary.MethodDefinition
-	Set md = ##class(Strix.Generator.Utilities).GetInCollection(cd.Methods, "ConvertCSVValue", 1, .Status)
-	Set md.FormalSpec = "ColumnHeader:%String,Value:%String,&Converted:%String"
-	Set md.ReturnType = "%Status"
-	Do md.Implementation.WriteLine(" If ColumnHeader = ""a"" Set Converted=Converted+1")
-	Do md.Implementation.WriteLine(" If ColumnHeader = ""b"", Value = ""x"" Quit $$$BuildStatus(""Can't be x"")")
-	Do md.Implementation.WriteLine(" Quit $$$OK")
-	Set Status = ##class(Strix.Testing.Support).SaveAndCompile(cd)
-	If '..AssertStatusOk(Status, "Should be able to update test class.") Quit
-	
-	; Test conversion
-	
-	Do ..MakeStream("a,b", "1961-06-22,don't change me")
-	
-	#dim p As Strix.CSV.Parser
-	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
-	Set p.AdaptorClassName = ..#TestClassName
-	
-	If '..Assert(p.Next(.Status), "Record should be found.") Quit
-	Set Obj = p.GetObject(.Status)
-	If '..AssertStatusOk(Status, "Should be able to get object.") Quit
-	Do ..AssertEqual(Obj.PropA, $ZDateH("1961-06-23", 3), "Property should be converted.")
-	Do ..AssertEqual(Obj.PropB, "don't change me", "Property should be unchanged.")
-	
-	; Test error return
-	
-	Do ..MakeStream("a,b", "1961-06-22,x")
-	
-	Set p = ##class(Strix.CSV.Parser).GetParser(..Stream, , 1)
-	Set p.AdaptorClassName = ..#TestClassName
-	
-	;CSV itself is valid, a record should be found:
-	If '..Assert(p.Next(.Status), "Record should be found.") Quit
-	
-	;...but the adaptor should refuse column b with value "x"
-	Set Obj = p.GetObject(.Status)
-	Do ..AssertStatusParameter(Status, 1, "Can't be x", "Expected error should be returned.")
-	
-	
-	Quit
-]]></Implementation>
-</Method>
-
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers

@@ -72,19 +72,10 @@ Loads the object from the data in Data (indexed by column header).</Description>
 <FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; If a non-abstract fixup method is present, call it.
-	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "FixupColumns") {
-		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
-		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
-	}
-	
-	; Check if we have a non-abstract conversion function (used below)
-	Set Convert = ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "ConvertCSVValue")
-	
 	Set key = ""
 	For  {
-		#dim pd As %Dictionary.PropertyDefinition
-		Set pd = %class.Properties.GetNext(.key)
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
 		If key = "" Quit
 		
 		Set Header = pd.Parameters.GetAt("CsvColumnHeader")
@@ -112,15 +103,16 @@ Loads the object from the data in Data (indexed by column header).</Description>
 			
 		}
 		
-		If Convert {
-			Set Code = "Set v=Data("""_Header_""") If v'="""" Set v2="_Code_",sc=..ConvertCSVValue("""_Header_""",v,.v2),.."_Name_"=v2"
-			Set Code = Code_" If 'sc Quit sc"
-		} Else {
-			Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
-		}
-		
+		Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
 		Do %code.WriteLine($Char(9)_Code)
 	}
+	
+	; If a non-abstract fixup method is present, call it.
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "PostProcessCsv") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..PostProcessCsv(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
@@ -134,19 +126,10 @@ Loads the object from the data in Data (indexed by column number).</Description>
 <FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; If a non-abstract fixup method is present, call it.
-	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "FixupColumns") {
-		Do %code.WriteLine($Char(9)_"Set sc = ..FixupColumns(.Data)")
-		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
-	}
-	
-	; Check if we have a non-abstract conversion function (used below)
-	Set Convert = ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "ConvertCSVValue")
-	
 	Set key = ""
 	For  {
-		#dim pd As %Dictionary.PropertyDefinition
-		Set pd = %class.Properties.GetNext(.key)
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
 		If key = "" Quit
 		
 		Set Index = pd.Parameters.GetAt("CsvColumn")
@@ -174,41 +157,29 @@ Loads the object from the data in Data (indexed by column number).</Description>
 			
 		}
 		
-		If Convert {
-			Set Code = "Set v=Data("_Index_") If v'="""" Set v2="_Code_",sc=..ConvertCSVValue("_Index_",v,.v2),.."_Name_"=v2"
-			Set Code = Code_" If 'sc Quit sc"
-		} Else {
-			Set Code = "Set v = Data("_Index_") If v '= """" Set .."_Name_" = "_Code
-		}
-		
+		Set Code = "Set v = Data("_Index_") If v '= """" Set .."_Name_" = "_Code
 		Do %code.WriteLine($Char(9)_Code)
 	}
+	
+	; If a non-abstract fixup method is present, call it.
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "PostProcessCsv") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..PostProcessCsv(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
 ]]></Implementation>
 </Method>
 
-<Method name="ConvertCSVValue">
+<Method name="PostProcessCsv">
 <Description>
-Callback to convert the value from the CSV file to logical value.
-The column header, original value, and default converted value
-are passed in. The converted value is passed in ByRef and can
-be changed. Errors can be returned as a %Status return value.</Description>
+This method is called after the object receives the data.
+Datatype conversions have been run. The original data is
+present in the Data array.</Description>
 <Abstract>1</Abstract>
-<FormalSpec><![CDATA[ColumnHeader:%String,Value:%String,&Converted:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="FixupColumns">
-<Description>
-Callback to adapt data before runing datatype conversions and
-storing in properties. Supports skipping the row or returning
-an error.</Description>
-<Abstract>1</Abstract>
-<FormalSpec><![CDATA[&Data:%String,*Skip:%Boolean=0]]></FormalSpec>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Skip = 0
@@ -235,8 +206,8 @@ false otherwise.</Description>
 	Do %code.WriteLine($Char(9)_"Merge Test = Columns")
 	Set key = ""
 	For  {
-		#dim pd As %Dictionary.PropertyDefinition
-		Set pd = %class.Properties.GetNext(.key)
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
 		If key = "" Quit
 		
 		Set Header = pd.Parameters.GetAt("CsvColumnHeader")
