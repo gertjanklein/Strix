@@ -61,5 +61,12 @@
 #define AssertAndLog(%cond) If '(%cond) { Do $$$LogAssert(##quote(%cond)) Throw ##class(%Exception.General).%New("Assertion error",,,##quote(%cond)) }
 
 
+#; =====
+
+#; Whether a class has a non-abstract method with the give name
+#define HasConcreteMethod(%class,%method) (+$$$comMemberDefined(%class,$$$cCLASSmethod,%method)&&('+$$$comMemberKeyGet(%class,$$$cCLASSmethod,%method,$$$cMETHabstract)))
+
+
+
 ]]></Routine>
 </Export>
