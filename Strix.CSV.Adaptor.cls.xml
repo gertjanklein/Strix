@@ -7,6 +7,7 @@
 <PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
 <Super>%SerialObject</Super>
 <TimeCreated>64771,47169.904165</TimeCreated>
+<DependsOn>Strix.Generator.Utilities</DependsOn>
 
 <Parameter name="PreferredLoader">
 <Description>
