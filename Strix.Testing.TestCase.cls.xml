@@ -143,6 +143,26 @@ Alias for ..Assert</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="AssertNotEmpty">
+<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If Result '= "" {
+		$$$ToTerm(".")
+		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
+		Quit 1
+	}
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
+	
+	$$$ToTerm("E")
+	If '$IsObject(..Runner) Quit 0
+	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, , Result, Description)
+	If ..Runner.Debug Do Info.ReportToTerminal() Break
+	
+	Quit 0
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ==
