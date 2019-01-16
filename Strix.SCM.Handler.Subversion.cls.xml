@@ -137,6 +137,30 @@ Zip: Zips the release directory.</Description>
 	}
 	
 	
+	;== Show item log
+	
+	If Name = "Source control,ShowItemLog", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		Set Target = ..GetGUICommand("/command:log /path:"""_Filename_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
+	;== Show diff
+	
+	If Name = "Source control,ShowDiff", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		Set Target = ..GetGUICommand("/command:diff /path:"""_Filename_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
 	;== Make release
 	
 	If Name = "Source control,MakeRelease" {
@@ -226,10 +250,12 @@ and whether the item should be enabled or not.</Description>
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
 	  "ShowRevisions": "Revisions for "_InternalName_"",
-	  "Delete": "Delete "_InternalName_"",
+	  "Delete": "Delete",
 	  "Status": "Working copy status",
 	  "Checkin": "Open checkin dialog",
 	  "ShowLog": "View repository log",
+	  "ShowItemLog": "View log ",
+	  "ShowDiff": "View diff",
 	  "MakeRelease": "Make release",
 	  : ""
 	)
@@ -271,13 +297,13 @@ and whether the item should be enabled or not.</Description>
 	;Append subversion-specific items
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
-	  $lb("Status", 1, 1, 0),
-	  $lb("Checkin", 1, 1, 0),
-	  $lb("ShowLog", 1, 0, 0),
-	  $lb("", 1, 0, 1),
-	  $lb("ShowRevisions", 1, 1, 0),
+	  $lb("ShowDiff", 1, 0, 0),
+	  $lb("ShowItemLog", 1, 1, 0),
 	  $lb("Delete", 1, 1, 0),
 	  $lb("", 1, 0, 1),
+	  ;$lb("Status", 1, 1, 0),
+	  $lb("ShowLog", 1, 0, 0),
+	  $lb("Checkin", 1, 1, 0),
 	  $lb("MakeRelease", 1, 1, 0),
 	)
 	
