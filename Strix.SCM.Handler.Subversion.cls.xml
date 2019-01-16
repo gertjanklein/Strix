@@ -127,6 +127,16 @@ Zip: Zips the release directory.</Description>
 	}
 	
 	
+	;== Show log
+	
+	If Name = "Source control,ShowLog" {
+		Set Target = ..GetGUICommand("/command:log /path:"_Project.GetProjectPath(), .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
 	;== Make release
 	
 	If Name = "Source control,MakeRelease" {
@@ -219,6 +229,7 @@ and whether the item should be enabled or not.</Description>
 	  "Delete": "Delete "_InternalName_"",
 	  "Status": "Working copy status",
 	  "Checkin": "Open checkin dialog",
+	  "ShowLog": "View repository log",
 	  "MakeRelease": "Make release",
 	  : ""
 	)
@@ -254,11 +265,15 @@ and whether the item should be enabled or not.</Description>
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
+	;Items is a list of lists containing:
+	;  Name, Enabled, Save before execute, is separator
+	
 	;Append subversion-specific items
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
 	  $lb("Status", 1, 1, 0),
 	  $lb("Checkin", 1, 1, 0),
+	  $lb("ShowLog", 1, 0, 0),
 	  $lb("", 1, 0, 1),
 	  $lb("ShowRevisions", 1, 1, 0),
 	  $lb("Delete", 1, 1, 0),
