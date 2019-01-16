@@ -199,10 +199,10 @@ and whether the item should be enabled or not.</Description>
 	;Get display name:
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set DisplayName = $Case(ItemName,
-	  "ExportItem":          "Save "_InternalName_" to disk",
-	  "ExportData":          "Save data for "_InternalName_" to disk",
-	  "LoadItem":            "Reload "_InternalName_" from disk",
-	  "LoadData":            "Reload data for "_InternalName_" from disk",
+	  "ExportItem":          "Save item to disk",
+	  "ExportData":          "Save data for item to disk",
+	  "LoadItem":            "Reload item from disk",
+	  "LoadData":            "Reload data for item from disk",
 	  "ExportProject":       "Save project to disk",
 	  "ImportProject":       "Load project from disk",
 	  "OpenFolder":          "Open working copy folder",
