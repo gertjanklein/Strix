@@ -51,7 +51,7 @@ The package to create the classes in</Description>
 Always add the XMLNAME parameter (1) or only if different from
 Caché property name (0)</Description>
 <Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
+<InitialExpression>1</InitialExpression>
 </Property>
 
 <UDLText name="T">
