@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Tests.CSVToClass">
+<Description>
+Tests Strix.CSV.Parser.</Description>
+<Super>Strix.Testing.TestCase</Super>
+<TimeCreated>64594,31293.265299</TimeCreated>
+
+<Parameter name="TestClassName">
+<Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
+</Parameter>
+
+<Property name="Stream">
+<Description>
+Stream to use as input to parser</Description>
+<Type>%Stream.Object</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Tests
+
+]]></Content>
+</UDLText>
+
+<Method name="TestBasic">
+<Description>
+Test basic functionality</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.CSV.ToClass
+	Set p = ..MakeProcessor("a,b,c", "1,2,3")
+	
+	Set sc = p.Create()
+	If '..AssertStatusOk(sc, "Test class is created without error.") Quit
+	If '..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(..#TestClassName), "Test class exists.") Quit
+	If '..AssertStatusOk($System.OBJ.Compile(..#TestClassName, "k-d"), "Test class compiles ok.") Quit
+	
+	Set cd = ##class(%Dictionary.ClassDefinition).%OpenId(..#TestClassName)
+	Do ..AssertEqual(cd.Super, "%RegisteredObject,Strix.CSV.Adaptor", "Test class has proper superclasses")
+	
+	#dim pd As %Dictionary.PropertyDefinition
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "a")
+	If ..AssertNotEmpty(pd, "Property a exists.") {
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "1", "CsvColumn for property a is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "a", "CsvColumnHeader for property a is correct.")
+	}
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "b")
+	If ..AssertNotEmpty(pd, "Property b exists.") {
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "2", "CsvColumn for property b is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "b", "CsvColumnHeader for property b is correct.")
+	}
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "c")
+	If ..AssertNotEmpty(pd, "Property c exists.") {
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "3", "CsvColumn for property c is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "c", "CsvColumnHeader for property c is correct.")
+	}
+	
+	Do ..Stream.Rewind()
+	
+	#dim Parser As Strix.CSV.Parser
+	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Stream, ",", 1)
+	Set Parser.AdaptorClassName = ..#TestClassName
+	If ..Assert(Parser.Next(.sc), "Parser can get record.") {
+		Set o = Parser.GetObject()
+		If '..Assert($IsObject(o), "An object is returned for the record.") Quit
+		Do ..AssertEqual(o.a, "1", "Property a has correct value.")
+		Do ..AssertEqual(o.b, "2", "Property b has correct value.")
+		Do ..AssertEqual(o.c, "3", "Property c has correct value.")
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Cleanup code.
+
+]]></Content>
+</UDLText>
+
+<Method name="MakeProcessor">
+<FormalSpec>Lines...:%String</FormalSpec>
+<Implementation><![CDATA[
+	Set Processor = ##class(Strix.CSV.ToClass).%New()
+	Set Processor.Separator = ","
+	Do ..MakeStream(Lines...)
+	Set Processor.Data = ..Stream
+	Set Processor.ClassName = ..#TestClassName
+	Quit Processor
+]]></Implementation>
+</Method>
+
+<Method name="MakeStream">
+<FormalSpec>Lines...:%String</FormalSpec>
+<Implementation><![CDATA[
+	Set ..Stream = ##class(%Stream.TmpCharacter).%New()
+	Do ..Stream.Clear()
+	For i = 1:1:$Get(Lines) {
+		Do ..Stream.WriteLine($Get(Lines(i)))
+	}
+	Do ..Stream.Rewind()
+]]></Implementation>
+</Method>
+
+<Method name="TearDown">
+<Description>
+Code to run after all tests in this class have been executed.</Description>
+<FormalSpec>FailedTests:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If FailedTests '= "" Quit $$$OK
+	;Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	;If 'Status Quit Status
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
