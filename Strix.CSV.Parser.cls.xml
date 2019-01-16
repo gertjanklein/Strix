@@ -18,7 +18,7 @@ Provides a resultset-like interface.</Description>
 <Property name="Input">
 <Description>
 The input data as a stream</Description>
-<Type>%AbstractStream</Type>
+<Type>%Stream.Object</Type>
 </Property>
 
 <Property name="Separator">
