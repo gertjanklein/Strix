@@ -47,6 +47,24 @@ Adds or updates a class parameter with the given value</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetProperty">
+<Description>
+Returns the property definition for the property with Name in ClassDef,
+or an empty string if no such property exists.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String</FormalSpec>
+<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
+<Implementation><![CDATA[
+	Set Key = ""
+	For  {
+		Set PropDef = ClassDef.Properties.GetNext(.Key)
+		If Key = "" Quit
+		If PropDef.Name = Name Return PropDef
+	}
+	Quit ""
+]]></Implementation>
+</Method>
+
 <Method name="AddProperty">
 <Description>
 Adds a new property to an existing class definition.</Description>
