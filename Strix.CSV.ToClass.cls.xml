@@ -36,16 +36,16 @@ Name of class to create</Description>
 Create a class ClassName that can be used to hold a record
 in the CSV in file FileName.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,ClassName:%String,Separator:%String</FormalSpec>
+<FormalSpec>FileName:%String,ClassName:%String,Separator:%String,*Status:%Status</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Me = ..%New(.ClassName, .Separator)
 	Set Me.Data = ##class(%FileCharacterStream).%New()
 	Set Status = Me.Data.LinkToFile(FileName)
-	If 'Status Quit $$$BuildStatus("Error linking to file '{}':", Status, FileName)
+	If 'Status Set Status = $$$BuildStatus("Error linking to file '{}':", Status, FileName) Quit ""
 	Set Status = Me.Create()
-	If 'Status Quit Status
-	Quit $$$OK
+	If 'Status Quit ""
+	Quit Me
 ]]></Implementation>
 </Method>
 

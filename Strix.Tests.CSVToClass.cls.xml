@@ -10,6 +10,12 @@ Tests Strix.CSV.Parser.</Description>
 <Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
 </Parameter>
 
+<Property name="TestFileName">
+<Description>
+Name of file to use as input</Description>
+<Type>%String</Type>
+</Property>
+
 <Property name="Stream">
 <Description>
 Stream to use as input to parser</Description>
@@ -74,12 +80,60 @@ Test basic functionality</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="TestCreateForFile">
+<Description>
+Test basic functionality</Description>
+<Implementation><![CDATA[
+	#dim p As Strix.CSV.ToClass
+	Set p = ..MakeProcessorForFile(.sc, "a,b,c", "1,2,3")
+	If '..AssertStatusOk(sc, "Created processor.") Quit
+	
+	Set sc = p.Create()
+	If '..AssertStatusOk(sc, "Test class is created without error.") Quit
+	If '..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(..#TestClassName), "Test class exists.") Quit
+	If '..AssertStatusOk($System.OBJ.Compile(..#TestClassName, "k-d"), "Test class compiles ok.") Quit
+	
+	Set cd = ##class(%Dictionary.ClassDefinition).%OpenId(..#TestClassName)
+	Do ..AssertEqual(cd.Super, "%RegisteredObject,Strix.CSV.Adaptor", "Test class has proper superclasses")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "a")
+	Do ..AssertNotEmpty(pd, "Property a exists.")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "b")
+	Do ..AssertNotEmpty(pd, "Property b exists.")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "c")
+	Do ..AssertNotEmpty(pd, "Property c exists.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Cleanup code.
 
 ]]></Content>
 </UDLText>
+
+<Method name="MakeProcessorForFile">
+<FormalSpec>Status:%Status,Lines...:%String</FormalSpec>
+<Implementation><![CDATA[
+	Set ..TestFileName = ##class(%File).TempFilename("csv")
+	Set File = ##class(%Stream.FileCharacter).%New()
+	Set Status = File.LinkToFile(..TestFileName)
+	If 'Status Set Status = $$$BuildStatus("Error linking to file '{}'", sc, FileName) Quit ""
+	
+	For i = 1:1:$Get(Lines) Do File.WriteLine(Lines(i))
+	
+	Set Status = File.%Save()
+	If 'Status Set Status = $$$BuildStatus("Error saving file '{}'", Status, ..TestFileName) Quit ""
+	
+	Set Processor = ##class(Strix.CSV.ToClass).CreateFromFile(..TestFileName, ..#TestClassName, ",")
+	
+	Quit Processor
+]]></Implementation>
+</Method>
 
 <Method name="MakeProcessor">
 <FormalSpec>Lines...:%String</FormalSpec>
@@ -112,8 +166,9 @@ Code to run after all tests in this class have been executed.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If FailedTests '= "" Quit $$$OK
-	;Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-	;If 'Status Quit Status
+	Set sc = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+	If 'sc Quit sc
+	Do ##class(%File).Delete(..TestFileName)
 	Quit $$$OK
 ]]></Implementation>
 </Method>
