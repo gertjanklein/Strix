@@ -239,6 +239,12 @@ Runs a single test method on the test object. Traps and returns any error.</Desc
 	
 	Set CurrentFailed = ..Failed, CurrentErrors = ..Errors
 	Do $ZObjMethod(TestObject, MethodName)
+	
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(..CurrentTestClass, "OnAfterTest") {
+		Set sc = $ZObjMethod(TestObject, "OnAfterTest", MethodName)
+		If 'sc Do TestObject.AssertStatusOk(sc, "OnAfterTest should not return an error.")
+	}
+	
 	Set Failed = ..Failed - CurrentFailed
 	Set Errors = ..Errors - CurrentErrors
 	

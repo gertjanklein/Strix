@@ -28,6 +28,17 @@ Code to run before any test in this class is executed.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="OnAfterTest">
+<Description>
+Code to run after a single test method has been run. The name
+of the method is passed in.</Description>
+<Abstract>1</Abstract>
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="TearDown">
 <Description>
 Code to run after all tests in this class have been executed.
