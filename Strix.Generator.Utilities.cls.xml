@@ -217,6 +217,7 @@ Returns whether the given method is present and non-abstract.</Description>
 <FormalSpec>ClassDef:%Dictionary.CompiledClass,MethodName:%String</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
+	If '$IsObject(ClassDef) Set ClassDef = ..GetClassDef(ClassDef)
 	Set Method = ..GetInCollection(ClassDef.Methods, MethodName)
 	If Method = "" Quit 0
 	Quit 'Method.Abstract
