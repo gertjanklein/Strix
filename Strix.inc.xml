@@ -21,6 +21,9 @@
 #define GetClassParameter(%cls,%parm) $$$comMemberKeyGet(%cls,$$$cCLASSparameter,%parm,$$$cPARAMdefault)
 #define GetPropertyParameter(%cls,%prop,%parm) $$$comMemberArrayGet(%cls,$$$cCLASSproperty,%prop,$$$cPROPparameter,%parm)
 
+#; Whether a class has a non-abstract method with the give name
+#define HasConcreteMethod(%class,%method) (+$$$comMemberDefined(%class,$$$cCLASSmethod,%method)&&('+$$$comMemberKeyGet(%class,$$$cCLASSmethod,%method,$$$cMETHabstract)))
+
 
 #; ===== Status
 
@@ -63,10 +66,10 @@
 #define AssertAndLog(%cond) If '(%cond) { Do $$$LogAssert(##quote(%cond)) Throw ##class(%Exception.General).%New("Assertion error",,,##quote(%cond)) }
 
 
-#; =====
+#; ===== String helpers
 
-#; Whether a class has a non-abstract method with the give name
-#define HasConcreteMethod(%class,%method) (+$$$comMemberDefined(%class,$$$cCLASSmethod,%method)&&('+$$$comMemberKeyGet(%class,$$$cCLASSmethod,%method,$$$cMETHabstract)))
+#define StartsWith(%x,%s) ($e(%x,1,$l(%s))=%s)
+#define EndsWith(%x,%s) ($e(%x,$l(%x)-$l(%s)+1,*)=%s)
 
 
 
