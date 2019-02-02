@@ -65,6 +65,23 @@ or an empty string if no such property exists.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetPropertyAttribute">
+<Description>
+Returns a property attribute (e.g., required) for the given property
+in the given class. If Compiled is true, the compiled property is checked.
+If the property definition can't be opened, an error is returned in Status.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String,PropertyName:%String,Attribute:%String,Compiled:%Boolean=0,*Status:%Status</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set PropertyClass = $Select(Compiled: "%Dictionary.CompiledProperty", 1: "%Dictionary.PropertyDefinition")
+	Set PropDef = $ZObjClassMethod(PropertyClass, "%OpenId", ClassName_"||"_PropertyName, .Status)
+	If 'Status Quit ""
+	Set Value = $ZObjProperty(PropDef, Attribute)
+	Quit Value
+]]></Implementation>
+</Method>
+
 <Method name="AddProperty">
 <Description>
 Adds a new property to an existing class definition.</Description>
