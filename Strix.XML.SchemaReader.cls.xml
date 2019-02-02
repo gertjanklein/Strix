@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.XML.SchemaReader">
+<Description>
+Schema reader that adds a callback after parsing is done,
+but before the classes are created.</Description>
+<IncludeCode>Strix</IncludeCode>
+<IncludeGenerator>Strix</IncludeGenerator>
+<Super>%XML.Utils.SchemaReader</Super>
+<TimeCreated>65045,39000.901232</TimeCreated>
+
+<Property name="Callback">
+<Description>
+Object to receive a callback when the schema is processed, but
+before the classes are created. Allows altering</Description>
+<Type>Strix.XML.SchemaReaderCallback</Type>
+</Property>
+
+<Method name="Process">
+<Description>
+Overridden method that adds a call to the callback object,
+if present.</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[LocationURL:%String,Package:%String="Test",&Features:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Open parent method
+	Set Parent = ##class(%Dictionary.MethodDefinition).%OpenId("%XML.Utils.SchemaReader||Process", , .sc)
+	If 'sc Quit $$$BuildStatus("Error opening parent method.", sc)
+	
+	; Copy code
+	While 'Parent.Implementation.AtEnd {
+		Set Line = Parent.Implementation.ReadLine()
+		If Line [ "SchemaResult).CreateResult($this" {
+			; Insert callback
+			Do %code.WriteLine(" If $IsObject(..Callback) Set sc=..Callback.PostProcessParseTree($this,$Name($$$ClassTreeRoot)) If 'sc Quit")
+		}
+		Do %code.WriteLine(Line)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ProcessStream">
+<Description>
+Processes XSD present in a stream, by creating a temporary file for it.</Description>
+<FormalSpec><![CDATA[Stream:%Stream.Object,Package:%String,&Features:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set FileName = ##class(%File).TempFilename("xsd")
+	Set File = ##class(%FileCharacterStream).%New()
+	Set File.TranslateTable = "UTF8"
+	Set sc = File.LinkToFile(FileName)
+	If 'sc Quit $$$BuildStatus("Error linking to temporary file {}:", sc, FileName)
+	Set sc = File.CopyFromAndSave(Stream)
+	If 'sc Quit $$$BuildStatus("Error copying data to temporary file {}:", sc, FileName)
+	Set sc = ..Process(FileName, .Package, .Features)
+	Do ##class(%File).Delete(FileName)
+	Quit sc
+]]></Implementation>
+</Method>
+</Class>
+</Export>

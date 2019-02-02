@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.XML.SchemaReaderCallback">
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>65045,38962.002691</TimeCreated>
+
+<Property name="Reader">
+<Description>
+The reader we receive the callback from</Description>
+<Type>Strix.XML.SchemaReader</Type>
+</Property>
+
+<Property name="ClassName">
+<Description>
+Name of the currently handled class</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ClassNode">
+<Description>
+Global node containing the class information</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PropertyName">
+<Description>
+Name of the currently handled property</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PropertyNode">
+<Description>
+Global node containing the property information</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PropertyIndex">
+<Description>
+The index of the current property (last subscript)</Description>
+<Type>%String</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="HandleClass">
+<Description>
+Overridable method: handles a single class.</Description>
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="HandleProperty">
+<Description>
+Overridable method: handles a single property.</Description>
+<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="ChangeClassname">
+<Description>
+Changes the name of the current class.</Description>
+<FormalSpec>NewName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Allow providing new name without package
+	If NewName '[ "." {
+		Set Package = $Piece(..ClassName, ".", 1, *-1)
+		Set NewName = Package_"."_NewName
+	}
+	
+	; Make sure XML name stays the same
+	If '$Data(@..ClassNode@("Parameter", "XMLNAME")) {
+		Set ShortName = $Piece(..ClassName, ".", *)
+		Set @..ClassNode@("Parameter", "XMLNAME") = ShortName
+	}
+	
+	; Change class name
+	Set @..ClassNode@("ClassName") = NewName
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetClassParameter">
+<Description>
+Sets a parameter for the current class</Description>
+<FormalSpec>Name:%String,Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @..ClassNode@("Parameter", Name) = Value
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ChangePropertyName">
+<Description>
+Changes the name of the current property.</Description>
+<FormalSpec>NewName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Make sure XML name stays the same
+	If '$Data(@..PropertyNode@("Parameter", "XMLNAME")) {
+		Set @..PropertyNode@("Parameter", "XMLNAME") = ..PropertyName
+	}
+	
+	; Change property name
+	Set @..PropertyNode@("Name") = NewName
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetPropertyParameter">
+<Description>
+Sets a property parameter for the current class</Description>
+<FormalSpec>Name:%String,Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @..PropertyNode@("Parameter", Name) = Value
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetPropertyRequired">
+<Description>
+Sets a property required flag</Description>
+<FormalSpec>Required:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @..PropertyNode@("Required") = Required
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+
+- Setting property required/not
+
+..Reader.Type2Class(itype As %String, ByRef isdt As %Boolean, ByRef xmlname)
+ 
+
+ 
+ 
+*/
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="PostProcessParseTree">
+<Description>
+Callback from schema reader. Called after parsing is done, and
+before any classes are created. Gets passed the name of the
+global node that contains the classes part of the parse tree.</Description>
+<FormalSpec>Reader:Strix.XML.SchemaReader,ClassTree:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Loop through generated classes
+	Set ckey = ""
+	For  {
+		Set ckey = $Order(@ClassTree@(ckey))
+		If ckey = "" Quit
+		
+		Set ..ClassNode = $Name(@ClassTree@(ckey))
+		If $Get(@..ClassNode@("Removed")) Continue
+		
+		Set ..ClassName = $Get(@..ClassNode@("ClassName"))
+		
+		Set sc = ..PostProcessClass(..ClassName)
+		If 'sc Return $$$BuildStatus("Error processing class '{}':", sc, ..ClassName)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="PostProcessClass">
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	; Call basic callback method
+	Set (..PropertyIndex, ..PropertyName, ..PropertyNode) = ""
+	Set sc = ..HandleClass(Name)
+	If 'sc Quit $$$BuildStatus("Error handling class '{}':", sc, ..ClassName)
+	
+	; Loop through properties
+	For pkey = 1:1:$Get(@..ClassNode@("Property")) {
+		Set ..PropertyIndex = pkey
+		Set ..PropertyNode = $Name(@..ClassNode@("Property", pkey))
+		Set ..PropertyName = @..PropertyNode@("Name")
+		
+		Set Type = ..Reader.TypeToClass($Get(@..PropertyNode@("Type")), .IsDatatype)
+		
+		Set sc = ..HandleProperty(..PropertyName, Type, IsDatatype)
+		If 'sc Return $$$BuildStatus("Error handling property {}:", sc, ..PropertyName)
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
