@@ -27,6 +27,22 @@ Helper: opens a class definition or returns a new one with the specified name.</
 ]]></Implementation>
 </Method>
 
+<Method name="GetOrderedList">
+<Description>
+Returns a copy of a collection, expected to consist of class definition
+members, ordered by their SequenceNumber property. This is the order in
+which they are shown in Studio.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Collection:%RelationshipObject,*Status:%Status</FormalSpec>
+<ReturnType>%Collection.AbstractIterator</ReturnType>
+<Implementation><![CDATA[
+	Set Result = ##class(Strix.Lib.Collections).GetCopy(Collection, 1, .Status)
+	If 'Status Quit Result
+	Set Status = ##class(Strix.Lib.Sorting).SortListOfObjects(Result, "SequenceNumber")
+	Quit Result
+]]></Implementation>
+</Method>
+
 <Method name="GetInCollection">
 <Description>
 Returns an item, specified by name, from a relationship collection
