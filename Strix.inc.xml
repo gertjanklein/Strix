@@ -73,5 +73,13 @@
 
 
 
+
+#; ===== Fixes
+
+#; Returned by class Config.Databases but only known (in %occErrors) as CPFNameDoesNotExist
+#define DatabaseDefinitionDoesNotExist 420
+
+
+
 ]]></Routine>
 </Export>
