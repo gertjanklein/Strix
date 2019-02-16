@@ -106,5 +106,33 @@ a stream.</Description>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
+
+<Method name="GetPropertyFromDoc">
+<Description>
+Retrieves a property from an XML %XML.Document, either from an element
+or from an attribute. Can be used from a %XML.Adaptor:XMLNew() override
+to get the value of the id element or attribute.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Document:%XML.Document,NodeId:%Integer,Property:%String,IsAttribute:%Boolean=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Value = ""
+	
+	#dim Node As %XML.Node	
+	Set Node = Document.GetNode(NodeId)
+	
+	If IsAttribute {
+		If Node.AttributeDefined(Property) Do Node.GetAttribute(Property, , .Value)
+		Quit Value
+	}
+	
+	If 'Node.MoveToFirstChild() Quit Value
+	Do {
+		If Node.NodeData = Property Do Node.GetText(.Value) Quit
+	} While Node.MoveToNextSibling()
+	
+	Quit Value
+]]></Implementation>
+</Method>
 </Class>
 </Export>
