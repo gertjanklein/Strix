@@ -98,6 +98,16 @@ Changes the name of the current class.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="RemoveClass">
+<Description>
+Removes the current class; it won't be created.</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @..ClassNode@("Removed") = 1
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="SetClassParameter">
 <Description>
 Sets a parameter for the current class</Description>
