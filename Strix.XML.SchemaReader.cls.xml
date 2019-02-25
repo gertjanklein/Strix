@@ -63,6 +63,9 @@ Processes XSD present in a stream, by creating a temporary file for it.</Descrip
 </UDLText>
 
 <Method name="ParseSchema">
+<Description>
+Overridden method, used to call callback directly after the
+schema is parsed.</Description>
 <Internal>1</Internal>
 <FormalSpec>filename:%String,url:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -70,20 +73,11 @@ Processes XSD present in a stream, by creating a temporary file for it.</Descrip
 	Set sc = ##super(.filename, .url)
 	If 'sc Quit sc
 	
-	Set sc = ..OnAfterParse()
-	If 'sc Quit sc
-	
-	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterParse">
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	If '$IsObject(..Callback) Quit $$$OK
-	
-	Set sc=..Callback.PostProcessParseTree($Name($$$ClassTreeRoot))
-	If 'sc Quit sc
+	; Run entry method on callback object, if present
+	If $IsObject(..Callback) {
+		Set sc = ..Callback.PostProcessParseTree($Name($$$ClassTreeRoot))
+		If 'sc Quit sc
+	}
 	
 	Quit $$$OK
 ]]></Implementation>

@@ -11,6 +11,13 @@ The reader we receive the callback from</Description>
 <Type>Strix.XML.SchemaReader</Type>
 </Property>
 
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
 <Property name="ClassName">
 <Description>
 Name of the currently handled class</Description>
