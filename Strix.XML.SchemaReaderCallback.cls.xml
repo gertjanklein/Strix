@@ -179,6 +179,9 @@ global node that contains the classes part of the parse tree.</Description>
 <FormalSpec>Reader:Strix.XML.SchemaReader,ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	; Save reference to reader
+	Set ..Reader = Reader
+	
 	; Loop through generated classes
 	Set ckey = ""
 	For  {
