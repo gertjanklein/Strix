@@ -16,31 +16,25 @@ before the classes are created. Allows altering</Description>
 <Type>Strix.XML.SchemaReaderCallback</Type>
 </Property>
 
-<Method name="Process">
+<Method name="CallbackSet">
 <Description>
-Overridden method that adds a call to the callback object,
-if present.</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[LocationURL:%String,Package:%String="Test",&Features:%String]]></FormalSpec>
+Setter that provides a back reference to the schema reader
+(this object) to the callback object.</Description>
+<FormalSpec>Callback:Strix.XML.SchemaReaderCallback</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Open parent method
-	Set Parent = ##class(%Dictionary.MethodDefinition).%OpenId("%XML.Utils.SchemaReader||Process", , .sc)
-	If 'sc Quit $$$BuildStatus("Error opening parent method.", sc)
-	
-	; Copy code
-	While 'Parent.Implementation.AtEnd {
-		Set Line = Parent.Implementation.ReadLine()
-		If Line [ "SchemaResult).CreateResult($this" {
-			; Insert callback
-			Do %code.WriteLine(" If $IsObject(..Callback) Set sc=..Callback.PostProcessParseTree($this,$Name($$$ClassTreeRoot)) If 'sc Quit")
-		}
-		Do %code.WriteLine(Line)
-	}
-	
+	Set i%Callback = Callback
+	If $IsObject(Callback) Set Callback.Reader = $this
 	Quit $$$OK
 ]]></Implementation>
 </Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
 
 <Method name="ProcessStream">
 <Description>
@@ -58,6 +52,40 @@ Processes XSD present in a stream, by creating a temporary file for it.</Descrip
 	Set sc = ..Process(FileName, .Package, .Features)
 	Do ##class(%File).Delete(FileName)
 	Quit sc
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="ParseSchema">
+<Internal>1</Internal>
+<FormalSpec>filename:%String,url:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set sc = ##super(.filename, .url)
+	If 'sc Quit sc
+	
+	Set sc = ..OnAfterParse()
+	If 'sc Quit sc
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterParse">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '$IsObject(..Callback) Quit $$$OK
+	
+	Set sc=..Callback.PostProcessParseTree($Name($$$ClassTreeRoot))
+	If 'sc Quit sc
+	
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>

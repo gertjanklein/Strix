@@ -186,12 +186,9 @@ Sets a property required flag</Description>
 Callback from schema reader. Called after parsing is done, and
 before any classes are created. Gets passed the name of the
 global node that contains the classes part of the parse tree.</Description>
-<FormalSpec>Reader:Strix.XML.SchemaReader,ClassTree:%String</FormalSpec>
+<FormalSpec>ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Save reference to reader
-	Set ..Reader = Reader
-	
 	; Loop through generated classes
 	Set ckey = ""
 	For  {

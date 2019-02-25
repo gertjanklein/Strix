@@ -79,7 +79,7 @@ called during schema processing.</Description>
 </Method>
 
 <Method name="Callback1">
-<FormalSpec>Reader:Strix.XML.SchemaReader,ClassTree:%String</FormalSpec>
+<FormalSpec>ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If '..AssertNotEmpty(ClassTree, "We receive a class node as parameter.") Quit $$$OK
@@ -114,7 +114,7 @@ abort schema processing by returning an error.</Description>
 </Method>
 
 <Method name="Callback2">
-<FormalSpec>Reader:Strix.XML.SchemaReader,ClassTree:%String</FormalSpec>
+<FormalSpec>ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$BuildStatus("Stop here.")
 ]]></Implementation>
@@ -506,7 +506,6 @@ Tests setting a property parameter.</Description>
 	Set Callback = $ZObjClassMethod(ClassName, "%New")
 	
 	;Make reader know about callback and v.v.
-	Set Callback.Reader = Reader
 	Set Reader.Callback = Callback
 	
 	Set ..Reader = Reader
