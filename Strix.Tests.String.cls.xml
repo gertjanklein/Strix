@@ -97,5 +97,25 @@ Test code for class Strix.Lib.String</Description>
 	Quit
 ]]></Implementation>
 </Method>
+
+<Method name="TestRxReplace">
+<Description>
+Minimal tests for the RxReplace method.</Description>
+<Implementation><![CDATA[
+	; Test simple backref
+	Set Result = ##class(Strix.Lib.String).RxReplace("XnXValue", "^XnX(.*)", "$1")
+	Do ..AssertEqual(Result, "Value", "Backreference works.")
+	
+	; Test replace alternatives
+	Set Result = ##class(Strix.Lib.String).RxReplace("blue socks and red shoes", "(blue|white|red)", "colour")
+	Do ..AssertEqual(Result, "colour socks and colour shoes", "Replace alternatives works.")
+	
+	; Test replace alternatives
+	Set Result = ##class(Strix.Lib.String).RxReplace("Weather report", "(.* (report))", "$1 $2")
+	Do ..AssertEqual(Result, "Weather report report", "Nested backreferences work.")
+	
+	Quit
+]]></Implementation>
+</Method>
 </Class>
 </Export>

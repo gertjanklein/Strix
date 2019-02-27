@@ -224,5 +224,19 @@ a %ListOfDataTypes object is created.</Description>
 	Quit
 ]]></Implementation>
 </Method>
+
+<Method name="RxReplace">
+<Description>
+Replace based on a regular expression. Example:
+  . RxReplace("XnXValue", "^XnX(.*)", "$1") = "Value"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>String:%String,RegEx:%String,With:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set rx = ##class(%Regex.Matcher).%New(RegEx, String)
+	Set Result = rx.ReplaceAll(With)
+	Quit Result
+]]></Implementation>
+</Method>
 </Class>
 </Export>
