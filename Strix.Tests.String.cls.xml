@@ -107,12 +107,24 @@ Minimal tests for the RxReplace method.</Description>
 	Do ..AssertEqual(Result, "Value", "Backreference works.")
 	
 	; Test replace alternatives
-	Set Result = ##class(Strix.Lib.String).RxReplace("blue socks and red shoes", "(blue|white|red)", "colour")
-	Do ..AssertEqual(Result, "colour socks and colour shoes", "Replace alternatives works.")
+	Set Result = ##class(Strix.Lib.String).RxReplace("blue socks and red shoes", "(blue|white|red)", "coloured")
+	Do ..AssertEqual(Result, "coloured socks and coloured shoes", "Replace alternatives works.")
 	
-	; Test replace alternatives
+	; Test nested group
 	Set Result = ##class(Strix.Lib.String).RxReplace("Weather report", "(.* (report))", "$1 $2")
 	Do ..AssertEqual(Result, "Weather report report", "Nested backreferences work.")
+	
+	; Test nested group with alternatives
+	Set Result = ##class(Strix.Lib.String).RxReplace("The blue parrot", "(.*(blue|white|red).*)", "$1 is $2")
+	Do ..AssertEqual(Result, "The blue parrot is blue", "Nested backreferences work.")
+	
+	; Test default case sensitivity
+	Set Result = ##class(Strix.Lib.String).RxReplace("The Blue parrot", "(.*(blue|white|red).*)", "$1 is $2")
+	Do ..AssertEqual(Result, "The Blue parrot", "Matching is case sensitive by default.")
+	
+	; Test replace case insensitively
+	Set Result = ##class(Strix.Lib.String).RxReplace("The Blue parrot", "(?i)(.*(blue|white|red).*)", "$1 is $2")
+	Do ..AssertEqual(Result, "The Blue parrot is Blue", "Matching is case sensitive by default.")
 	
 	Quit
 ]]></Implementation>
