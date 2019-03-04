@@ -75,12 +75,12 @@ Overridable method: handles a single property.</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-// =====
+// ===== Helpers
 
 ]]></Content>
 </UDLText>
 
-<Method name="ChangeClassname">
+<Method name="RenameClass">
 <Description>
 Changes the name of the current class.</Description>
 <FormalSpec>NewName:%String</FormalSpec>
@@ -126,7 +126,37 @@ Sets a parameter for the current class</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ChangePropertyName">
+<Method name="GetClassType">
+<Description>
+Retrieves the type of the current class. Output parameter
+NamespaceIdx receives the index in the schemareader ..NSInfo
+property for the class.</Description>
+<FormalSpec>*NamespaceIdx:%Integer</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Info = $Get(@..ClassNode@("Type"))
+	Set NamespaceIdx = $Piece(Info, "^", 1)
+	Set Type = $Piece(Info, "^", 2)
+	Set Ref = $Piece(Info, "^", 3)
+	
+	If Info ?1"^^"1.N {
+		; Reference to another node; get the classname from there:
+		Set ClassBase = $Name(@..ClassNode, $QLength(..ClassNode)-1)
+		Set Type = @ClassBase@(Ref, "ClassName")
+	}
+	
+	Quit Type
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Method name="RenameProperty">
 <Description>
 Changes the name of the current property.</Description>
 <FormalSpec>NewName:%String</FormalSpec>
@@ -168,22 +198,7 @@ Sets a property required flag</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-/*
-
-- Setting property required/not
-
-..Reader.Type2Class(itype As %String, ByRef isdt As %Boolean, ByRef xmlname)
- 
-
- 
- 
-*/
-]]></Content>
-</UDLText>
-
-<UDLText name="T">
-<Content><![CDATA[
-// =====
+// ===== Internal
 
 ]]></Content>
 </UDLText>
@@ -216,6 +231,8 @@ global node that contains the classes part of the parse tree.</Description>
 </Method>
 
 <Method name="PostProcessClass">
+<Description>
+Called by PostProcessParseTree for each class.</Description>
 <FormalSpec>Name:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
