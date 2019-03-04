@@ -60,7 +60,17 @@ The index of the current property (last subscript)</Description>
 Overridable method: handles a single class.</Description>
 <FormalSpec>Name:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
+<Implementation><![CDATA[
+	
+	
+	zw @..ClassNode@("Super")
+	
+	
+	
+	
+	
+	
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -122,6 +132,35 @@ Sets a parameter for the current class</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set @..ClassNode@("Parameter", Name) = Value
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetSuperClass">
+<Description>
+Returns the superclass for the currently processed class</Description>
+<FormalSpec>*NamespaceIdx:%Integer</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Info = $Get(@..ClassNode@("Super"))
+	If Info ? 1.N1"^".E {
+		Set NamespaceIdx = $Piece(Info, "^", 1)
+		Set SuperClass = $Piece(Info, "^", 2)
+	} Else {
+		Set NamespaceIdx = ""
+		Set SuperClass = Info
+	}
+	Quit SuperClass
+]]></Implementation>
+</Method>
+
+<Method name="SetSuperClass">
+<Description>
+Changes the superclass for the currently processed class</Description>
+<FormalSpec>SuperClass:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @..ClassNode@("Super") = SuperClass
 	Quit $$$OK
 ]]></Implementation>
 </Method>
