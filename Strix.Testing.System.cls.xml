@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Testing.System">
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>65053,54905.671825</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ----- Databases
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateDatabase">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String,BaseDir:%String="",*DatabaseDir:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	; --- Determine directory
+	
+	If BaseDir = "" Set BaseDir = $System.Util.ManagerDirectory()
+	Set DatabaseDir = ##class(%File).SubDirectoryName(BaseDir, Name)
+	If '##class(%File).DirectoryExists(DatabaseDir) {
+		Set ok = ##class(%File).CreateDirectoryChain(DatabaseDir, .rc)
+		If 'ok Quit ..BuildStatus("Error {} creating directory {}.",, rc, DatabaseDir)
+	}
+	
+	; --- Create database file
+	
+	Set sc = ##class(SYS.Database).CreateDatabase(DatabaseDir, 10)
+	If 'sc Quit ..BuildStatus("Error creating database file at {}:", sc, DatabaseDir)
+	
+	; --- Create database definition
+	
+	Set Properties("Directory") = DatabaseDir
+	Set sc = ##class(Config.Databases).Create(Name, .Properties)
+	If 'sc Quit ..BuildStatus("Error creating database definition for {}:", sc, DatabaseDir)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DeleteDatabase">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	; --- Get name from directory
+	
+	; Make sure the directory doesn't end in a slash, so we can
+	; get the last piece.
+	Set Directory = ##class(%File).NormalizeFilename(Directory)
+	Set Name = ##class(%File).GetFilename(Directory)
+	
+	; --- Delete database definition
+	
+	Set sc = ##class(Config.Databases).Delete(Name)
+	If 'sc {
+		Set ec = $System.Status.GetErrorCodes(sc)
+		If ec '= $$$DatabaseDefinitionDoesNotExist Quit ..BuildStatus("Error deleting database definition {}:", sc, Name)
+	}
+	
+	; --- Delete database file
+	
+	Set sc = ##class(SYS.Database).DeleteDatabase(Directory)
+	If 'sc {
+		Set ec = $System.Status.GetErrorCodes(sc)
+		If ec '= $$$DatabaseDoesNotExist Quit ..BuildStatus("Error deleting database file {}:", sc, Directory)
+	}
+	
+	; --- Delete directory
+	
+	Set ok = ##class(%File).RemoveDirectoryTree(Directory)
+	If 'ok Quit ..BuildStatus("Error removing database directory {}:", $g(%objlasterror), Directory)
+	
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ----- Namespaces
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateNamespace">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String,DatabaseName:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	If DatabaseName = "" Set DatabaseName = Name
+	Set Properties("Globals") = DatabaseName
+	
+	Set sc = ##class(Config.Namespaces).Create(Name, .Properties)
+	If 'sc Quit ..BuildStatus("Error creating namespace {} for database {}:", sc, Name, DatabaseName)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DeleteNamespace">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	Set sc = ##class(Config.Namespaces).Delete(Name)
+	If 'sc Quit ..BuildStatus("Error deleting namespace {}:", sc, Name)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ----- Ensemble
+
+]]></Content>
+</UDLText>
+
+<Method name="EnableEnsemble">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Namespace:%String,NoExtraDbs:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If NoExtraDbs {
+		; If a mapping for these globals exists, the secondary and temp databases
+		; will not be created.
+		Set sc = ..MapGlobal(Namespace, "Ens.SecondaryData*")
+		If 'sc Quit sc
+		Set sc = ..MapGlobal(Namespace, "CacheTemp.Ens*")
+		If 'sc Quit sc
+	}
+	
+	Set sc = ##class(%EnsembleMgr).EnableNamespace(Namespace, 0)
+	If 'sc Quit ..BuildStatus("Error enabling Ensemble:", sc)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DisableEnsemble">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Namespace:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set sc = ##class(%EnsembleMgr).DisableNamespace(Namespace, 0)
+	If 'sc Quit ..BuildStatus("Error disabling Ensemble:", sc)
+	
+	; Ensemble created a CSP application; delete it
+	Set App = $System.CSP.GetDefaultApp(Namespace)
+	If App '= "" {
+		Set sc = ..DeleteCSPApplication(App)
+		If 'sc Quit sc
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Method name="DeleteCSPApplication">
+<Description>
+Deletes a CSP application.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>App:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	If '##class(Security.Applications).Exists(App) Quit $$$OK
+	Set sc = ##class(Security.Applications).Get(App, .Properties)
+	If 'sc Quit ..BuildStatus("Error determining properties for {}:", sc, App)
+	Set Directory = $Get(Properties("Path"))
+	
+	Set sc = ##class(Security.Applications).Delete(App)
+	If 'sc Quit ..BuildStatus("Error deleting {}:", sc, App)
+	
+	; Try to delete directory but ignore possible error.
+	Set ok = ##class(%File).RemoveDirectory(Directory, .rc)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MapGlobal">
+<Description>
+Adds a global mapping in Namespace to the specified database.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Namespace:%String,Global:%String,Database:%String="CACHETEMP"</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	If ##class(Config.MapGlobals).Exists(Namespace, Global) Quit $$$OK
+	
+	Set Properties("Database") = Database
+	Set sc = ##class(Config.MapGlobals).Create(Namespace, Global, .Properties)
+	If 'sc Quit ..BuildStatus("Error creating mapping in {} for global {} to database {}:", sc, Namespace, Global, Database)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="BuildStatus">
+<Description>
+Helper for creating updated status</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Message:%String,Status:%Status="",Args...:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	For i = 1:1:$Get(Args) {
+		Set Message = $Replace(Message, "{}", $Get(Args(i)), 1, 1)
+	}
+	
+	;Convert message to %Status
+	Set MsgStatus = $System.Status.Error($$$GeneralError, Message)
+	
+	;Append status from parameter, if specified
+	If Status '= "" Set MsgStatus = $System.Status.AppendStatus(MsgStatus, Status)
+	
+	Quit MsgStatus
+]]></Implementation>
+</Method>
+</Class>
+</Export>
