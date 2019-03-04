@@ -55,6 +55,38 @@ The index of the current property (last subscript)</Description>
 ]]></Content>
 </UDLText>
 
+<Method name="Create">
+<Description>
+Template entry point; intended to be overridden and completed
+in a subclass.</Description>
+<Abstract>1</Abstract>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Package:%String="temp"</FormalSpec>
+<Implementation><![CDATA[
+	; Get class creation times of currently existing classes in Package
+	Set sc = ..GetTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error determining class creation times:", sc)
+	
+	;;
+	;; Optional: create %SOAP.WSDL.Reader here for WSDL processing
+	;;
+	
+	; Create schema reader
+	Set sr = ##class(Strix.XML.SchemaReader).%New()
+	Set sr.Callback = ..%New()
+	
+	;;
+	;; Configure and process, either SOAP reader or schema reader
+	;;
+	
+	; Restore class creation time for classes that still exist
+	Set sc = ..UpdateTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="HandleClass">
 <Description>
 Overridable method: handles a single class.</Description>
@@ -281,7 +313,34 @@ with the output of the GetTimes method.</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-// ===== Internal
+// -----
+
+]]></Content>
+</UDLText>
+
+<Method name="ShowError">
+<Description>
+Displays an error message and/or %Status.</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Message:%String="",Status:%Status="",Args...</FormalSpec>
+<Implementation><![CDATA[
+	If $Get(Args) Set Message = $$$BuildStr(Message, Args...)
+	If Message '= "", Status '= "" {
+		Write Message_":",!
+		Do $System.Status.DisplayError(Status)
+	} ElseIf Message '= "" {
+		Write Message,!
+	} Else {
+		Do $System.Status.DisplayError(Status)
+	}
+	Quit 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Internal =====
 
 ]]></Content>
 </UDLText>
