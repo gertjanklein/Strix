@@ -60,17 +60,7 @@ The index of the current property (last subscript)</Description>
 Overridable method: handles a single class.</Description>
 <FormalSpec>Name:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	
-	
-	zw @..ClassNode@("Super")
-	
-	
-	
-	
-	
-	
-	Quit $$$OK
+<Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
 </Method>
 
