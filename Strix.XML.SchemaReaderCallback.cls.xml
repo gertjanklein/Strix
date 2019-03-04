@@ -227,6 +227,60 @@ Sets a property required flag</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
+// ===== Additional helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="GetTimes">
+<Description>
+Load the creation times of all classes in Package, and return them
+in output parameter Times. This can be used in conjunction with
+the UpdateTimes method, to persist class creation times through
+subsequent runs of the schemareader (which deletes the classes
+before recreating them). This is useful to prevent source code diffs
+showing changes when there aren't.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Package:%String,Times:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set sc = $System.OBJ.GetPackageList(.Items, Package, "/includesubpackages")
+	If 'sc Quit $$$BuildStatus("Error loading list of existing classes in {}:", Status, Package)
+	Set ClassName = ""
+	For  {
+		Set ClassName = $Order(Items(ClassName))
+		If ClassName = "" Quit
+		Set Time = $$$defClassKeyGet(ClassName, $$$cCLASStimecreated)
+		Set Times(ClassName) = Time
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="UpdateTimes">
+<Description>
+Update the class creation time for classes in Package, if this
+information is present in the Times array. Expected to be used
+with the output of the GetTimes method.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Package:%String,Times:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set sc = $System.OBJ.GetPackageList(.Items, Package, "/includesubpackages")
+	If 'sc Quit $$$BuildStatus("Error loading list of existing classes in {}:", Status, Package)
+	Set ClassName = ""
+	For  {
+		Set ClassName = $Order(Items(ClassName))
+		If ClassName = "" Quit
+		If '$Data(Times(ClassName)) Continue
+		$$$defClassKeySet(ClassName, $$$cCLASStimecreated, Times(ClassName))
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
 // ===== Internal
 
 ]]></Content>
