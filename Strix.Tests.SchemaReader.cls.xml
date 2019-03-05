@@ -185,7 +185,7 @@ Tests that callback method HandleClass is called for each class.</Description>
 </Method>
 
 <Method name="Callback4">
-<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If '..Assert("Element1,String1,String2" [ Name, "Name '{}' is expected.", Name) Quit
@@ -217,9 +217,6 @@ Tests renaming a class.</Description>
 	Set XSDStream = ..GetXSD("Schema1")
 	Set sc = ..BuildCallBack(Reader, "HandleClass", "Callback5")
 	
-	
-	d $System.OBJ.DeletePackage(..#TestPackage, "-d")
-	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
 	
@@ -236,11 +233,11 @@ Tests renaming a class.</Description>
 </Method>
 
 <Method name="Callback5">
-<FormalSpec>Name:%String</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If $$$ClassShortName(Name) '= "Base" Quit $$$OK
-	Set sc = ..CallbackObject.ChangeClassname("BaseRenamed")
+	Set sc = ..CallbackObject.RenameClass("BaseRenamed")
 	Do ..AssertStatusOk(sc, "Changing class name does not return an error.")
 	Quit $$$OK
 ]]></Implementation>
@@ -277,14 +274,14 @@ Tests renaming a property.</Description>
 </Method>
 
 <Method name="Callback6">
-<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If Name = "Element1" {
-		Set sc = ..CallbackObject.ChangePropertyName("Element")
+		Set sc = ..CallbackObject.RenameProperty("Element")
 		Do ..AssertStatusOk(sc, "Changing property name does not return an error.")
 	} ElseIf Name = "String2" {
-		Set sc = ..CallbackObject.ChangePropertyName("SecondString")
+		Set sc = ..CallbackObject.RenameProperty("SecondString")
 		Do ..AssertStatusOk(sc, "Changing property name does not return an error.")
 	}
 	Quit $$$OK
@@ -317,7 +314,7 @@ Tests setting a property's required attribute.</Description>
 </Method>
 
 <Method name="Callback7">
-<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If Name = "String1" {
@@ -358,7 +355,7 @@ Tests setting a class parameter.</Description>
 </Method>
 
 <Method name="Callback8">
-<FormalSpec>Name:%String</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If $$$ClassShortName(Name) '= "Base" Quit $$$OK
@@ -395,7 +392,7 @@ Tests setting a property parameter.</Description>
 </Method>
 
 <Method name="Callback9">
-<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	If Name '= "String1" Quit $$$OK

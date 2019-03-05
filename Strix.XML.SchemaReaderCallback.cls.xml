@@ -42,12 +42,6 @@ Global node containing the property information</Description>
 <Type>%String</Type>
 </Property>
 
-<Property name="PropertyIndex">
-<Description>
-The index of the current property (last subscript)</Description>
-<Type>%String</Type>
-</Property>
-
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -90,7 +84,7 @@ in a subclass.</Description>
 <Method name="HandleClass">
 <Description>
 Overridable method: handles a single class.</Description>
-<FormalSpec>Name:%String</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
@@ -99,7 +93,7 @@ Overridable method: handles a single class.</Description>
 <Method name="HandleProperty">
 <Description>
 Overridable method: handles a single property.</Description>
-<FormalSpec>Name:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
@@ -108,6 +102,46 @@ Overridable method: handles a single property.</Description>
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="GetValidName">
+<Description>
+Receives a class short name or property name and its XML name,
+and returns what it should be named.</Description>
+<FormalSpec>Name:%String,XmlName:%String,*Changed:%Boolean</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Changed = 0
+	If $ZName(XmlName, 6) Quit XmlName
+	
+	Set NewName = ""
+	For i = 1:1:$Length(XmlName) {
+		Set Char = $Extract(XmlName, i)
+		If " _.(-" [ Char, $Extract(XmlName, i+1) ? 1A {
+			Set NewName = NewName_$ZConvert($Extract(XmlName, $Increment(i)), "U")
+			Continue
+		}
+		
+		If NewName '= "" {
+			;Valid as second or later character?
+			If $ZName("x"_Char, 6) Set NewName = NewName_Char
+		} Else {
+			;Valid as first character?
+			If $ZName(Char, 6) Set NewName = NewName_Char
+		}
+	}
+	
+	Set Changed = Name '= NewName
+	
+	Quit NewName
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
 
 ]]></Content>
 </UDLText>
@@ -132,6 +166,7 @@ Changes the name of the current class.</Description>
 	
 	; Change class name
 	Set @..ClassNode@("ClassName") = NewName
+	Set ..ClassName = NewName
 	
 	Quit $$$OK
 ]]></Implementation>
@@ -378,20 +413,31 @@ Called by PostProcessParseTree for each class.</Description>
 <FormalSpec>Name:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	Set (..PropertyName, ..PropertyNode) = ""
+	
 	; Call basic callback method
-	Set (..PropertyIndex, ..PropertyName, ..PropertyNode) = ""
-	Set sc = ..HandleClass(Name)
+	Set XmlName = $Get(@..ClassNode@("Parameter", "XMLNAME"), Name)
+	
+	; Handle Xml to Caché name conversion here
+	Set Name = ..GetValidName($Piece(Name, ".", *), XmlName, .Changed)
+	If Changed Do ..RenameClass(Name)
+	
+	Set sc = ..HandleClass(Name, XmlName)
 	If 'sc Quit $$$BuildStatus("Error handling class '{}':", sc, ..ClassName)
 	
 	; Loop through properties
 	For pkey = 1:1:$Get(@..ClassNode@("Property")) {
-		Set ..PropertyIndex = pkey
 		Set ..PropertyNode = $Name(@..ClassNode@("Property", pkey))
-		Set ..PropertyName = @..PropertyNode@("Name")
+		Set (..PropertyName, PropertyName) = @..PropertyNode@("Name")
 		
 		Set Type = ..Reader.TypeToClass($Get(@..PropertyNode@("Type")), .IsDatatype)
+		Set XmlName = $Get(@..PropertyNode@("Parameter", "XMLNAME"), PropertyName)
 		
-		Set sc = ..HandleProperty(..PropertyName, Type, IsDatatype)
+		; Handle Xml to Caché name conversion here
+		Set PropertyName = ..GetValidName(PropertyName, XmlName, .Changed)
+		If Changed Do ..RenameProperty(PropertyName)
+		
+		Set sc = ..HandleProperty(..PropertyName, XmlName, Type, IsDatatype)
 		If 'sc Return $$$BuildStatus("Error handling property {}:", sc, ..PropertyName)
 	}
 	
