@@ -83,7 +83,8 @@ in a subclass.</Description>
 
 <Method name="HandleClass">
 <Description>
-Overridable method: handles a single class.</Description>
+Overridable method: handles a single class, after the parse tree
+has been built but before the class is generated.</Description>
 <FormalSpec>Name:%String,XmlName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
@@ -92,7 +93,8 @@ Overridable method: handles a single class.</Description>
 
 <Method name="HandleProperty">
 <Description>
-Overridable method: handles a single property.</Description>
+Overridable method: handles a single property, after the parse tree
+has been built but before the class is generated.</Description>
 <FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
@@ -389,7 +391,7 @@ global node that contains the classes part of the parse tree.</Description>
 <FormalSpec>ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Loop through generated classes
+	; Loop through classes to be generated
 	Set ckey = ""
 	For  {
 		Set ckey = $Order(@ClassTree@(ckey))
