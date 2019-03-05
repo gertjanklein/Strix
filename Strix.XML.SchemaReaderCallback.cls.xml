@@ -380,11 +380,12 @@ Displays an error message and/or %Status.</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="PostProcessParseTree">
+<Method name="ProcessParseTree">
 <Description>
 Callback from schema reader. Called after parsing is done, and
 before any classes are created. Gets passed the name of the
 global node that contains the classes part of the parse tree.</Description>
+<Internal>1</Internal>
 <FormalSpec>ClassTree:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -399,7 +400,7 @@ global node that contains the classes part of the parse tree.</Description>
 		
 		Set ..ClassName = $Get(@..ClassNode@("ClassName"))
 		
-		Set sc = ..PostProcessClass(..ClassName)
+		Set sc = ..ProcessClassNode(..ClassName)
 		If 'sc Return $$$BuildStatus("Error processing class '{}':", sc, ..ClassName)
 	}
 	
@@ -407,9 +408,10 @@ global node that contains the classes part of the parse tree.</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="PostProcessClass">
+<Method name="ProcessClassNode">
 <Description>
 Called by PostProcessParseTree for each class.</Description>
+<Internal>1</Internal>
 <FormalSpec>Name:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[

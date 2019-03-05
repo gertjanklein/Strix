@@ -61,15 +61,16 @@ Test processing an XSD passes in a stream (ProcessStream method).</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="TestPostProcessParseTree">
+<Method name="TestProcessParseTree">
 <Description>
-Tests that the basic callback method, PostProcessParseTree, is
+Tests that the basic callback method, ProcessParseTree, is
 called during schema processing.</Description>
 <Implementation><![CDATA[
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
-	Set sc = ..BuildCallBack(Reader, "PostProcessParseTree", "Callback1")
+	Set sc = ..BuildCallBack(Reader, "ProcessParseTree", "Callback1")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
@@ -97,13 +98,14 @@ called during schema processing.</Description>
 
 <Method name="TestCallbackStatus">
 <Description>
-Tests that the basic callback method, PostProcessParseTree, can
+Tests that the basic callback method, ProcessParseTree, can
 abort schema processing by returning an error.</Description>
 <Implementation><![CDATA[
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
-	Set sc = ..BuildCallBack(Reader, "PostProcessParseTree", "Callback2")
+	Set sc = ..BuildCallBack(Reader, "ProcessParseTree", "Callback2")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertErrorStatus(sc, "Processing schema fails.") Quit
@@ -127,14 +129,15 @@ abort schema processing by returning an error.</Description>
 ]]></Content>
 </UDLText>
 
-<Method name="TestPostProcessClass">
+<Method name="TestProcessClassNode">
 <Description>
 Tests that callback method HandleClass is called for each class.</Description>
 <Implementation><![CDATA[
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
-	Set sc = ..BuildCallBack(Reader, "PostProcessClass", "Callback3")
+	Set sc = ..BuildCallBack(Reader, "ProcessClassNode", "Callback3")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
@@ -172,6 +175,7 @@ Tests that callback method HandleClass is called for each class.</Description>
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
 	Set sc = ..BuildCallBack(Reader, "HandleProperty", "Callback4")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
@@ -216,6 +220,7 @@ Tests renaming a class.</Description>
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
 	Set sc = ..BuildCallBack(Reader, "HandleClass", "Callback5")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
@@ -258,6 +263,7 @@ Tests renaming a property.</Description>
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
 	Set sc = ..BuildCallBack(Reader, "HandleProperty", "Callback6")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
 	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
@@ -302,7 +308,10 @@ Tests setting a property's required attribute.</Description>
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
+	
 	Set sc = ..BuildCallBack(Reader, "HandleProperty", "Callback7")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
+	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
 	
@@ -342,7 +351,10 @@ Tests setting a class parameter.</Description>
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
+	
 	Set sc = ..BuildCallBack(Reader, "HandleClass", "Callback8")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
+	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
 	
@@ -379,7 +391,10 @@ Tests setting a property parameter.</Description>
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
+	
 	Set sc = ..BuildCallBack(Reader, "HandleProperty", "Callback9")
+	If '..AssertStatusOk(sc, "Building callback class works.") Quit
+	
 	Set sc = Reader.ProcessStream(XSDStream, ..#TestPackage)
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
 	

@@ -75,7 +75,7 @@ schema is parsed.</Description>
 	
 	; Run entry method on callback object, if present
 	If $IsObject(..Callback) {
-		Set sc = ..Callback.PostProcessParseTree($Name($$$ClassTreeRoot))
+		Set sc = ..Callback.ProcessParseTree($Name($$$ClassTreeRoot))
 		If 'sc Quit sc
 	}
 	
