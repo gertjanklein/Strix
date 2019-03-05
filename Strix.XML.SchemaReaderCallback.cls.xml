@@ -51,35 +51,31 @@ Global node containing the property information</Description>
 
 <Method name="Create">
 <Description>
-Template entry point; intended to be overridden and completed
-in a subclass.</Description>
-<Abstract>1</Abstract>
+Basic entry point; can be overridden in a subclass to further
+configure the schema reader.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Package:%String="temp"</FormalSpec>
+<FormalSpec>SchemaLocation:%String,Package:%String="Test"</FormalSpec>
 <Implementation><![CDATA[
-	; Get class creation times of currently existing classes in Package
-	Set sc = ..GetTimes(Package, .Times)
-	If 'sc Quit ..ShowError("Error determining class creation times:", sc)
+	; Create and configure reader
+	Set Reader = ##class(Strix.XML.SchemaReader).%New()
+	Set Reader.Callback = ..%New()
+	Set Reader.CompileClasses = 0
+	Set Reader.MakePersistent = 0
+	Set Reader.MakeSerial = 0
 	
-	;;
-	;; Optional: create %SOAP.WSDL.Reader here for WSDL processing
-	;;
-	
-	; Create schema reader
-	Set sr = ##class(Strix.XML.SchemaReader).%New()
-	Set sr.Callback = ..%New()
-	
-	;;
-	;; Configure and process, either SOAP reader or schema reader
-	;;
-	
-	; Restore class creation time for classes that still exist
-	Set sc = ..UpdateTimes(Package, .Times)
-	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
+	Set sc = ..RunReader(Reader, SchemaLocation, Package)
+	If 'sc Quit ..ShowError("Error running schema reader:", sc)
 	
 	Quit $$$OK
 ]]></Implementation>
 </Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
 
 <Method name="HandleClass">
 <Description>
@@ -96,6 +92,14 @@ has been built but before the class is generated.</Description>
 Overridable method: handles a single property, after the parse tree
 has been built but before the class is generated.</Description>
 <FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="PostProcessClass">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[	Quit $$$OK
 ]]></Implementation>
@@ -297,6 +301,51 @@ Sets a property required flag</Description>
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Additional helpers
+
+]]></Content>
+</UDLText>
+
+<Method name="RunReader">
+<Description>
+Runs the schema reader for the given schema and package.</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Reader:Strix.XML.SchemaReader,SchemaLocation:%String,Package:%String,&Features:%String]]></FormalSpec>
+<Implementation><![CDATA[
+	; Get class creation times of currently existing classes in Package
+	Set sc = ..GetTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error determining class creation times:", sc)
+	
+	; Run the schema reader
+	Set sc = Reader.Process(SchemaLocation, Package, .Features)
+	If 'sc Quit ..ShowError("Error processing schema in {}:", sc, SchemaLocation)
+	
+	; Restore class creation time for classes that still exist
+	Set sc = ..UpdateTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
+	
+	; Determine the classes that were created
+	Set SchemaResult = ##class(%XML.Utils.SchemaResult).CreateResult(Reader, , .Features)
+	Merge Classes = SchemaResult.Classes
+	
+	; Allow postprocessing the generated classes
+	Set ClassName = ""
+	For  {
+		Set ClassName = $Order(Classes(ClassName))
+		If ClassName = "" Quit
+		
+		Set sc = ..PostProcessClass(ClassName)
+		If 'sc Quit
+	}
+	If 'sc Quit $$$BuildStatus("Error postprocessing class {}:", sc, ClassName)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
 
 ]]></Content>
 </UDLText>
