@@ -132,8 +132,8 @@ Returns the (property) description for a specific setting,</Description>
 		Set Action = 3
 		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
 		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
-		Set Namespace = $ZUtil(5)
-		Set Target = "http://"_Host_":"_Port_"/csp/"_Namespace_"/Strix.SCM.UI.cls"
+		Set App = $System.CSP.GetDefaultApp($ZUtil(5))
+		Set Target = "http://"_Host_":"_Port_App_"/Strix.SCM.UI.cls"
 		Quit $$$OK
 	}
 	
