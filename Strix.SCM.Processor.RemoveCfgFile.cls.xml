@@ -14,8 +14,13 @@ Removes the SCM configuration file from the release.</Description>
 	Set ConfigFilePath = ##class(%File).SubDirectoryName(Directory, ConfigFileName)
 	
 	; Windows 10 Version 10.0.16299: sometimes file appears not there
-	; (yet). Wait a while to be sure.
-	For i = 1:1:5 Hang 1 If ##class(%File).Exists(ConfigFilePath) Quit
+	; (yet). Wait a while for it to appear.
+	Set Msg = "Waiting for config file to appear..."
+	For i = 1:1:100 {
+		If ##class(%File).Exists(ConfigFilePath) Quit
+		If Msg '= "" Do ..Write(Msg) Set Msg = ""
+		Hang .1
+	}
 	
 	If '##class(%File).Exists(ConfigFilePath) {
 		Quit $$$BuildErr("Error: configuration file '{}' not found.", , ConfigFilePath)
