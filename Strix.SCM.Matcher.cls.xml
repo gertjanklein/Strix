@@ -52,10 +52,16 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 	;Convert type to lowercase
 	$$$NormalizeType(Item)
 	Set ItemType = $$$ItemType(Item)
+	Set ItemName = $$$ItemName(Item)
+	
+	; Sometimes, in Strix.SCM.Studio:OnAfterLoad(), an item ".CLS" (no
+	; name, no Object parameter either) comes in. Check for an empty name
+	; here, and jus ignore.
+	If ItemName = "" Quit 0
 	
 	If ItemType = "cls" {
 		;If this is a generated class, ignore it
-		If $$$defClassKeyGet($$$ItemName(Item),$$$cCLASSgeneratedby) '= "" Quit 0
+		If $$$defClassKeyGet(ItemName,$$$cCLASSgeneratedby) '= "" Quit 0
 	}
 	
 	
