@@ -30,10 +30,10 @@ Available variables:
 <Description>
 Comma-separated list of release post-processors to run. Available \
 processors are:
-EnsProdDir: Moves Ensemble Production classes to a subdirectory "Productions".
-RemoveCfgFile: Removes the SCM configuration file from the release.
-RemoveEnsProd: Removes Ensemble Production classes from the export.
-Zip: Zips the release directory.</Description>
+• EnsProdDir: Moves Ensemble Production classes to a subdirectory "Productions".
+• RemoveCfgFile: Removes the SCM configuration file from the release.
+• RemoveEnsProd: Removes Ensemble Production classes from the export.
+• Zip: Zips the release directory.</Description>
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="80"/>
 </Property>
