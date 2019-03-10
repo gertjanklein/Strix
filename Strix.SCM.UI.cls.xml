@@ -264,6 +264,13 @@ Displays the Edit Project page</Description>
     <p class=Explain>Whether to items as UDL (checked) or XML (unchecked).</p>
   </td>
 </tr>
+<tr>
+  <th>Postprocessors:</th>
+  <td>
+    #(..TextInput("PostProcessors", 80))#
+    <p class=Explain>List of item postprocessors to run on export.</p>
+  </td>
+</tr>
 >
 	
 	;===== Handler settings:
@@ -386,6 +393,7 @@ function Ays()
 	Do %request.Set("Handler", Project.Handler)
 	If Project.PackageSubdirs Do %request.Set("PackageSubdirs", 1)
 	If Project.ExportUDL Do %request.Set("ExportUDL", 1)
+	Do %request.Set("PostProcessors", Project.PostProcessors)
 	
 	Set Members = ""
 	For i = 1:1:Project.Members.Count() {
@@ -415,6 +423,7 @@ function Ays()
 	Set Project.ProjectPath = %request.Get("ProjectPath")
 	Set Project.PackageSubdirs = ''%request.IsDefined("PackageSubdirs")
 	Set Project.ExportUDL = ''%request.IsDefined("ExportUDL")
+	Set Project.PostProcessors = %request.Get("PostProcessors")
 	
 	;Make sure the project's directory exists
 	If ##class(Strix.Lib.File).IsPathAbsolute(Project.ProjectPath) {

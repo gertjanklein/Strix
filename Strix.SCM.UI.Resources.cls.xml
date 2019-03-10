@@ -150,7 +150,7 @@ table {
 /* ========== */
 .Explain {
 	margin: 0.5em 0 0.2em 0;
-	color: #006;
+	color: #664;
 	font-size: 100%;
 	max-width: 50em;
 }
