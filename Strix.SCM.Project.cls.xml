@@ -97,6 +97,13 @@ Whether to export items as XML (0) or CDL (1)</Description>
 <InitialExpression>0</InitialExpression>
 </Property>
 
+<Property name="PostProcessors">
+<Description>
+Comma-separated list of export item post-processors to run.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="80"/>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
@@ -328,6 +335,34 @@ parameter InternalName, initialized with the project's settings.</Description>
 	}
 	
 	Quit Handler
+]]></Implementation>
+</Method>
+
+<Method name="GetProcessors">
+<FormalSpec>*Status:%Status</FormalSpec>
+<ReturnType>%ListOfObjects</ReturnType>
+<Implementation><![CDATA[
+	Set Status = $$$OK
+	
+	Set Processors = ##class(%ListOfObjects).%New()
+	Set Names = $ZStrip(..PostProcessors, "<>W")
+	If Names = "" Quit Processors
+	
+	For i = 1:1:$Length(Names, ",") {
+		Set ClassName = $ZStrip(Names, "<>W")
+		If ClassName = "" Continue
+		
+		If ClassName '[ ".", ##class(%Dictionary.ClassDefinition).%ExistsId("Strix.SCM.Processor."_ClassName) {
+			Set ClassName = "Strix.SCM.Processor."_ClassName
+		}
+		
+		Set Processor = ##class(Strix.SCM.Processor.Base).Get(ClassName, "", $this, .Status)
+		If 'Status Return ""
+		
+		Do Processors.Insert(Processor)
+	}
+	
+	Quit Processors
 ]]></Implementation>
 </Method>
 
@@ -715,6 +750,9 @@ Returns the id and name of all project owning an item.</Description>
 </Value>
 <Value name="8">
 <Value>ExportUDL</Value>
+</Value>
+<Value name="9">
+<Value>PostProcessors</Value>
 </Value>
 </Data>
 </Storage>

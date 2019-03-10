@@ -64,9 +64,17 @@ Returns a processor instance, initialized with handler and project.</Description
 
 <Method name="Run">
 <Description>
-Processors should override the Run method.</Description>
+Release processors should override the Run method.</Description>
 <Abstract>1</Abstract>
 <ReturnType>%Status</ReturnType>
+</Method>
+
+<Method name="ProcessExport">
+<Description>
+Item processors should provide an Export method.</Description>
+<Abstract>1</Abstract>
+<FormalSpec>Item:%String,Export:%Stream,*Status:%Status</FormalSpec>
+<ReturnType>%Stream</ReturnType>
 </Method>
 
 <Method name="Write">
@@ -74,7 +82,12 @@ Processors should override the Run method.</Description>
 Call back to handler for messages; allows the handler to filter them
 based on e.g. verbosity.</Description>
 <FormalSpec>Text:%String</FormalSpec>
-<Implementation><![CDATA[	Do ..Handler.HandlePostProcessorOutput(Text)
+<Implementation><![CDATA[
+	If $IsObject(..Handler) {
+		Do ..Handler.HandlePostProcessorOutput(Text)
+	} Else {
+		Write !,Text
+	}
 ]]></Implementation>
 </Method>
 </Class>
