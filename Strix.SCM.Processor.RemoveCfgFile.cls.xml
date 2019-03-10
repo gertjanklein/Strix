@@ -6,6 +6,19 @@ Removes the SCM configuration file from the release.</Description>
 <Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,71436.986665</TimeCreated>
 
+<Parameter name="HandlerType">
+<Description>
+This processor works on a release.</Description>
+<Default>Release</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Method name="Run">
 <FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -14,13 +27,8 @@ Removes the SCM configuration file from the release.</Description>
 	Set ConfigFilePath = ##class(%File).SubDirectoryName(Directory, ConfigFileName)
 	
 	; Windows 10 Version 10.0.16299: sometimes file appears not there
-	; (yet). Wait a while for it to appear.
-	Set Msg = "Waiting for config file to appear..."
-	For i = 1:1:100 {
-		If ##class(%File).Exists(ConfigFilePath) Quit
-		If Msg '= "" Do ..Write(Msg) Set Msg = ""
-		Hang .1
-	}
+	; (yet). Wait a while to be sure.
+	For i = 1:1:5 Hang 1 If ##class(%File).Exists(ConfigFilePath) Quit
 	
 	If '##class(%File).Exists(ConfigFilePath) {
 		Quit $$$BuildErr("Error: configuration file '{}' not found.", , ConfigFilePath)

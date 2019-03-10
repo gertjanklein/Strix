@@ -283,6 +283,8 @@ and whether the item should be enabled or not.</Description>
 </UDLText>
 
 <Method name="GetMenuItems">
+<Description>
+Appends this handlers menus to those of the superclass.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
 <ReturnType>%List</ReturnType>
@@ -319,6 +321,8 @@ and whether the item should be enabled or not.</Description>
 </UDLText>
 
 <Method name="MakeRelease">
+<Description>
+Implements the MakeRelease menu item</Description>
 <FormalSpec>Project:Strix.SCM.Project,Revision:%String,*ErrorMsg:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -369,6 +373,8 @@ and whether the item should be enabled or not.</Description>
 </Method>
 
 <Method name="HandlePostProcessors">
+<Description>
+Helper for MakeRelease: runs post-processors</Description>
 <FormalSpec>Project:Strix.SCM.Project,Revision:%String,ReleasePath:%String,*ErrorMsg:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
@@ -381,6 +387,9 @@ and whether the item should be enabled or not.</Description>
 		If ClassName '[ ".", ##class(%Dictionary.ClassDefinition).%ExistsId("Strix.SCM.Processor."_ClassName) {
 			Set ClassName = "Strix.SCM.Processor."_ClassName
 		}
+		; Skip non-release handlers
+		Set Type = $Parameter(ClassName, "HandlerType")
+		If Type '= "Release" Continue
 		
 		Write "== Running postprocessor "_ClassName,!
 		
@@ -402,6 +411,13 @@ and whether the item should be enabled or not.</Description>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
 
 <Method name="GetCommandOutput">
 <Description>

@@ -6,6 +6,19 @@ Removes Ensemble Production classes from the export.</Description>
 <Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,67492.869936</TimeCreated>
 
+<Parameter name="HandlerType">
+<Description>
+This processor works on a release.</Description>
+<Default>Release</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Method name="Run">
 <FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>

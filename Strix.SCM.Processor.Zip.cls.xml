@@ -6,6 +6,19 @@ Zips the release directory.</Description>
 <Super>Strix.SCM.Processor.Base</Super>
 <TimeCreated>64374,53782.637984</TimeCreated>
 
+<Parameter name="HandlerType">
+<Description>
+This processor works on a release.</Description>
+<Default>Release</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
 <Method name="Run">
 <FormalSpec>Revision:%String,Directory:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>

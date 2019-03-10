@@ -7,6 +7,14 @@ Base class for post-processors.</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>64652,58901.37132</TimeCreated>
 
+<Parameter name="HandlerType">
+<Description>
+Whether the processor is meant to work on an item or on
+a release.</Description>
+<Constraint>,Release,Item</Constraint>
+<Flags>ENUM</Flags>
+</Parameter>
+
 <Property name="Handler">
 <Description>
 The current handler</Description>
