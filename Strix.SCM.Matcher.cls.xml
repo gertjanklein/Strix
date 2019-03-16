@@ -49,6 +49,9 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 <Implementation><![CDATA[
 	Set (AsItem, AsStorage) = 0
 	
+	; Studio may pass multiple items as a comma-separated list.
+	If Item [ "," Quit 0
+	
 	;Convert type to lowercase
 	$$$NormalizeType(Item)
 	Set ItemType = $$$ItemType(Item)
@@ -56,7 +59,7 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 	
 	; Sometimes, in Strix.SCM.Studio:OnAfterLoad(), an item ".CLS" (no
 	; name, no Object parameter either) comes in. Check for an empty name
-	; here, and jus ignore.
+	; here, and just ignore.
 	If ItemName = "" Quit 0
 	
 	If ItemType = "cls" {
