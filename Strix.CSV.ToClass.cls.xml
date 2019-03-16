@@ -173,7 +173,7 @@ Derive a valid Caché property name from a column header.</Description>
 			Continue
 		}
 		
-		If $ZName(Char, 6) Set Name = Name_Char
+		If $ZName(Name_Char, 6) Set Name = Name_Char
 	}
 	
 	Quit Name
