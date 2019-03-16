@@ -20,8 +20,41 @@ The separator to use in parsing the CSV data</Description>
 
 <Property name="ClassName">
 <Description>
-Name of class to create</Description>
+Name of the class to create</Description>
 <Type>%String</Type>
+</Property>
+
+<Property name="SuperClass">
+<Description>
+Superclass(es) for the class to create</Description>
+<Type>%String</Type>
+<InitialExpression>"%RegisteredObject,Strix.CSV.Adaptor"</InitialExpression>
+</Property>
+
+<Property name="CsvNameParameter">
+<Description>
+Name of the property parameter for storing the column header.
+If empty, this property parameter will not be generated.</Description>
+<Type>%String</Type>
+<InitialExpression>"CsvColumnHeader"</InitialExpression>
+</Property>
+
+<Property name="CsvIndexParameter">
+<Description>
+Name of the property parameter for storing the column number.
+If empty, this property parameter will not be generated.</Description>
+<Type>%String</Type>
+<InitialExpression>"CsvColumnNr"</InitialExpression>
+</Property>
+
+<Property name="ResetClass">
+<Description>
+When an existing class is regenerated, an attempt is made to keep
+existing property types and parameters. If ResetClass is true,
+all existing properties will be regenerated with their default
+settings. Additionally, the storage for the class will be removed.</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
 </Property>
 
 <UDLText name="T">
@@ -36,16 +69,16 @@ Name of class to create</Description>
 Create a class ClassName that can be used to hold a record
 in the CSV in file FileName.</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,ClassName:%String,Separator:%String,*Status:%Status</FormalSpec>
+<FormalSpec>FileName:%String,ClassName:%String,Separator:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	Set Me = ..%New(.ClassName, .Separator)
 	Set Me.Data = ##class(%FileCharacterStream).%New()
 	Set Status = Me.Data.LinkToFile(FileName)
-	If 'Status Set Status = $$$BuildStatus("Error linking to file '{}':", Status, FileName) Quit ""
+	If 'Status Quit $$$BuildStatus("Error linking to file '{}':", Status, FileName)
 	Set Status = Me.Create()
-	If 'Status Quit ""
-	Quit Me
+	If 'Status Quit Status
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -67,13 +100,22 @@ in the CSV in file FileName.</Description>
 	#dim ClassDef As %Dictionary.ClassDefinition
 	Set ClassDef = ##class(Strix.Generator.Utilities).GetClassDef(..ClassName, .IsNew, .Status)
 	If 'Status Quit $$$BuildStatus("Can't create/open class definition for '{}':", Status, ..ClassName)
-	If IsNew Set ClassDef.Super = "%RegisteredObject,Strix.CSV.Adaptor"
+	Set ClassDef.Super = ..SuperClass
 	
+	If ..ResetClass {
+		; Clear storage
+		Do ClassDef.Storages.Clear()
+	} Else {
+		; Get existing property definitions (if any) to take datatype etc. from
+		Do ..GetExistingProperties(ClassDef, .ExistingProperties)
+	}
+	
+	; Remove all existing properties from the class definition
 	Set Status = ClassDef.Properties.Clear()
 	If 'Status Quit $$$BuildStatus("Can't clear existing properties in '{}':", Status, ..ClassName)
 	
-	For i = 1:1:Parser.Data {
-		Set ColumnName = Parser.Data(i)
+	For ColumnNr = 1:1:Parser.Data {
+		Set ColumnName = Parser.Data(ColumnNr)
 		If ColumnName = "" Continue
 		
 		Set PropertyName = ..GetPropertyName(ColumnName)
@@ -88,10 +130,22 @@ in the CSV in file FileName.</Description>
 		Set PropDef = ##class(Strix.Generator.Utilities).GetInCollection(ClassDef.Properties, PropertyName, 1, .Status)
 		If 'Status Return $$$BuildStatus("Can't create/open property definition for column '{}', property '{}':", Status, ColumnName, PropertyName)
 		
-		Do PropDef.Parameters.SetAt(ColumnName, "CsvColumnHeader")
-		Do PropDef.Parameters.SetAt(i, "CsvColumn")
-		Set PropDef.SequenceNumber = i
-		Set PropDef.Type = "%String"
+		Set PropDef.SequenceNumber = ColumnNr
+		
+		#dim Existing As %Dictionary.PropertyDefinition
+		Set ParmName = $Select(..CsvNameParameter '= "": ColumnName, 1: ColumnNr)
+		If $Data(ExistingProperties(ParmName), Existing) {
+			; Keep existing type and property parameters
+			Set PropDef.Type = Existing.Type
+			Set PropDef.Parameters = Existing.Parameters
+		} Else {
+			Set PropDef.Type = "%String"
+			Do PropDef.Parameters.SetAt("", "MAXLEN")
+		}
+		
+		; Set the custom property parameter(s) for CSV column name and/or index.
+		If ..CsvNameParameter '= "" Do PropDef.Parameters.SetAt(ColumnName, ..CsvNameParameter)
+		If ..CsvIndexParameter '= "" Do PropDef.Parameters.SetAt(ColumnNr, ..CsvIndexParameter)
 	}
 	
 	Set Status = ClassDef.%Save()
@@ -123,6 +177,28 @@ Derive a valid Caché property name from a column header.</Description>
 	}
 	
 	Quit Name
+]]></Implementation>
+</Method>
+
+<Method name="GetExistingProperties">
+<Description>
+Returns property definitions already present in the class, indexed
+on column name</Description>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,*Existing</FormalSpec>
+<Implementation><![CDATA[
+	Set ParmName = $Select(..CsvNameParameter '= "": ..CsvNameParameter, 1: ..CsvIndexParameter)
+	Set key = ""
+	For  {
+		#dim PropDef As %Dictionary.PropertyDefinition
+		Set PropDef = ClassDef.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Column = PropDef.Parameters.GetAt(ParmName)
+		If Column = "" Continue
+		
+		Set Existing(Column) = PropDef
+	}
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 

@@ -10,7 +10,7 @@ The column header in the CSV</Description>
 <Type>%String</Type>
 </Parameter>
 
-<Parameter name="CsvColumn">
+<Parameter name="CsvColumnNr">
 <Description>
 The column index in the CSV</Description>
 <Type>%Integer</Type>

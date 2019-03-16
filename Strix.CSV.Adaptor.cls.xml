@@ -132,7 +132,7 @@ Loads the object from the data in Data (indexed by column number).</Description>
 		Set pd = %compiledclass.Properties.GetNext(.key)
 		If key = "" Quit
 		
-		Set Index = pd.Parameters.GetAt("CsvColumn")
+		Set Index = pd.Parameters.GetAt("CsvColumnNr")
 		If Index = "" Continue
 		
 		Set Name = pd.Name, Type = $$$DenormalizeClassname(pd.Type)

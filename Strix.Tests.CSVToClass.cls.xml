@@ -47,19 +47,19 @@ Test basic functionality</Description>
 	#dim pd As %Dictionary.PropertyDefinition
 	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "a")
 	If ..AssertNotEmpty(pd, "Property a exists.") {
-		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "1", "CsvColumn for property a is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnNr"), "1", "CsvColumn for property a is correct.")
 		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "a", "CsvColumnHeader for property a is correct.")
 	}
 	
 	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "b")
 	If ..AssertNotEmpty(pd, "Property b exists.") {
-		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "2", "CsvColumn for property b is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnNr"), "2", "CsvColumn for property b is correct.")
 		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "b", "CsvColumnHeader for property b is correct.")
 	}
 	
 	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "c")
 	If ..AssertNotEmpty(pd, "Property c exists.") {
-		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumn"), "3", "CsvColumn for property c is correct.")
+		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnNr"), "3", "CsvColumn for property c is correct.")
 		Do ..AssertEqual(pd.Parameters.GetAt("CsvColumnHeader"), "c", "CsvColumnHeader for property c is correct.")
 	}
 	
@@ -84,12 +84,9 @@ Test basic functionality</Description>
 <Description>
 Test basic functionality</Description>
 <Implementation><![CDATA[
-	#dim p As Strix.CSV.ToClass
-	Set p = ..MakeProcessorForFile(.sc, "a,b,c", "1,2,3")
+	Set sc = ..MakeProcessorForFile("a,b,c", "1,2,3")
 	If '..AssertStatusOk(sc, "Created processor.") Quit
 	
-	Set sc = p.Create()
-	If '..AssertStatusOk(sc, "Test class is created without error.") Quit
 	If '..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(..#TestClassName), "Test class exists.") Quit
 	If '..AssertStatusOk($System.OBJ.Compile(..#TestClassName, "k-d"), "Test class compiles ok.") Quit
 	
@@ -111,13 +108,13 @@ Test basic functionality</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-// ===== Cleanup code.
+// ===== Helpers.
 
 ]]></Content>
 </UDLText>
 
 <Method name="MakeProcessorForFile">
-<FormalSpec>Status:%Status,Lines...:%String</FormalSpec>
+<FormalSpec>Lines...:%String</FormalSpec>
 <Implementation><![CDATA[
 	Set ..TestFileName = ##class(%File).TempFilename("csv")
 	Set File = ##class(%Stream.FileCharacter).%New()
@@ -129,9 +126,9 @@ Test basic functionality</Description>
 	Set Status = File.%Save()
 	If 'Status Set Status = $$$BuildStatus("Error saving file '{}'", Status, ..TestFileName) Quit ""
 	
-	Set Processor = ##class(Strix.CSV.ToClass).CreateFromFile(..TestFileName, ..#TestClassName, ",")
+	Set Status = ##class(Strix.CSV.ToClass).CreateFromFile(..TestFileName, ..#TestClassName, ",")
 	
-	Quit Processor
+	Quit Status
 ]]></Implementation>
 </Method>
 
@@ -158,6 +155,13 @@ Test basic functionality</Description>
 	Do ..Stream.Rewind()
 ]]></Implementation>
 </Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Cleanup code.
+
+]]></Content>
+</UDLText>
 
 <Method name="TearDown">
 <Description>
