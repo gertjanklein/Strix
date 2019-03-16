@@ -5,7 +5,6 @@
 <IncludeCode>Strix</IncludeCode>
 <IncludeGenerator>Strix</IncludeGenerator>
 <PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
-<Super>%SerialObject</Super>
 <TimeCreated>64771,47169.904165</TimeCreated>
 <DependsOn>Strix.Generator.Utilities</DependsOn>
 
@@ -229,10 +228,5 @@ false otherwise.</Description>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
-
-<Storage name="Default">
-<Type>%Library.CacheSerialState</Type>
-<StreamLocation>^Strix.CSV.AdaptorS</StreamLocation>
-</Storage>
 </Class>
 </Export>
