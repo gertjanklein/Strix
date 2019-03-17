@@ -55,8 +55,8 @@
 
 
 #; Write to terminal if there is one
-#define IsTerm (($Principal["|TRM|")||($Principal["|TNT|"))
-#def1arg ToTerm(%args) If (($Principal["|TRM|")||($Principal["|TNT|")) { Write %args }
+#define IsTerm (($Principal["|TRM|")||($Principal["|TNT|")||($Principal["/dev/pts/"))
+#def1arg ToTerm(%args) If $$$IsTerm { Write %args }
 
 
 #; ===== Assertions
