@@ -286,6 +286,39 @@ Compilation may have changed storage.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="OnAfterDelete">
+<Description>
+Delete on-disk version as well.</Description>
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If '..SyncToDisk Quit $$$OK
+	If InternalName = "" Quit $$$OK
+	
+	; Get project this item belongs to
+	#dim Project As Strix.SCM.Project
+	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
+		Write Msg,!
+		Quit $$$OK
+	}
+	
+	; Determine filename
+	Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+	If 'Status Quit Status
+	
+	; If it doesn't exists we're done
+	If '##class(%File).Exists(Filename) Quit $$$OK
+	
+	; Delete
+	Set ok = ##class(%File).Delete(Filename, .rc)
+	If 'ok Write !,$$$BuildStr("== Error {} deleting {}.", rc, Filename) Quit $$$OK
+	
+	Write !,"== Deleted "_Filename_"."
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Menus and menu items
