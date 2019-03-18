@@ -289,8 +289,8 @@ Creates a temporary file with the Xml passed in, and returns its name.</Descript
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	;Remove generated classes
-	;Set Status = $System.OBJ.DeletePackage(..#TestClassPackage, "-d")
-	;If 'Status Quit Status
+	Set Status = $System.OBJ.DeletePackage(..#TestClassPackage, "-d")
+	If 'Status Quit Status
 	
 	;Delete temporary files
 	For i = 1:1:..TempFiles.Count() {
