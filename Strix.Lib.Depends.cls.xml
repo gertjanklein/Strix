@@ -17,6 +17,20 @@
 
 <UDLText name="T">
 <Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Property name="Matchers">
+<Description>
+Cached regex objects (performance)</Description>
+<Type>%Regex.Matcher</Type>
+<Collection>array</Collection>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
 // =====
 
 ]]></Content>
@@ -47,7 +61,6 @@ Check all dependencies of one or more packages.</Description>
 	}
 	
 	Quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -89,7 +102,6 @@ Checks dependencies for a single item.</Description>
 	}
 	
 	Quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -150,7 +162,6 @@ Checks a single class for its dependencies</Description>
 	;Projections, ...
 	
 	Quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -160,24 +171,36 @@ Checks code, passed as a stream, for references to classes.</Description>
 <FormalSpec>Code:%Stream,Package:%String="User",ClassName=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	; Start crude, refine later...
-	Set Rx1 = ##class(%Regex.Matcher).%New("##class\(([^)%]+)\)")
+	; Check for classmethod calls and #dim statements
+	Set RegExes = $lb("##class\(([^)%]+)\)", "(?i)#dim +\w+ +As +([\w.]+)")
 	
 	While 'Code.AtEnd {
 		Set Line = Code.ReadLine()
 		If $ZStrip(Line, "<>W") = "" Continue
 		
-		Set Rx1.Text = Line
-		While Rx1.Locate() {
-			Set Item = Rx1.Group(1)
-			If Item '[ "." Set Item = Package_"."_Item
-			Set Item = Item_".cls"
-			If '$Data(..Checked(Item)) Do ..AddItem(Item, ClassName)
+		For i = 1:1:$ll(RegExes) {
+			; Get cached matcher, if already present
+			Set RegEx = $li(RegExes, i)
+			If ..Matchers.IsDefined(RegEx) {
+				Set Matcher = ..Matchers.GetAt(RegEx)
+			} Else {
+				; Create matcher for this regex and add to cache
+				Set Matcher = ##class(%Regex.Matcher).%New(RegEx)
+				Do ..Matchers.SetAt(Matcher, RegEx)
+			}
+			
+			; Attempt to match the current code line
+			Set Matcher.Text = Line
+			While Matcher.Locate() {
+				Set Item = Matcher.Group(1)
+				If Item '[ "." Set Item = Package_"."_Item
+				Set Item = Item_".cls"
+				If '$Data(..Checked(Item)) Do ..AddItem(Item, ClassName)
+			}
 		}
 	}
 	
 	Quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -201,8 +224,6 @@ it is not a system item.</Description>
 	If Name ? 1"CSPX."1.E Quit
 	Set ..Dependencies(Name) = ClassName
 	Quit
-
-
 ]]></Implementation>
 </Method>
 
@@ -224,7 +245,6 @@ Helper for creating updated status</Description>
 	If Status '= "" Set MsgStatus = $System.Status.AppendStatus(MsgStatus, Status)
 	
 	Quit MsgStatus
-
 ]]></Implementation>
 </Method>
 </Class>
