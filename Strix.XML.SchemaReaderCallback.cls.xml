@@ -271,6 +271,7 @@ Changes the name of the current property.</Description>
 	
 	; Change property name
 	Set @..PropertyNode@("Name") = NewName
+	Set ..PropertyName = NewName
 	
 	Quit $$$OK
 ]]></Implementation>
