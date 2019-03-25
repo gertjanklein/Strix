@@ -120,7 +120,7 @@ and returns what it should be named.</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	Set Changed = 0
-	If $ZName(XmlName, 6) Quit XmlName
+	If $ZName(XmlName, 6) Set Changed = Name '= XmlName Quit XmlName
 	
 	Set NewName = ""
 	For i = 1:1:$Length(XmlName) {
