@@ -54,10 +54,15 @@
 	
 	; --- Get name from directory
 	
-	; Make sure the directory doesn't end in a slash, so we can
-	; get the last piece.
+	; Make sure the directory doesn't end in a slash
 	Set Directory = ##class(%File).NormalizeFilename(Directory)
-	Set Name = ##class(%File).GetFilename(Directory)
+	
+	; Determine the name of the database
+	Set sc = ##class(Config.Databases).DatabasesByDirectory("", Directory, .dblist)
+	If 'sc Quit ..BuildStatus("Error determining database(s) for directory {}:", sc, Directory)
+	If dblist = "" Quit ..BuildStatus("No database found in directory {}:",, Directory)
+	If $ListLength(dblist) > 1 Quit ..BuildStatus("Multiple databases present in {}: {}.",, Directory, $lts(dblist, ", "))
+	Set Name = $List(dblist, 1)
 	
 	; --- Delete database definition
 	
@@ -167,6 +172,30 @@
 		Set sc = ..DeleteCSPApplication(App)
 		If 'sc Quit sc
 	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Method name="DeleteResource">
+<Description>
+Helper to delete a resource</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New $Namespace
+	Do $ZUtil(5, "%SYS")
+	
+	Set sc = ##class(Security.Resources).Delete(Name)
+	If 'sc Quit ..BuildStatus("Error deleting resource {}:", sc, Name)
 	
 	Quit $$$OK
 ]]></Implementation>
