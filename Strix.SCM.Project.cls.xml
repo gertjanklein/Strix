@@ -621,7 +621,8 @@ Returns all projects in this namespace.</Description>
 Returns all known projects</Description>
 <Type>%SQLQuery</Type>
 <SqlQuery>SELECT ID, Name
-  FROM Project</SqlQuery>
+  FROM Project
+ ORDER BY Name</SqlQuery>
 </Query>
 
 <Query name="ProjectsOwningItem">
