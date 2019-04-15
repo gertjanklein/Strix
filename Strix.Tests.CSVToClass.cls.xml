@@ -109,7 +109,7 @@ Test basic functionality</Description>
 
 <Method name="TestChangeDatatype">
 <Description>
-Test the DetermineDataType callback method</Description>
+Tests DetermineDataType can be overridden</Description>
 <Implementation><![CDATA[
 	Set p = ..MakeProcessor("String,Date,Integer", "1,2,3")
 	
@@ -130,6 +130,34 @@ Test the DetermineDataType callback method</Description>
 	
 	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "Integer")
 	Do ..AssertEqual(pd.Type, "%Integer", "Property Integer type is %Integer")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="TestGetParser">
+<Description>
+Tests GetParser can be overridden</Description>
+<Implementation><![CDATA[
+	Set p = ..MakeProcessor("x,y,z", "a,b,c", "1,2,3")
+	
+	Set sc = p.Create()
+	If '..AssertStatusOk(sc, "Test class is created without error.") Quit
+	If '..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(..#TestClassName), "Test class exists.") Quit
+	If '..AssertStatusOk($System.OBJ.Compile(..#TestClassName, "k-d"), "Test class compiles ok.") Quit
+	
+	Set cd = ##class(%Dictionary.ClassDefinition).%OpenId(..#TestClassName)
+	Do ..AssertEqual(cd.Super, "%RegisteredObject,Strix.CSV.Adaptor", "Test class has proper superclasses")
+	
+	#dim pd As %Dictionary.PropertyDefinition
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "a")
+	Do ..AssertNotEmpty(pd, "Property a exists.")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "b")
+	Do ..AssertNotEmpty(pd, "Property b exists.")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "c")
+	Do ..AssertNotEmpty(pd, "Property c exists.")
 	
 	Quit
 ]]></Implementation>
@@ -160,6 +188,22 @@ Overridden method from Strix.CSV.ToClass</Description>
 		Quit $$$OK
 	}
 	Quit ##super(ColumnNr, ColumnName, PropDef)
+]]></Implementation>
+</Method>
+
+<Method name="GetParser">
+<Description>
+Overridden method from Strix.CSV.ToClass</Description>
+<FormalSpec>*Parser:Strix.CSV.Parser</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If ..Runner.CurrentTestMethod = "TestGetParser" {
+		Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, 1)
+		If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
+		If Parser.Data < 2 Quit $$$BuildStatus("Only one column found; is separator correct?")
+		Quit $$$OK
+	}
+	Quit ##super(.Parser)
 ]]></Implementation>
 </Method>
 
