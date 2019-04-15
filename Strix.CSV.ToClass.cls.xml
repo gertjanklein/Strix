@@ -11,6 +11,13 @@ Data to deduce class from. Must include header row.</Description>
 <Type>%Stream.Object</Type>
 </Property>
 
+<Property name="SkipCount">
+<Description>
+Number of lines to skip before reading header line</Description>
+<Type>%Integer</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
 <Property name="Separator">
 <Description>
 The separator to use in parsing the CSV data</Description>
@@ -93,7 +100,7 @@ in the CSV in file FileName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Parser As Strix.CSV.Parser
-	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator)
+	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, ..SkipCount)
 	If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
 	If Parser.Data < 2 Quit $$$BuildStatus("Only one column found; is separator correct?")
 	
@@ -167,7 +174,7 @@ Derive a valid Caché property name from a column header.</Description>
 	Set Name = ""
 	For i = 1:1:$Length(ColumnName) {
 		Set Char = $Extract(ColumnName, i)
-		If " _.(" [ Char, $Extract(ColumnName, i+1) ? 1A {
+		If " _.(/" [ Char, $Extract(ColumnName, i+1) ? 1A {
 			Set Name = Name_$ZConvert($Extract(ColumnName, i+1), "U")
 			Set i = i+1
 			Continue
