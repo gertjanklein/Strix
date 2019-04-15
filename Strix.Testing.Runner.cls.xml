@@ -100,7 +100,7 @@ Number errors trapped/returned in this test run</Description>
 <Description>
 Bookkeeping: current testcase</Description>
 <Type>%String</Type>
-<Private>1</Private>
+<Internal>1</Internal>
 <Transient>1</Transient>
 </Property>
 
@@ -108,7 +108,7 @@ Bookkeeping: current testcase</Description>
 <Description>
 Bookkeeping: current testcase method</Description>
 <Type>%String</Type>
-<Private>1</Private>
+<Internal>1</Internal>
 <Transient>1</Transient>
 </Property>
 
