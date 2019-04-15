@@ -100,9 +100,8 @@ in the CSV in file FileName.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	#dim Parser As Strix.CSV.Parser
-	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, ..SkipCount)
-	If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
-	If Parser.Data < 2 Quit $$$BuildStatus("Only one column found; is separator correct?")
+	Set Status = ..GetParser(.Parser)
+	If 'Status Quit Status
 	
 	#dim ClassDef As %Dictionary.ClassDefinition
 	Set ClassDef = ##class(Strix.Generator.Utilities).GetClassDef(..ClassName, .IsNew, .Status)
@@ -146,8 +145,8 @@ in the CSV in file FileName.</Description>
 			Set PropDef.Type = Existing.Type
 			Set PropDef.Parameters = Existing.Parameters
 		} Else {
-			Set PropDef.Type = "%String"
-			Do PropDef.Parameters.SetAt("", "MAXLEN")
+			Set Status = ..DetermineDataType(ColumnNr, ColumnName, PropDef)
+			If 'Status Return Status
 		}
 		
 		; Set the custom property parameter(s) for CSV column name and/or index.
@@ -162,10 +161,33 @@ in the CSV in file FileName.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="GetParser">
+<Description>
+Sets up the parser and reads the column header line.
+Can be overridden to skip lines etc.</Description>
+<FormalSpec>*Parser:Strix.CSV.Parser</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, ..SkipCount)
+	If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
+	If Parser.Data < 2 Quit $$$BuildStatus("Only one column found; is separator correct?")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DetermineDataType">
+<FormalSpec>ColumnNr:%Integer,ColumnName:%String,PropDef:%Dictionary.PropertyDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set PropDef.Type = "%String"
+	Do PropDef.Parameters.SetAt("", "MAXLEN")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="GetPropertyName">
 <Description>
 Derive a valid Caché property name from a column header.</Description>
-<ClassMethod>1</ClassMethod>
 <FormalSpec>ColumnName:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[

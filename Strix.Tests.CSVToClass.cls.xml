@@ -3,8 +3,9 @@
 <Class name="Strix.Tests.CSVToClass">
 <Description>
 Tests Strix.CSV.Parser.</Description>
-<Super>Strix.Testing.TestCase</Super>
+<Super>Strix.Testing.TestCase,Strix.CSV.ToClass</Super>
 <TimeCreated>64594,31293.265299</TimeCreated>
+<Inheritance>left</Inheritance>
 
 <Parameter name="TestClassName">
 <Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
@@ -106,6 +107,62 @@ Test basic functionality</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="TestChangeDatatype">
+<Description>
+Test the DetermineDataType callback method</Description>
+<Implementation><![CDATA[
+	Set p = ..MakeProcessor("String,Date,Integer", "1,2,3")
+	
+	Set sc = p.Create()
+	If '..AssertStatusOk(sc, "Test class is created without error.") Quit
+	If '..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(..#TestClassName), "Test class exists.") Quit
+	If '..AssertStatusOk($System.OBJ.Compile(..#TestClassName, "k-d"), "Test class compiles ok.") Quit
+	
+	Set cd = ##class(%Dictionary.ClassDefinition).%OpenId(..#TestClassName)
+	Do ..AssertEqual(cd.Super, "%RegisteredObject,Strix.CSV.Adaptor", "Test class has proper superclasses")
+	
+	#dim pd As %Dictionary.PropertyDefinition
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "String")
+	Do ..AssertEqual(pd.Type, "%String", "Property String type is %String")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "Date")
+	Do ..AssertEqual(pd.Type, "%Date", "Property Date type is %Date")
+	
+	Set pd = ##class(Strix.Testing.Support).GetProperty(cd, "Integer")
+	Do ..AssertEqual(pd.Type, "%Integer", "Property Integer type is %Integer")
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="DetermineDataType">
+<Description>
+Overridden method from Strix.CSV.ToClass</Description>
+<FormalSpec>ColumnNr:%Integer,ColumnName:%String,PropDef:%Dictionary.PropertyDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If ..Runner.CurrentTestMethod = "TestChangeDatatype" {
+		If ColumnName = "String" {
+			Set PropDef.Type = "%String"
+			Do PropDef.Parameters.SetAt("", "MAXLEN")
+		} ElseIf ColumnName = "Date" {
+			Set PropDef.Type = "%Date"
+		} ElseIf ColumnName = "Integer" {
+			Set PropDef.Type = "%Integer"
+		}
+		Quit $$$OK
+	}
+	Quit ##super(ColumnNr, ColumnName, PropDef)
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // ===== Helpers.
@@ -135,7 +192,7 @@ Test basic functionality</Description>
 <Method name="MakeProcessor">
 <FormalSpec>Lines...:%String</FormalSpec>
 <Implementation><![CDATA[
-	Set Processor = ##class(Strix.CSV.ToClass).%New()
+	Set Processor = $this
 	Set Processor.Separator = ","
 	Do ..MakeStream(Lines...)
 	Set Processor.Data = ..Stream
