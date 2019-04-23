@@ -406,14 +406,17 @@ data.</Description>
 		If $Data(Chk("%Boolean")), '$lf($lb("true", "false", 1, 0), Value) Kill Chk("%Boolean")
 	}
 	
+	; Count options left
+	Set key = "", Chk = 0
+	For  Set key = $Order(Chk(key)) Quit:key=""  Set Chk = Chk + 1
+	
 	;If only one option left, return it
-	Set Option = $Order(Chk(""))
-	If Option '= "", $Order(Chk(Option)) = "" Quit Option
+	If Chk = 1 Quit $Order(Chk(""))
 	
 	;If %Integer is valid, %Float is too, but not the other way around
-	If $Data(Chk("%Integer")) Quit "%Integer"
+	If Chk = 2, $Data(Chk("%Integer")), $Data(Chk("%Float")) Quit "%Integer"
 	
-	;If multiple options left here, default to string.
+	;If multiple or no options left here, default to string.
 	
 	Quit "%String"
 ]]></Implementation>
