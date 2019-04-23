@@ -238,5 +238,20 @@ Replace based on a regular expression. Example:
 	Quit Result
 ]]></Implementation>
 </Method>
+
+<Method name="UnQuote">
+<Description>
+Returns a quoted string unquoted ("XXX" becomes XXX).</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Input:%String,Unescape:%Boolean=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	If $Extract(Input) '= """" Quit Input
+	If $Extract(Input, *) '= """" Quit Input
+	Set Input = $Extract(Input, 2, *-1)
+	If Unescape Set Input = $Replace(Input, """""", """")
+	Quit Input
+]]></Implementation>
+</Method>
 </Class>
 </Export>
