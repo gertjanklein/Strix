@@ -96,7 +96,7 @@ Test creating simple test class with one property with just
 an attribute but no subelements: should create a class with
 a "content" property.</Description>
 <Implementation><![CDATA[
-	Set Xml = "<a><b id=""1"">x</b><b></b></a>"
+	Set Xml = "<a><b id=""2"">x</b><b></b></a>"
 	
 	Set FileName = ..TempFile(Xml)
 	
