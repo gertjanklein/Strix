@@ -267,6 +267,7 @@ Names of created classes</Description>
 			Set Parm = $Piece(Parms, ",", i)
 			Set ParmName = $ZStrip($Piece(Parm, "=", 1), "<>W")
 			Set ParmValue = $ZStrip($Piece(Parm, "=", 2), "<>W")
+			Set ParmValue = ##class(Strix.Lib.String).UnQuote(ParmValue)
 			Do Def.Parameters.SetAt(ParmValue, ParmName)
 		}
 	}
