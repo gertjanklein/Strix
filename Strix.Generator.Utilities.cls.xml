@@ -34,7 +34,7 @@ members, ordered by their SequenceNumber property. This is the order in
 which they are shown in Studio.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Collection:%RelationshipObject,*Status:%Status</FormalSpec>
-<ReturnType>%Collection.AbstractIterator</ReturnType>
+<ReturnType>%Collection.AbstractList</ReturnType>
 <Implementation><![CDATA[
 	Set Result = ##class(Strix.Lib.Collections).GetCopy(Collection, 1, .Status)
 	If 'Status Quit Result
