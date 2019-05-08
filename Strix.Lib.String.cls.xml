@@ -83,7 +83,9 @@ and this example as well:
 Values may be passed in as multiple method parameters, e.g.:
   Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, "a", "b", "c", ...)
 or as a single $List, e.g.:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, $ListBuild("a", "b", "c", ...))</Description>
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, $ListBuild("a", "b", "c", ...))
+or as JSON, to use as keyword parameters:
+  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, {"a":42})</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Template:%String,Parameters...:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -93,6 +95,18 @@ or as a single $List, e.g.:
 		Set Data = Parameters(1)
 		Set Parameters = $ListLength(Data)
 		For i = 1:1:$ListLength(Data) Set Parameters(i) = $ListGet(Data, i)
+		
+	} Else {
+		; Allow keyword arguments by passing in a JSON literal
+		For i = 1:1:$Get(Parameters) {
+			If '$IsObject($Get(Parameters(i))) Continue
+			If 'Parameters(i).%IsA("%Library.DynamicObject") Continue
+			; Dynamic object; create array for easy access and possibly merging
+			Set it = Parameters(i).%GetIterator()
+			While it.%GetNext(.key, .value) { Set kwa(key) = value }
+			Kill Parameters(i)
+		}
+		
 	}
 	
 	Set RefCounter = 0
@@ -128,12 +142,18 @@ or as a single $List, e.g.:
 			
 		} Else {
 			Set ParmNumber = $Extract(Template, StartIndex + 1, EndIndex - 1)
-			If ParmNumber '= +ParmNumber Quit
 			
 		}
 		
-		;Get parameter value
-		Set Value = $Get(Parameters(ParmNumber))
+		If ParmNumber ? 1.N {
+			;Get parameter value
+			Set Value = $Get(Parameters(ParmNumber))
+			
+		} Else {
+			; Possible keyword argument passed as json
+			Set Value = $Get(kwa(ParmNumber))
+			
+		}
 		Set ValueLen = $Length(Value)
 		
 		;Replace parameter reference with actual value

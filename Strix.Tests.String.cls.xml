@@ -40,6 +40,32 @@ Test code for class Strix.Lib.String</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="TestTemplateReplaceKwArgs">
+<Implementation><![CDATA[
+	; Keyword argument
+	Set Template = "{a}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, {"a":42})
+	Do ..AssertEqual(Result, "42", "Basic keyword argument replacement.")
+	
+	; Keyword arguments in order
+	Set Template = "{a}{b}{c}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, {"c":1, "b":2, "a":42})
+	Do ..AssertEqual(Result, "4221", "Basic keyword argument replacement.")
+	
+	; Keyword combined with regular arguments
+	Set Template = "{a}{}{c}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, {"a":42}, "this is b", {"c":52})
+	Do ..AssertEqual(Result, "42this is b52", "Basic keyword argument replacement.")
+	
+	; Keyword arguments merging
+	Set Template = "{a}{b}{c}"
+	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, {"a":42}, {"a":1, "c":42})
+	Do ..AssertEqual(Result, "142", "Basic keyword argument replacement.")
+	
+	Quit
+]]></Implementation>
+</Method>
+
 <Method name="TestListObjToString">
 <Implementation><![CDATA[
 	Set List = ##class(%ListOfDataTypes).%New()
