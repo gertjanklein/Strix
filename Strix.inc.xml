@@ -43,6 +43,7 @@
 #; ===== Formatting
 
 #def1arg BuildStr(%args) ##class(Strix.Lib.String).TemplateReplace(%args)
+#def1arg BuildMsg(%args) ##class(Strix.Lib.String).TemplateReplace(%args)
 
 
 #; ===== Logging
