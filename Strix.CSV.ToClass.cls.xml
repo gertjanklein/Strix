@@ -196,7 +196,7 @@ Derive a valid Caché property name from a column header.</Description>
 	Set Name = ""
 	For i = 1:1:$Length(ColumnName) {
 		Set Char = $Extract(ColumnName, i)
-		If " _.(/" [ Char, $Extract(ColumnName, i+1) ? 1A {
+		If " _.(/-" [ Char, $Extract(ColumnName, i+1) ? 1A {
 			Set Name = Name_$ZConvert($Extract(ColumnName, i+1), "U")
 			Set i = i+1
 			Continue
