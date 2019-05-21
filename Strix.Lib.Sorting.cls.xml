@@ -75,6 +75,49 @@ objects with the same sort key stay in the same order.</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="SortList">
+<Description>
+Sorts the data in a %List. Sort can be ascending (default) or descending;
+Supported flag is N for numeric.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Data:%List,Direction:%Integer=1,Flags:%String=""</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	If $ListLength(Data) < 2 Quit Data
+	
+	; Construct array for sorting
+	For i = 1:1:$ListLength(Data) {
+		Set Value = $ListGet(Data, i)
+		
+		If Flags [ "N" {
+			;Numeric
+			Set Key = +Value
+		} Else {
+			Set Key = " "_$ZConvert(Value, "l")
+		}
+		
+		Set Sorted(Key, $Increment(Sorted(Key))) = Value
+	}
+	
+	; Create sorted list
+	Set Result = ""
+	Set Key = ""
+	For  {
+		Set Key = $Order(Sorted(Key), Direction)
+		If Key = "" Quit
+		
+		Set Index = ""
+		For  {
+			Set Index = $Order(Sorted(Key, Index), 1, Value)
+			If Index = "" Quit
+			Set Result = Result_$ListBuild(Value)
+		}
+	}
+	
+	Quit Result
+]]></Implementation>
+</Method>
+
 <UDLText name="T">
 <Content><![CDATA[
 // =====
