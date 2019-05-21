@@ -38,7 +38,7 @@ which they are shown in Studio.</Description>
 <Implementation><![CDATA[
 	Set Result = ##class(Strix.Lib.Collections).GetCopy(Collection, 1, .Status)
 	If 'Status Quit Result
-	Set Status = ##class(Strix.Lib.Sorting).SortListOfObjects(Result, "SequenceNumber")
+	Set Status = ##class(Strix.Lib.Sorting).SortListOfObjects(Result, "SequenceNumber:::N")
 	Quit Result
 ]]></Implementation>
 </Method>
