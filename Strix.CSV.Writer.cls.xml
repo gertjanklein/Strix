@@ -126,7 +126,7 @@ Helper: returns CSV column info</Description>
 <ReturnType>%List</ReturnType>
 <Implementation><![CDATA[
 	#dim Properties As %Collection.AbstractList
-	Set Properties = ##class(Strix.Generator.Utilities).GetOrderedList(%class.Properties, .sc)
+	Set Properties = ##class(Strix.Generator.Utilities).GetOrderedList(%compiledclass.Properties, .sc)
 	If 'sc Quit $$$BuildStatus("Error retrieving property list for class {}:", sc, %class.Name)
 	
 	Set Names = ""
@@ -134,7 +134,16 @@ Helper: returns CSV column info</Description>
 		#dim pd As %Dictionary.CompiledProperty
 		Set pd = Properties.GetAt(i)
 		
+		; Skip this property, if so requested
+		If 'pd.Parameters.GetAt("CsvInclude") Continue
+		
+		; Skip internal properties
+		If pd.Internal Continue
+		
+		; Skip system properties
 		Set Name = pd.Name
+		If $Extract(Name) = "%" Continue
+		
 		Set ColumnName = pd.Parameters.GetAt("CsvColumnHeader")
 		; If column name is equal to property name or empty, use property name
 		If ColumnName = Name Set ColumnName = ""
@@ -143,6 +152,7 @@ Helper: returns CSV column info</Description>
 		If Names '= "" Set Names = Names_","
 		Set Names = Names_"$lb("""_pd.Name_""","""_$Replace(ColumnName, """", """""")_""","""_Type_""")"
 	}
+	
 	If Names '= "" {
 		Do %code.WriteLine($Char(9)_"Quit $lb("_Names_")")
 	} Else {
