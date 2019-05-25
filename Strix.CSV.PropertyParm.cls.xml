@@ -7,13 +7,20 @@
 <Parameter name="CsvColumnHeader">
 <Description>
 The column header in the CSV</Description>
-<Type>%String</Type>
+<Type>STRING</Type>
 </Parameter>
 
 <Parameter name="CsvColumnNr">
 <Description>
 The column index in the CSV</Description>
-<Type>%Integer</Type>
+<Type>INTEGER</Type>
+</Parameter>
+
+<Parameter name="CsvInclude">
+<Description>
+Whether to include the property in the CSV export.</Description>
+<Type>BOOLEAN</Type>
+<Default>1</Default>
 </Parameter>
 </Class>
 </Export>
