@@ -1,81 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Testing.Info">
-<Description>
-This class records information about a testing 'event': a
-test failure, an error in setup code, etc.</Description>
-<Super>%SerialObject</Super>
-<TimeCreated>63861,65757.407765</TimeCreated>
+/// This class records information about a testing 'event': a
+/// test failure, an error in setup code, etc.
+Class Strix.Testing.Info Extends %SerialObject
+{
 
-<Property name="Type">
-<Description>
-The type of info:
-Log: a message
-Fail: a test fail
-Skip: test skipped (optionally with reason)
-Error: an error occurred</Description>
-<Type>%String</Type>
-<Required>1</Required>
-<Parameter name="VALUELIST" value=",Log,Fail,Skip,Error"/>
-</Property>
+/// The type of info:
+/// Log: a message
+/// Fail: a test fail
+/// Skip: test skipped (optionally with reason)
+/// Error: an error occurred
+Property Type As %String(VALUELIST = ",Log,Fail,Skip,Error") [ Required ];
 
-<Property name="ClassName">
-<Description>
-The test class this information is related to</Description>
-<Type>%String</Type>
-</Property>
+/// The test class this information is related to
+Property ClassName As %String;
 
-<Property name="MethodName">
-<Description>
-The test method this info is related to</Description>
-<Type>%String</Type>
-</Property>
+/// The test method this info is related to
+Property MethodName As %String;
 
-<Property name="AssertionType">
-<Description>
-The type of test that was performed:
-Assert[Not]Equal, AssertTrue, AssertFalse, AssertStatusOk, AssertStatusFail</Description>
-<Type>%String</Type>
-</Property>
+/// The type of test that was performed:
+/// Assert[Not]Equal, AssertTrue, AssertFalse, AssertStatusOk, AssertStatusFail
+Property AssertionType As %String;
 
-<Property name="Expected">
-<Description>
-Expected result of the test (if appropriate)</Description>
-<Type>%String</Type>
-</Property>
+/// Expected result of the test (if appropriate)
+Property Expected As %String;
 
-<Property name="Result">
-<Description>
-Actual result of the test (if appropriate)</Description>
-<Type>%String</Type>
-</Property>
+/// Actual result of the test (if appropriate)
+Property Result As %String;
 
-<Property name="Description">
-<Description>
-Description of the test or log line</Description>
-<Type>%String</Type>
-</Property>
+/// Description of the test or log line
+Property Description As %String;
 
-<Property name="Status">
-<Description>
-The error status for type Error</Description>
-<Type>%Status</Type>
-</Property>
+/// The error status for type Error
+Property Status As %Status;
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Get">
-<Description>
-Contructor for normal info</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Type:%String,ClassName:%String="",MethodName:%String="",AssertionType:%String="",Expected:%String="",Result:%String="",Description:%String=""</FormalSpec>
-<ReturnType>Info</ReturnType>
-<Implementation><![CDATA[
+/// Contructor for normal info
+ClassMethod Get(Type As %String, ClassName As %String = "", MethodName As %String = "", AssertionType As %String = "", Expected As %String = "", Result As %String = "", Description As %String = "") As Info
+{
 	Set Me = ..%New()
 	Set Me.Type = Type
 	Set Me.ClassName = ClassName
@@ -85,16 +46,11 @@ Contructor for normal info</Description>
 	Set Me.Result = Result
 	Set Me.Description = Description
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetForError">
-<Description>
-Constructor for error info</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String="",MethodName:%String="",Description:%String="",Status:%Status=""</FormalSpec>
-<ReturnType>Info</ReturnType>
-<Implementation><![CDATA[
+/// Constructor for error info
+ClassMethod GetForError(ClassName As %String = "", MethodName As %String = "", Description As %String = "", Status As %Status = "") As Info
+{
 	Set Me = ..%New()
 	Set Me.Type = "Error"
 	Set Me.ClassName = ClassName
@@ -102,11 +58,10 @@ Constructor for error info</Description>
 	Set Me.Description = Description
 	Set Me.Status = Status
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="ReportToTerminal">
-<Implementation><![CDATA[
+Method ReportToTerminal()
+{
 	If $X Write !
 	
 	If ..Type = "Fail" {
@@ -156,20 +111,12 @@ Constructor for error info</Description>
 	Do $system.OBJ.Dump(##this)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Storage name="Default">
-<Type>%Library.CacheSerialState</Type>
-<State>InfoState</State>
-<StreamLocation>^Strix.Testing.InfoS</StreamLocation>
+Storage Default
+{
 <Data name="InfoState">
 <Value name="1">
 <Value>Type</Value>
@@ -196,6 +143,10 @@ Constructor for error info</Description>
 <Value>Status</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<State>InfoState</State>
+<StreamLocation>^Strix.Testing.InfoS</StreamLocation>
+<Type>%Library.CacheSerialState</Type>
+}
+
+}
+

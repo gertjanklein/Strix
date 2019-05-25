@@ -1,131 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Testing.Runner">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63861,42599.26957</TimeCreated>
+Include Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.Testing.Runner Extends %RegisteredObject
+{
+
 // =====
 
-]]></Content>
-</UDLText>
+/// Debug flag; when set and an assertion fails, a Break is executed.
+Property Debug As %Boolean [ InitialExpression = 0 ];
 
-<Property name="Debug">
-<Description>
-Debug flag; when set and an assertion fails, a Break is executed.</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+/// Date/time the test run started
+Property TestRunStart As %TimeStamp [ InitialExpression = {$ZDateTime($ZUtil(188), 3, 1, 3)} ];
 
-<Property name="TestRunStart">
-<Description>
-Date/time the test run started</Description>
-<Type>%TimeStamp</Type>
-<InitialExpression>$ZDateTime($ZUtil(188), 3, 1, 3)</InitialExpression>
-</Property>
+/// Date/time the test run finished
+Property TestRunDone As %TimeStamp;
 
-<Property name="TestRunDone">
-<Description>
-Date/time the test run finished</Description>
-<Type>%TimeStamp</Type>
-</Property>
+/// Information on test failures, trapped errors, etc.
+Property Results As list Of Strix.Testing.Info(STORAGEDEFAULT = "array");
 
-<Property name="Results">
-<Description>
-Information on test failures, trapped errors, etc.</Description>
-<Type>Strix.Testing.Info</Type>
-<Collection>list</Collection>
-<Parameter name="STORAGEDEFAULT" value="array"/>
-</Property>
+/// Number of testcases (classes) seen in this test run
+Property TestCases As %Integer [ InitialExpression = 0 ];
 
-<Property name="TestCases">
-<Description>
-Number of testcases (classes) seen in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Number of tests (methods) seen in this test run
+Property Tests As %Integer [ InitialExpression = 0 ];
 
-<Property name="Tests">
-<Description>
-Number of tests (methods) seen in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Total number of asserts in this test run
+Property Asserts As %Integer [ InitialExpression = 0 ];
 
-<Property name="Asserts">
-<Description>
-Total number of asserts in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Number of failed asserts in this test run
+Property Failed As %Integer [ InitialExpression = 0 ];
 
-<Property name="Failed">
-<Description>
-Number of failed asserts in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Number of skipped tests in this test run
+Property Skipped As %Integer [ InitialExpression = 0 ];
 
-<Property name="Skipped">
-<Description>
-Number of skipped tests in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Number errors trapped/returned in this test run
+Property Errors As %Integer [ InitialExpression = 0 ];
 
-<Property name="Errors">
-<Description>
-Number errors trapped/returned in this test run</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+/// Bookkeeping: current testcase
+Property CurrentTestClass As %String [ Internal, Transient ];
 
-<Property name="CurrentTestClass">
-<Description>
-Bookkeeping: current testcase</Description>
-<Type>%String</Type>
-<Internal>1</Internal>
-<Transient>1</Transient>
-</Property>
+/// Bookkeeping: current testcase method
+Property CurrentTestMethod As %String [ Internal, Transient ];
 
-<Property name="CurrentTestMethod">
-<Description>
-Bookkeeping: current testcase method</Description>
-<Type>%String</Type>
-<Internal>1</Internal>
-<Transient>1</Transient>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Run">
-<Description>
-Runs all tests in the specified package.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Package:%String,Debug:%Boolean=0,*Runner:Strix.Testing.Runner</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Runs all tests in the specified package.
+ClassMethod Run(Package As %String, Debug As %Boolean = 0, Output Runner As Strix.Testing.Runner) As %Status
+{
 	Set Runner = ..%New()
 	Set Runner.Debug = Debug
 	
@@ -152,13 +76,10 @@ Runs all tests in the specified package.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RunPackage">
-<FormalSpec>Package:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method RunPackage(Package As %String) As %Status
+{
 	Set sc = $System.OBJ.GetPackageList(.Classes, Package, "/includesubpackages")
 	If 'sc Quit $$$BuildErr("Error creating list of classes in '"_Package_"'", sc)
 	
@@ -183,15 +104,11 @@ Runs all tests in the specified package.</Description>
 	
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RunClass">
-<Description>
-Runs test methods in the specified subclass of Strix.Testing.TestCase</Description>
-<FormalSpec>ClassName:%String,TestToRun:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Runs test methods in the specified subclass of Strix.Testing.TestCase
+Method RunClass(ClassName As %String, TestToRun As %String = "") As %Status
+{
 	Set ..CurrentTestClass = ClassName, ..CurrentTestMethod = ""
 	Set ..TestCases = ..TestCases + 1
 	
@@ -223,14 +140,11 @@ Runs test methods in the specified subclass of Strix.Testing.TestCase</Descripti
 	If 'sc Quit $$$BuildErr("Error running TearDown", sc)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RunMethod">
-<Description>
-Runs a single test method on the test object. Traps and returns any error.</Description>
-<FormalSpec>TestObject:Strix.Testing.TestCase,MethodName:%String,*Failed:%Integer,*Errors:%Integer</FormalSpec>
-<Implementation><![CDATA[
+/// Runs a single test method on the test object. Traps and returns any error.
+Method RunMethod(TestObject As Strix.Testing.TestCase, MethodName As %String, Output Failed As %Integer, Output Errors As %Integer)
+{
 	Set $ZTrap = "Error"
 	
 	Set ..CurrentTestMethod = MethodName
@@ -259,23 +173,13 @@ Error
 	Set Errors = ..Errors - CurrentErrors
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetTestMethods">
-<Description>
-Returns a list of method names in the specified class starting with Test.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Methods:%ListOfDataTypes</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns a list of method names in the specified class starting with Test.
+ClassMethod GetTestMethods(ClassName As %String, Methods As %ListOfDataTypes) As %Status
+{
 	Set Methods = ##class(%ListOfDataTypes).%New()
 	
 	&sql(DECLARE C CURSOR FOR
@@ -294,75 +198,49 @@ Returns a list of method names in the specified class starting with Test.</Descr
 	&sql(CLOSE C)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="RecordAssertionOk">
-<Description>
-Records a successful assertion (mainly for counting)</Description>
-<Implementation><![CDATA[
+/// Records a successful assertion (mainly for counting)
+Method RecordAssertionOk()
+{
 	Set ..Asserts = ..Asserts + 1
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="RecordAssertionFailed">
-<Description>
-Records a failed assertion.</Description>
-<FormalSpec>AssertionType:%String,Expected:%String="",Result:%String="",Description:%String=""</FormalSpec>
-<ReturnType>Strix.Testing.Info</ReturnType>
-<Implementation><![CDATA[
+/// Records a failed assertion.
+Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "", Result As %String = "", Description As %String = "") As Strix.Testing.Info
+{
 	Set ..Failed = ..Failed + 1
 	Set Info = ##class(Strix.Testing.Info).Get("Fail", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
 	Do ..Results.Insert(Info)
 	Quit Info
-]]></Implementation>
-</Method>
+}
 
-<Method name="RecordTestSkipped">
-<Description>
-Records a test skip.</Description>
-<FormalSpec>Reason:%String=""</FormalSpec>
-<ReturnType>Strix.Testing.Info</ReturnType>
-<Implementation><![CDATA[
+/// Records a test skip.
+Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Info
+{
 	Set ..Skipped = ..Skipped + 1
 	Set Info = ##class(Strix.Testing.Info).Get("Skip", ..CurrentTestClass, ..CurrentTestMethod, , , , Reason)
 	Do ..Results.Insert(Info)
 	Quit Info
-]]></Implementation>
-</Method>
+}
 
-<Method name="RecordError">
-<Description>
-Records an error (e.g. trapped error, error status, etc.).</Description>
-<FormalSpec>Description:%String="",Status:%Status=""</FormalSpec>
-<ReturnType>Strix.Testing.Info</ReturnType>
-<Implementation><![CDATA[
+/// Records an error (e.g. trapped error, error status, etc.).
+Method RecordError(Description As %String = "", Status As %Status = "") As Strix.Testing.Info
+{
 	Set ..Errors = ..Errors + 1
 	Set Info = ##class(Strix.Testing.Info).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
 	Do ..Results.Insert(Info)
 	Quit Info
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ReportToTerminal">
-<Description>
-Writes test run results to the terminal</Description>
-<Implementation><![CDATA[
+/// Writes test run results to the terminal
+Method ReportToTerminal()
+{
 	If $X Write !
 	Write !
 	
@@ -382,7 +260,7 @@ Writes test run results to the terminal</Description>
 		Write !,"#"_i_" "_Info.ClassName_":"_Info.MethodName_":",!
 		Do Info.ReportToTerminal()
 	}
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

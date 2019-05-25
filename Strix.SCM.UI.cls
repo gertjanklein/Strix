@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.UI">
-<IncludeCode>Strix</IncludeCode>
-<Super>Strix.SCM.UI.Support</Super>
-<TimeCreated>63868,66788.751601</TimeCreated>
+Include Strix
 
-<Method name="OnPreHTTP">
-<ClassMethod>1</ClassMethod>
-<PublicList>ErrorMsg,Message,Config,Project,Page</PublicList>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Class Strix.SCM.UI Extends Strix.SCM.UI.Support
+{
+
+ClassMethod OnPreHTTP() As %Boolean [ PublicList = (ErrorMsg, Message, Config, Project, Page) ]
+{
 	If %request.Get("img") '= "" Quit ##class(Strix.SCM.UI.Resources).OnPreHTTP()
 	
 	Set (ErrorMsg, Message) = ""
@@ -82,14 +77,10 @@
 	}
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnPage">
-<ClassMethod>1</ClassMethod>
-<PublicList>ErrorMsg,Message,Config,Project,Page</PublicList>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod OnPage() As %Status [ PublicList = (ErrorMsg, Message, Config, Project, Page) ]
+{
 	If %request.Get("img") '= "" Quit ##class(Strix.SCM.UI.Resources).OnPage()
 	
 	If ErrorMsg '= "" Quit ..Error(ErrorMsg)
@@ -171,23 +162,13 @@ or <i>C:\dev\Strix\Strix.scm.cfg</i>).</p>
 	Do ..Footer()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Project">
-<Description>
-Displays the Edit Project page</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Config:Strix.SCM.Config,Project:Strix.SCM.Project,Message:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Displays the Edit Project page
+ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Message As %String) As %Status
+{
 	Do ..ProjectToRequest(Project)
 	
 	Do ..Header("Source control configuration")
@@ -315,20 +296,12 @@ Displays the Edit Project page</Description>
 	Do ..Footer()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Header">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Titel:%String=""</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod Header(Titel As %String = "")
+{
 	Set System = ..GetSystemText()
 	&html<<!DOCTYPE HTML> 
 
@@ -352,41 +325,26 @@ function Ays()
 <div id=Contents>
 >	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CfgToRequest">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Config:Strix.SCM.Config</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod CfgToRequest(Config As Strix.SCM.Config)
+{
 	Do %request.Set("BasePath", Config.BasePath)
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="SaveCfg">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Config:Strix.SCM.Config</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod SaveCfg(Config As Strix.SCM.Config) As %Status
+{
 	Set Config.BasePath = %request.Get("BasePath")
 	Set sc = Config.%Save()
 	If 'sc Quit sc
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ProjectToRequest">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod ProjectToRequest(Project As Strix.SCM.Project)
+{
 	Do %request.Set("Name", Project.Name)
 	Do %request.Set("ProjectPath", Project.ProjectPath)
 	Do %request.Set("ConfigFilePath", Project.ConfigFilePath)
@@ -409,14 +367,10 @@ function Ays()
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="SaveProject">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Config:Strix.SCM.Config,Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project) As %Status
+{
 	Set Project.Name = %request.Get("Name")
 	Set Project.Handler = %request.Get("Handler")
 	Set Project.ConfigFilePath = %request.Get("ConfigFilePath")
@@ -476,14 +430,10 @@ function Ays()
 	If 'sc Quit sc
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LoadProject">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Config:Strix.SCM.Config,*Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod LoadProject(Config As Strix.SCM.Config, Output Project As Strix.SCM.Project) As %Status
+{
 	Set SubPath = %request.Get("LoadExisting")
 	If SubPath = "" Quit $$$ERROR($$$GeneralError, "No project path specified.")
 	
@@ -507,33 +457,20 @@ function Ays()
 	If 'sc Quit sc
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="DeleteProject">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod DeleteProject(Project As Strix.SCM.Project) As %Status
+{
 	If Project.%Id() = "" Quit $$$OK
 	Set sc = Project.%DeleteId(Project.%Id())
 	If 'sc Quit sc
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Error">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ErrorMsg:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Error(ErrorMsg As %String) As %Status
+{
 	Set System = ..GetSystemText()
 	&html<<!DOCTYPE HTML> 
 
@@ -559,31 +496,25 @@ function Ays()
 >
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Footer">
-<ClassMethod>1</ClassMethod>
-<Implementation><![CDATA[
+ClassMethod Footer()
+{
 	&html<</div>
 </body>
 </html>
 >
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetSystemText">
-<Description>
-Returns a system identifier consisting of system name, instance name, namespace.</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a system identifier consisting of system name, instance name, namespace.
+ClassMethod GetSystemText() As %String
+{
 	Set System = $ZUtil(86)
 	If System["*" Set System = $Piece(System, "*", 2)
 	Set System = ##class(%Function).HostName()_":"_System_":"_$ZUtil(5)
 	Quit System
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,43 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.XMLToClass">
-<Description>
-Tests Strix.XML.ToClass.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
+/// Tests Strix.XML.ToClass.
+Class Strix.Tests.XMLToClass Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassPackage">
-<Description>
-Base package for created test classes</Description>
-<Default>TestXMLToClass</Default>
-</Parameter>
+/// Base package for created test classes
+Parameter TestClassPackage = "TestXMLToClass";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+/// Names of temporary files, to be cleaned up
+Property TempFiles As list Of %String(MAXLEN = 512);
 
-<Property name="TempFiles">
-<Description>
-Names of temporary files, to be cleaned up</Description>
-<Type>%String</Type>
-<Collection>list</Collection>
-<Parameter name="MAXLEN" value="512"/>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Tests
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test creating simple test class with one property</Description>
-<Implementation><![CDATA[
+/// Test creating simple test class with one property
+Method TestBasic()
+{
 	Set Xml = "<a><b>x</b></a>"
 	
 	Set FileName = ..TempFile(Xml)
@@ -59,13 +36,11 @@ Test creating simple test class with one property</Description>
 	Do $System.OBJ.Delete(ClassName, "-d")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestBasicListProp">
-<Description>
-Test creating simple test class with one property of type list</Description>
-<Implementation><![CDATA[
+/// Test creating simple test class with one property of type list
+Method TestBasicListProp()
+{
 	Set Xml = "<a><b>x</b><b></b></a>"
 	
 	Set FileName = ..TempFile(Xml)
@@ -87,15 +62,13 @@ Test creating simple test class with one property of type list</Description>
 	Do $System.OBJ.Delete(ClassName, "-d")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestPropWithAttr">
-<Description>
-Test creating simple test class with one property with just
-an attribute but no subelements: should create a class with
-a "content" property.</Description>
-<Implementation><![CDATA[
+/// Test creating simple test class with one property with just
+/// an attribute but no subelements: should create a class with
+/// a "content" property.
+Method TestPropWithAttr()
+{
 	Set Xml = "<a><b id=""2"">x</b><b></b></a>"
 	
 	Set FileName = ..TempFile(Xml)
@@ -138,13 +111,11 @@ a "content" property.</Description>
 	Do $System.OBJ.Delete(ClassName_","_Classname2, "-d")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestMembers">
-<Description>
-Test members: "collection of things" configuration setting</Description>
-<Implementation><![CDATA[
+/// Test members: "collection of things" configuration setting
+Method TestMembers()
+{
 	Set Xml = "<main><m1><p1>m1-1.p1</p1><p2>m1-1.p2</p2></m1><m2><p1>m2.p1</p1><p2>m2.p2</p2></m2><m1><p1>m1-2.p1</p1></m1></main>"
 	
 	Set FileName = ..TempFile(Xml)
@@ -161,37 +132,24 @@ Test members: "collection of things" configuration setting</Description>
 	;Do $System.OBJ.Delete(ClassName, "-d")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="ClassExists">
-<Description>
-Checks whether the specified class exists.</Description>
-<FormalSpec>Name:%String,Package:%String=""</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether the specified class exists.
+Method ClassExists(Name As %String, Package As %String = "") As %Boolean
+{
 	If Name '[ "." {
 		If Package = "" Set Package = ..#TestClassPackage
 		Set Name = Package_"."_Name
 	}
 	Quit ##class(%Dictionary.ClassDefinition).%ExistsId(Name)
-]]></Implementation>
-</Method>
+}
 
-<Method name="HasProperty">
-<Description>
-Checks whether a property exists, returning some information about it
-if it does.</Description>
-<FormalSpec>PropertyId:%String,*Type:%String,*Collection:%String,*Parameters:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether a property exists, returning some information about it
+/// if it does.
+Method HasProperty(PropertyId As %String, Output Type As %String, Output Collection As %String, Output Parameters As %String) As %Boolean
+{
 	Kill Type, Collection, Parameters
 	
 	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(PropertyId)
@@ -206,29 +164,21 @@ if it does.</Description>
 	}
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="HasParameter">
-<Description>
-Checks whether a class parameter exists, returning its value
-if it does.</Description>
-<FormalSpec>ParameterId:%String,*Value:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether a class parameter exists, returning its value
+/// if it does.
+Method HasParameter(ParameterId As %String, Output Value As %String) As %Boolean
+{
 	Set Def = ##class(%Dictionary.ParameterDefinition).%OpenId(ParameterId)
 	If '$IsObject(Def) Quit 0
 	Set Value = Def.Default
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetObject">
-<Description>
-Reads the Xml into an object of the specified class, and returns the object.</Description>
-<FormalSpec>ClassName:%String,Xml:%String,*Object:%XML.Adaptor</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Reads the Xml into an object of the specified class, and returns the object.
+Method GetObject(ClassName As %String, Xml As %String, Output Object As %XML.Adaptor) As %Boolean
+{
 	Set Status = $System.OBJ.Compile(ClassName, "crbuk-d")
 	If '..AssertStatusOk(Status, "Class {} should compile without error.", ClassName) Quit 0
 	
@@ -241,15 +191,11 @@ Reads the Xml into an object of the specified class, and returns the object.</De
 	If '..AssertStatusOk(Status, "XML reader return ok status from parsing XML.") Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckRoundTrip">
-<Description>
-Check if provided Xml roundtrips properly.</Description>
-<FormalSpec>ClassName:%String,Xml:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Check if provided Xml roundtrips properly.
+Method CheckRoundTrip(ClassName As %String, Xml As %String) As %Boolean
+{
 	#dim Obj As %XML.Adaptor
 	If '..GetObject(ClassName, Xml, .Obj) Quit 0
 	
@@ -259,15 +205,11 @@ Check if provided Xml roundtrips properly.</Description>
 	If '..AssertEqual(Output, Xml, "Re-created XML should equal original XML.") Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="TempFile">
-<Description>
-Creates a temporary file with the Xml passed in, and returns its name.</Description>
-<FormalSpec>Xml:%String</FormalSpec>
-<ReturnType>%FileCharacterStream</ReturnType>
-<Implementation><![CDATA[
+/// Creates a temporary file with the Xml passed in, and returns its name.
+Method TempFile(Xml As %String) As %FileCharacterStream
+{
 	Set Name = ##class(%File).TempFilename("temp.xml")
 	Set File = ##class(%FileCharacterStream).%New()
 	Set File.Filename = Name
@@ -275,19 +217,12 @@ Creates a temporary file with the Xml passed in, and returns its name.</Descript
 	Set Status = File.%Save()
 	Do ..TempFiles.Insert(Name)
 	Quit Name
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Cleanup code.
 
-]]></Content>
-</UDLText>
-
-<Method name="TearDown">
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method TearDown() As %Status
+{
 	;Remove generated classes
 	Set Status = $System.OBJ.DeletePackage(..#TestClassPackage, "-d")
 	If 'Status Quit Status
@@ -299,7 +234,7 @@ Creates a temporary file with the Xml passed in, and returns its name.</Descript
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

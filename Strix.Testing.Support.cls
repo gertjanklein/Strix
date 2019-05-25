@@ -1,20 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Testing.Support">
-<Description>
-Support code for tests.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63863,39872.663386</TimeCreated>
+Include Strix
 
-<Method name="CreateClass">
-<Description>
-Creates a class with the specified name. If a class
-by that name already exists, it is deleted.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Super:%String="%Persistent",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Support code for tests.
+Class Strix.Testing.Support Extends %RegisteredObject
+{
+
+/// Creates a class with the specified name. If a class
+/// by that name already exists, it is deleted.
+ClassMethod CreateClass(ClassName As %String, Super As %String = "%Persistent", Output ClassDef As %Dictionary.ClassDefinition) As %Status
+{
 	;Kill existing extent (if any)
 	Set Status = ..KillExtent(ClassName)
 	If 'Status Quit Status
@@ -30,31 +23,21 @@ by that name already exists, it is deleted.</Description>
 	Set ClassDef.ProcedureBlock = 1
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetClassParameter">
-<Description>
-Adds or updates a class parameter with the given value</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Value:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Adds or updates a class parameter with the given value
+ClassMethod SetClassParameter(ClassDef As %Dictionary.ClassDefinition, Name As %String, Value As %String) As %Status
+{
 	#dim pd As %Dictionary.ParameterDefinition
 	Set pd = ##class(Strix.Generator.Utilities).GetInCollection(ClassDef.Parameters, Name, 1, .Status)
 	Set pd.Default = Value
 	Quit Status
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetProperty">
-<Description>
-Returns the property definition for the property with Name in ClassDef,
-or an empty string if no such property exists.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String</FormalSpec>
-<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
-<Implementation><![CDATA[
+/// Returns the property definition for the property with Name in ClassDef,
+/// or an empty string if no such property exists.
+ClassMethod GetProperty(ClassDef As %Dictionary.ClassDefinition, Name As %String) As %Dictionary.PropertyDefinition
+{
 	Set Key = ""
 	For  {
 		Set PropDef = ClassDef.Properties.GetNext(.Key)
@@ -62,49 +45,34 @@ or an empty string if no such property exists.</Description>
 		If PropDef.Name = Name Return PropDef
 	}
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetPropertyAttribute">
-<Description>
-Returns a property attribute (e.g., required) for the given property
-in the given class. If Compiled is true, the compiled property is checked.
-If the property definition can't be opened, an error is returned in Status.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,PropertyName:%String,Attribute:%String,Compiled:%Boolean=0,*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a property attribute (e.g., required) for the given property
+/// in the given class. If Compiled is true, the compiled property is checked.
+/// If the property definition can't be opened, an error is returned in Status.
+ClassMethod GetPropertyAttribute(ClassName As %String, PropertyName As %String, Attribute As %String, Compiled As %Boolean = 0, Output Status As %Status) As %String
+{
 	Set PropertyClass = $Select(Compiled: "%Dictionary.CompiledProperty", 1: "%Dictionary.PropertyDefinition")
 	Set PropDef = $ZObjClassMethod(PropertyClass, "%OpenId", ClassName_"||"_PropertyName, .Status)
 	If 'Status Quit ""
 	Set Value = $ZObjProperty(PropDef, Attribute)
 	Quit Value
-]]></Implementation>
-</Method>
+}
 
-<Method name="AddProperty">
-<Description>
-Adds a new property to an existing class definition.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String,Collection:%String=""</FormalSpec>
-<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
-<Implementation><![CDATA[
+/// Adds a new property to an existing class definition.
+ClassMethod AddProperty(ClassDef As %Dictionary.ClassDefinition, Name As %String, Type As %String, Collection As %String = "") As %Dictionary.PropertyDefinition
+{
 	Set Property = ##class(%Dictionary.PropertyDefinition).%New()
 	Set Property.Name = Name
 	Set Property.Type = Type
 	Set Property.Collection = Collection
 	Do ClassDef.Properties.Insert(Property)
 	Quit Property
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetPropertyParameter">
-<Description>
-Sets a property parameter value</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,PropertyName:%String,ParameterName:%String,Value:%String="",Compile:%Boolean=1</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets a property parameter value
+ClassMethod SetPropertyParameter(ClassDef As %Dictionary.ClassDefinition, PropertyName As %String, ParameterName As %String, Value As %String = "", Compile As %Boolean = 1) As %Status
+{
 	; Find property definition
 	
 	Set Key = ""
@@ -124,16 +92,11 @@ Sets a property parameter value</Description>
 	If Compile Quit ..SaveAndCompile(ClassDef)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SaveAndCompile">
-<Description>
-Saves and compiles the class passed as a class definition.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Saves and compiles the class passed as a class definition.
+ClassMethod SaveAndCompile(ClassDef As %Dictionary.ClassDefinition) As %Status
+{
 	Set Status = ClassDef.%Save()
 	If 'Status Quit $$$BuildErr("Error saving class '"_ClassDef.Name_"'", Status)
 	
@@ -141,16 +104,11 @@ Saves and compiles the class passed as a class definition.</Description>
 	If 'Status Quit $$$BuildErr("Error compiling class '"_ClassDef.Name_"'", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RemoveClass">
-<Description>
-Remove a class and any data it may contain.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Remove a class and any data it may contain.
+ClassMethod RemoveClass(ClassName As %String) As %Status
+{
 	Set Status = ..KillExtent(ClassName)
 	If 'Status Quit Status
 	
@@ -159,16 +117,11 @@ Remove a class and any data it may contain.</Description>
 	If 'Status Quit $$$BuildErr("Error deleting test class '"_ClassName_"'", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="KillExtent">
-<Description>
-Removes the extent for a class if it has one and is compiled.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Removes the extent for a class if it has one and is compiled.
+ClassMethod KillExtent(ClassName As %String) As %Status
+{
 	;If %KillExtent doesn't exist or isn't runnable we're done
 	If '##class(%Dictionary.CompiledMethod).%ExistsId(ClassName_"||%KillExtent") Quit $$$OK
 	
@@ -176,7 +129,7 @@ Removes the extent for a class if it has one and is compiled.</Description>
 	If 'Status Quit $$$BuildErr("Error clearing extent for class '"_ClassName_"'", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

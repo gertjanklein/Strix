@@ -1,52 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Matcher">
-<Description>
-Matches item patterns.</Description>
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63688,45811.150382</TimeCreated>
+Include Strix.SCM
 
-<Property name="SpecList">
-<Description>
-Item specifications to match against</Description>
-<Type>%String</Type>
-<Collection>list</Collection>
-</Property>
+/// Matches item patterns.
+Class Strix.SCM.Matcher Extends %RegisteredObject
+{
 
-<Property name="Patterns">
-<Description>
-The patterns generated from the specs, for re-use</Description>
-<Type>%String</Type>
-<Collection>array</Collection>
-</Property>
+/// Item specifications to match against
+Property SpecList As list Of %String;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The patterns generated from the specs, for re-use
+Property Patterns As array Of %String;
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="%OnNew">
-<Description>
-Constructor, pass in the list of project member specifications</Description>
-<FormalSpec>SpecList:%ListOfDataTypes=""</FormalSpec>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Constructor, pass in the list of project member specifications
+Method %OnNew(SpecList As %ListOfDataTypes = "") As %Status [ Private, ServerOnly = 1 ]
+{
 	If SpecList Set ..SpecList = SpecList
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Matches">
-<Description>
-Returns a boolean indicating whether an item matches any of the specs here.</Description>
-<FormalSpec>Item:%String,*AsItem:%Boolean,*AsStorage:%Boolean</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether an item matches any of the specs here.
+Method Matches(Item As %String, Output AsItem As %Boolean, Output AsStorage As %Boolean) As %Boolean
+{
 	Set (AsItem, AsStorage) = 0
 	
 	; Studio may pass multiple items as a comma-separated list.
@@ -123,23 +98,14 @@ Returns a boolean indicating whether an item matches any of the specs here.</Des
 	}
 	
 	Quit AsItem || AsStorage
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetAllMembers">
-<Description>
-Build an array of all current items matching the specifications
-in ..SpecList.</Description>
-<FormalSpec>*Members:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Build an array of all current items matching the specifications
+/// in ..SpecList.
+Method GetAllMembers(Output Members As %String) As %Status
+{
 	;First convert all specs to patterns
 	For i = 1:1:..SpecList.Count() {
 		Set Spec = ..SpecList.GetAt(i)
@@ -199,23 +165,14 @@ in ..SpecList.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="HandleClassSpec">
-<Description>
-Parses the specification for items of type cls, and stores
-the result in Members.</Description>
-<FormalSpec><![CDATA[Node:%String,Pattern:%String,&Members:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Parses the specification for items of type cls, and stores
+/// the result in Members.
+Method HandleClassSpec(Node As %String, Pattern As %String, ByRef Members As %String) As %Status
+{
 	Set Name = ""
 	For  {
 		Set Name = $Order(@Node@(Name))
@@ -227,16 +184,12 @@ the result in Members.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="HandleRoutineSpec">
-<Description>
-Parses the specification for items of type mac, int, and inc, and stores
-the result in Members.</Description>
-<FormalSpec><![CDATA[Spec:%String,&Members:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Parses the specification for items of type mac, int, and inc, and stores
+/// the result in Members.
+Method HandleRoutineSpec(Spec As %String, ByRef Members As %String) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("%Routine:RoutineList")
 	Set Status = rs.Execute(Spec)
 	If 'Status Quit $$$BuildErr("Error executing routine query with spec '"_Spec_"':", Status)
@@ -249,16 +202,12 @@ the result in Members.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="HandleStorageSpec">
-<Description>
-Parses the specification for items of type stg (storage), and stores the
-result in Members.</Description>
-<FormalSpec><![CDATA[Node:%String,Spec:%String,Pattern:%String,&Members:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Parses the specification for items of type stg (storage), and stores the
+/// result in Members.
+Method HandleStorageSpec(Node As %String, Spec As %String, Pattern As %String, ByRef Members As %String) As %Status
+{
 	;The pattern ends in .stg, but we are looking for classes
 	If Pattern '? 1.E1".stg""" Quit $$$BuildErr("Pattern spec error: '"_Pattern_"'", 1)
 	Set $Extract(Pattern, *-4, *) = ".cls"""
@@ -279,17 +228,12 @@ result in Members.</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetStorageGlobals">
-<Description>
-Returns the globals used for a class's storage (if specified in the
-standard Caché manner -- custom storage is not supported).</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the globals used for a class's storage (if specified in the
+/// standard Caché manner -- custom storage is not supported).
+ClassMethod GetStorageGlobals(ClassName As %String, Output Status As %Status) As %String
+{
 	If ClassName ?1.E1".cls" Set ClassName = $Extract(ClassName, 1, *-4)
 	
 	#dim Def As %Dictionary.ClassDefinition
@@ -319,15 +263,11 @@ standard Caché manner -- custom storage is not supported).</Description>
 	Set Result = ##class(Strix.Lib.String).ListFromArray(.Globals, ",")
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetAllClasses">
-<Description>
-Determines all available classes</Description>
-<FormalSpec>Node:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Determines all available classes
+Method GetAllClasses(Node As %String) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("%Dictionary.ClassDefinitionQuery:Summary")
 	Set Status = rs.Execute()
 	If 'Status Quit $$$BuildErr("Error executing all classes query:", Status)
@@ -349,17 +289,12 @@ Determines all available classes</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MakePattern">
-<Description>
-Converts a specification containing optional asterisks (*) as match-all
-character to a corresponding COS pattern.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Specification:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts a specification containing optional asterisks (*) as match-all
+/// character to a corresponding COS pattern.
+ClassMethod MakePattern(Specification As %String) As %String
+{
 	;Remove negation, will be handled elsewhere
 	If $Extract(Specification) = "-" Set Specification = $Extract(Specification, 2, *)
 	
@@ -383,7 +318,7 @@ character to a corresponding COS pattern.</Description>
 	}
 	
 	Quit Pattern
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

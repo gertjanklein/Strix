@@ -1,19 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.StringList">
-<Description>
-Creates a list-like string without binary characters.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63643,29154.65607</TimeCreated>
+Include Strix
 
-<Method name="Create">
-<Description>
-Create a stringlist from the input; each parameter will be a list item.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Items...:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Creates a list-like string without binary characters.
+Class Strix.Lib.StringList Extends %RegisteredObject
+{
+
+/// Create a stringlist from the input; each parameter will be a list item.
+ClassMethod Create(Items... As %String) As %String
+{
 	Set Result = ""
 	
 	For i = 1:1:$Get(Items) {
@@ -36,24 +29,19 @@ Create a stringlist from the input; each parameter will be a list item.</Descrip
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="Explode">
-<Description>
-Converts a stringlist to a sequential array of items. The top node
-specifies the total number of items; null items are not present
-in the array (but are in the count). The array is suitable to
-use in method calls using the triple-dot syntax. Example:
-Set StringList = ##class(Strix.Lib.StringList).Create("testing","one","two")
-Do ##class(Strix.Lib.StringList).Explode(StringList, .Items)
-Do ##class(SomeClass).SomeMethod(Items...)
-Which is equivalent to:
-Do ##class(SomeClass).SomeMethod("testing","one","two")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[StringList:%String,&Items:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Converts a stringlist to a sequential array of items. The top node
+/// specifies the total number of items; null items are not present
+/// in the array (but are in the count). The array is suitable to
+/// use in method calls using the triple-dot syntax. Example:
+/// Set StringList = ##class(Strix.Lib.StringList).Create("testing","one","two")
+/// Do ##class(Strix.Lib.StringList).Explode(StringList, .Items)
+/// Do ##class(SomeClass).SomeMethod(Items...)
+/// Which is equivalent to:
+/// Do ##class(SomeClass).SomeMethod("testing","one","two")
+ClassMethod Explode(StringList As %String, ByRef Items As %String) As %Status
+{
 	Set Status = ..GetIndices(StringList, .Indices)
 	If 'Status Quit Status
 	
@@ -76,29 +64,19 @@ Do ##class(SomeClass).SomeMethod("testing","one","two")</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Check">
-<Description>
-Checks whether the input is a valid StringList</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String,*Status:%Status</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether the input is a valid StringList
+ClassMethod Check(StringList As %String, Output Status As %Status) As %Boolean
+{
 	Set Status = ..GetIndices(StringList)
 	Quit Status = $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetItem">
-<Description>
-Returns a specific item from a stringlist. If a null item is requested,
-the value in Default is returned.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String,Index:%Integer,Default:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a specific item from a stringlist. If a null item is requested,
+/// the value in Default is returned.
+ClassMethod GetItem(StringList As %String, Index As %Integer, Default As %String = "") As %String
+{
 	Set Status = ..GetIndices(StringList, .Indices)
 	If 'Status Quit ""
 	
@@ -118,16 +96,11 @@ the value in Default is returned.</Description>
 	If Type = "e" Set Content = ..Unescape(Content)
 	
 	Quit Content
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetSubList">
-<Description>
-Returns one or more items from a stringlist as stringlist.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String,From:%Integer,To:%Integer=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns one or more items from a stringlist as stringlist.
+ClassMethod GetSubList(StringList As %String, From As %Integer, To As %Integer = "") As %String
+{
 	Set Status = ..GetIndices(StringList, .Indices)
 	If 'Status Quit ""
 	
@@ -154,36 +127,21 @@ Returns one or more items from a stringlist as stringlist.</Description>
 	Set SubList = $Extract(StringList, ItemStart, ItemEnd)
 	
 	Quit SubList
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetLength">
-<Description>
-Returns the length (number of items) in stringlist</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String</FormalSpec>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[
+/// Returns the length (number of items) in stringlist
+ClassMethod GetLength(StringList As %String) As %Integer
+{
 	Set Status = ..GetIndices(StringList, .Indices)
 	If 'Status Quit ""
 	Quit Indices
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="FromList">
-<Description>
-Converts a Caché %List to a StringList.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%List</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts a Caché %List to a StringList.
+ClassMethod FromList(Input As %List) As %String
+{
 	If Input = "" Quit ""
 	
 	;Create parameters array
@@ -201,16 +159,11 @@ Converts a Caché %List to a StringList.</Description>
 	Set Result = ..Create(Parameters...)
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="ToList">
-<Description>
-Converts a StringList to a Caché %List.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Converts a StringList to a Caché %List.
+ClassMethod ToList(StringList As %String) As %List
+{
 	If StringList = "" Quit ""
 	
 	Set Result = ""
@@ -232,23 +185,13 @@ Converts a StringList to a Caché %List.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetIndices">
-<Description>
-Retuns an array with various indices of the items in a stringlist.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>StringList:%String,*Indices</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Retuns an array with various indices of the items in a stringlist.
+ClassMethod GetIndices(StringList As %String, Output Indices) As %Status
+{
 	Set Indices = 0
 	If StringList = "" Quit $$$OK
 	
@@ -286,24 +229,14 @@ Retuns an array with various indices of the items in a stringlist.</Description>
 	}
 	
 	Quit Status
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Escape">
-<Description>
-Escapes control characters in the input string, by replacing them
-with "\nn", where nn is the hex code of the control character.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%String,*HasEscapes:%Boolean</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Escapes control characters in the input string, by replacing them
+/// with "\nn", where nn is the hex code of the control character.
+ClassMethod Escape(Input As %String, Output HasEscapes As %Boolean) As %String
+{
 	Set Result = "", HasEscapes = 0
 	
 	;If input does not contain control characters we don't have to escape
@@ -323,16 +256,11 @@ with "\nn", where nn is the hex code of the control character.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="Unescape">
-<Description>
-Converts an escaped string back into input format</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts an escaped string back into input format
+ClassMethod Unescape(Input As %String) As %String
+{
 	Set Result = ""
 	
 	Set Index = 0, PrevIndex = 1
@@ -355,7 +283,7 @@ Converts an escaped string back into input format</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,18 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.StreamUtil">
-<Abstract>1</Abstract>
-<IncludeCode>Strix</IncludeCode>
-<TimeCreated>64420,39651.374694</TimeCreated>
+Include Strix
 
-<Method name="Base64Decode">
-<Description>
-Decodes the base64-encoded data in a stream. Places the result in
-OutStream if passed in, or the original stream otherwise.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>InStream:%Stream.Object,*OutStream:%Stream.Object=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Class Strix.Lib.StreamUtil [ Abstract ]
+{
+
+/// Decodes the base64-encoded data in a stream. Places the result in
+/// OutStream if passed in, or the original stream otherwise.
+ClassMethod Base64Decode(InStream As %Stream.Object, Output OutStream As %Stream.Object = "") As %Status
+{
 	If OutStream = "" {
 		; Return decoded data in original stream. First copy the encoded
 		; data to a temporary stream, and set up InStream and OutStream
@@ -45,17 +39,12 @@ OutStream if passed in, or the original stream otherwise.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Base64Encode">
-<Description>
-Base64-encodes the data in a stream. Places the result in
-OutStream if passed in, or the original stream otherwise.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>InStream:%Stream.Object,*OutStream:%Stream.Object=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Base64-encodes the data in a stream. Places the result in
+/// OutStream if passed in, or the original stream otherwise.
+ClassMethod Base64Encode(InStream As %Stream.Object, Output OutStream As %Stream.Object = "") As %Status
+{
 	If OutStream = "" {
 		; Return encoded data in original stream. First copy the original
 		; data to a temporary stream, and set up InStream and OutStream
@@ -88,7 +77,7 @@ OutStream if passed in, or the original stream otherwise.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

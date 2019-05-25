@@ -1,22 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.Batcher">
-<Description>
-Test code for class Strix.Lib.Batcher</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,77720.622688</TimeCreated>
+/// Test code for class Strix.Lib.Batcher
+Class Strix.Tests.Batcher Extends Strix.Testing.TestCase
+{
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestDataType">
-<Description>
-Test batcher with ordinary strings</Description>
-<Implementation><![CDATA[
+/// Test batcher with ordinary strings
+Method TestDataType()
+{
 	Set List = ##class(%ListOfDataTypes).%New()
 	For i = 1:1:10 Do List.Insert(i)
 	
@@ -41,13 +31,11 @@ Test batcher with ordinary strings</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestContainerType">
-<Description>
-Test using the proper container type for CurrentBatch</Description>
-<Implementation><![CDATA[
+/// Test using the proper container type for CurrentBatch
+Method TestContainerType()
+{
 	#dim Batcher As Strix.Lib.Batcher
 	
 	;Normal %ListOfXxx classes: container should be of same type
@@ -72,13 +60,11 @@ Test using the proper container type for CurrentBatch</Description>
 	Do ..AssertEqual(Batcher.CurrentBatch.%ClassName(1), "%Library.ListOfDataTypes", "Batcher should return datatype container for %Collection.ListOfDT.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestEmpty">
-<Description>
-Test Next() returns 0 on empty collection</Description>
-<Implementation><![CDATA[
+/// Test Next() returns 0 on empty collection
+Method TestEmpty()
+{
 	#dim Batcher As Strix.Lib.Batcher
 	
 	Set List = ##class(%ListOfObjects).%New()
@@ -86,7 +72,7 @@ Test Next() returns 0 on empty collection</Description>
 	Do ..AssertEqual(Batcher.Next(), 0, "Batcher.Next() should not return 1 if collection empty.")
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

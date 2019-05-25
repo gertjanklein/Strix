@@ -1,26 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.CSV.PropertyParm">
-<Abstract>1</Abstract>
-<TimeCreated>64771,47207.427476</TimeCreated>
+Class Strix.CSV.PropertyParm [ Abstract ]
+{
 
-<Parameter name="CsvColumnHeader">
-<Description>
-The column header in the CSV</Description>
-<Type>STRING</Type>
-</Parameter>
+/// The column header in the CSV
+Parameter CsvColumnHeader As STRING;
 
-<Parameter name="CsvColumnNr">
-<Description>
-The column index in the CSV</Description>
-<Type>INTEGER</Type>
-</Parameter>
+/// The column index in the CSV
+Parameter CsvColumnNr As INTEGER;
 
-<Parameter name="CsvInclude">
-<Description>
-Whether to include the property in the CSV export.</Description>
-<Type>BOOLEAN</Type>
-<Default>1</Default>
-</Parameter>
-</Class>
-</Export>
+/// Whether to include the property in the CSV export.
+Parameter CsvInclude As BOOLEAN = 1;
+
+}
+

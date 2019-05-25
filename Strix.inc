@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Routine name="Strix" type="INC"><![CDATA[
+ROUTINE Strix [Type=INC]
 #include %occErrors
 #include %occStatus
 #include %occReference
@@ -82,5 +80,3 @@
 
 
 
-]]></Routine>
-</Export>

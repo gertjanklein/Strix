@@ -1,20 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.DateTime">
-<Description>
-Tests the DataTime datatype.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,39629.142541</TimeCreated>
+/// Tests the DataTime datatype.
+Class Strix.Tests.DateTime Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.DateTimeTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.DateTimeTest";
 
-<Method name="Setup">
-<Description>
-Code to run before any test in this class is executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run before any test in this class is executed.
+Method Setup() As %Status
+{
 	;Create a persistent, XML-enabled class with properties of type DateTime for testing.
 	
 	#dim ClassDef As %Dictionary.ClassDefinition
@@ -31,28 +23,19 @@ Code to run before any test in this class is executed.</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-]]></Implementation>
-</Method>
+/// Code to run after all tests in this class have been executed.
+Method TearDown() As %Status
+{
+	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestStorage">
-<Description>
-Test that values are stored as $Horolog-type strings</Description>
-<Implementation><![CDATA[
+/// Test that values are stored as $Horolog-type strings
+Method TestStorage()
+{
 	Set DateTime = $Horolog
 	
 	#dim Obj As Strix.Tests.Temp.DateTimeTest
@@ -72,13 +55,11 @@ Test that values are stored as $Horolog-type strings</Description>
 	Do Obj.%DeleteId(Obj.%Id())
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestXMLOutput">
-<Description>
-Test that values output to XML properly</Description>
-<Implementation><![CDATA[
+/// Test that values output to XML properly
+Method TestXMLOutput()
+{
 	Set DateTime = $ZDateTimeH("2015-11-07 12:33:00", 3, 1)
 	
 	#dim Obj As Strix.Tests.Temp.DateTimeTest
@@ -97,13 +78,11 @@ Test that values output to XML properly</Description>
 	Do ..AssertContains(XML, "<Prop2>2015-11-07T12:33:00Z</Prop2>", "Generated XML should contain proper value for Prop2.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestXMLInput">
-<Description>
-Test that values input from XML properly</Description>
-<Implementation><![CDATA[
+/// Test that values input from XML properly
+Method TestXMLInput()
+{
 	Set DateTimeString = "2015-11-07T12:33:00"
 	Set DateTime = $ZDateTimeH(DateTimeString, 3, 1)
 	
@@ -166,20 +145,13 @@ Test that values input from XML properly</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestOdbcToLogical">
-<Description>
-Test property method OdbcToLogical</Description>
-<Implementation><![CDATA[
+/// Test property method OdbcToLogical
+Method TestOdbcToLogical()
+{
 	Set DateTimeString = "2015-11-07 12:33:00"
 	Set DateTime = $ZDateTimeH(DateTimeString, 3, 1)
 	
@@ -196,13 +168,11 @@ Test property method OdbcToLogical</Description>
 	Do ..AssertEqual(Test, "", "OdbcToLogical property method on empty input.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestLogicalToOdbc">
-<Description>
-Test property method LogicalToOdbc</Description>
-<Implementation><![CDATA[
+/// Test property method LogicalToOdbc
+Method TestLogicalToOdbc()
+{
 	Set DateTimeString = "2015-11-07 12:33:00"
 	Set DateTime = $ZDateTimeH(DateTimeString, 3, 1)
 	
@@ -219,20 +189,13 @@ Test property method LogicalToOdbc</Description>
 	Do ..AssertEqual(Test, "", "LogicalToOdbc property method on empty input.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestDisplayToLogical">
-<Description>
-Test property method DisplayToLogical</Description>
-<Implementation><![CDATA[
+/// Test property method DisplayToLogical
+Method TestDisplayToLogical()
+{
 	Set DateTimeString = "2015-11-07 12:33:00"
 	Set DateTime = $ZDateTimeH(DateTimeString, 3, 1)
 	
@@ -249,13 +212,11 @@ Test property method DisplayToLogical</Description>
 	Do ..AssertEqual(Test, "", "OdbcToLogical property method on empty input.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestLogicalToDisplay">
-<Description>
-Test property method LogicalToDisplay</Description>
-<Implementation><![CDATA[
+/// Test property method LogicalToDisplay
+Method TestLogicalToDisplay()
+{
 	Set DateTimeString = "2015-11-07 12:33:00"
 	Set DateTime = $ZDateTimeH(DateTimeString, 3, 1)
 	
@@ -272,20 +233,13 @@ Test property method LogicalToDisplay</Description>
 	Do ..AssertEqual(Test, "", "LogicalToOdbc property method on empty input.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestIsValid">
-<Description>
-Test property method IsValid</Description>
-<Implementation><![CDATA[
+/// Test property method IsValid
+Method TestIsValid()
+{
 	#dim Obj As Strix.Tests.Temp.DateTimeTest
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
 	
@@ -297,7 +251,7 @@ Test property method IsValid</Description>
 	Do ..AssertErrorStatus(Obj.Prop2IsValid("9999999"), "With x value")
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

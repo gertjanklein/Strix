@@ -1,37 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.JSONProperty">
-<Description>
-Test code for class Strix.JSON.Adaptor</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,77720.622688</TimeCreated>
+/// Test code for class Strix.JSON.Adaptor
+Class Strix.Tests.JSONProperty Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.JSONPropertyTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.JSONPropertyTest";
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run after all tests in this class have been executed.
+Method TearDown() As %Status
+{
 	Do $ZObjClassMethod(..#TestClassName, "%KillExtent")
 	Do ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test basic JSON conversion</Description>
-<Implementation><![CDATA[
+/// Test basic JSON conversion
+Method TestBasic()
+{
 	If '..AssertStatusOk(..CreateClass("a,b:JSON,c:Str")) Quit
 	
 	
@@ -112,23 +97,13 @@ Test basic JSON conversion</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateClass">
-<Description>
-Create a class with the specified properties</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Properties:%String="",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Create a class with the specified properties
+ClassMethod CreateClass(Properties As %String = "", Output ClassDef As %Dictionary.ClassDefinition) As %Status
+{
 	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%Persistent,Strix.JSON.Adaptor", .ClassDef)
 	If 'Status Quit Status
 	
@@ -147,7 +122,7 @@ Create a class with the specified properties</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

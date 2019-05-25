@@ -1,84 +1,43 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.CSV.ToClass">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>65025,42303.833561</TimeCreated>
+Include Strix
 
-<Property name="Data">
-<Description>
-Data to deduce class from. Must include header row.</Description>
-<Type>%Stream.Object</Type>
-</Property>
+Class Strix.CSV.ToClass Extends %RegisteredObject
+{
 
-<Property name="SkipCount">
-<Description>
-Number of lines to skip before reading header line</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Data to deduce class from. Must include header row.
+Property Data As %Stream.Object;
 
-<Property name="Separator">
-<Description>
-The separator to use in parsing the CSV data</Description>
-<Type>%String</Type>
-<InitialExpression>","</InitialExpression>
-</Property>
+/// Number of lines to skip before reading header line
+Property SkipCount As %Integer [ InitialExpression = 0 ];
 
-<Property name="ClassName">
-<Description>
-Name of the class to create</Description>
-<Type>%String</Type>
-</Property>
+/// The separator to use in parsing the CSV data
+Property Separator As %String [ InitialExpression = "," ];
 
-<Property name="SuperClass">
-<Description>
-Superclass(es) for the class to create</Description>
-<Type>%String</Type>
-<InitialExpression>"%RegisteredObject,Strix.CSV.Adaptor"</InitialExpression>
-</Property>
+/// Name of the class to create
+Property ClassName As %String;
 
-<Property name="CsvNameParameter">
-<Description>
-Name of the property parameter for storing the column header.
-If empty, this property parameter will not be generated.</Description>
-<Type>%String</Type>
-<InitialExpression>"CsvColumnHeader"</InitialExpression>
-</Property>
+/// Superclass(es) for the class to create
+Property SuperClass As %String [ InitialExpression = "%RegisteredObject,Strix.CSV.Adaptor" ];
 
-<Property name="CsvIndexParameter">
-<Description>
-Name of the property parameter for storing the column number.
-If empty, this property parameter will not be generated.</Description>
-<Type>%String</Type>
-<InitialExpression>"CsvColumnNr"</InitialExpression>
-</Property>
+/// Name of the property parameter for storing the column header.
+/// If empty, this property parameter will not be generated.
+Property CsvNameParameter As %String [ InitialExpression = "CsvColumnHeader" ];
 
-<Property name="ResetClass">
-<Description>
-When an existing class is regenerated, an attempt is made to keep
-existing property types and parameters. If ResetClass is true,
-all existing properties will be regenerated with their default
-settings. Additionally, the storage for the class will be removed.</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Name of the property parameter for storing the column number.
+/// If empty, this property parameter will not be generated.
+Property CsvIndexParameter As %String [ InitialExpression = "CsvColumnNr" ];
 
-<UDLText name="T">
-<Content><![CDATA[
+/// When an existing class is regenerated, an attempt is made to keep
+/// existing property types and parameters. If ResetClass is true,
+/// all existing properties will be regenerated with their default
+/// settings. Additionally, the storage for the class will be removed.
+Property ResetClass As %Boolean [ InitialExpression = 0 ];
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateFromFile">
-<Description>
-Create a class ClassName that can be used to hold a record
-in the CSV in file FileName.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,ClassName:%String,Separator:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Create a class ClassName that can be used to hold a record
+/// in the CSV in file FileName.
+ClassMethod CreateFromFile(FileName As %String, ClassName As %String, Separator As %String) As %Status
+{
 	Set Me = ..%New(.ClassName, .Separator)
 	Set Me.Data = ##class(%FileCharacterStream).%New()
 	Set Status = Me.Data.LinkToFile(FileName)
@@ -86,19 +45,12 @@ in the CSV in file FileName.</Description>
 	Set Status = Me.Create()
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Create">
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Create() As %Status
+{
 	#dim Parser As Strix.CSV.Parser
 	Set Status = ..GetParser(.Parser)
 	If 'Status Quit Status
@@ -158,39 +110,28 @@ in the CSV in file FileName.</Description>
 	If 'Status Quit $$$BuildStatus("Error saving class definition:", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetParser">
-<Description>
-Sets up the parser and reads the column header line.
-Can be overridden to skip lines etc.</Description>
-<FormalSpec>*Parser:Strix.CSV.Parser</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets up the parser and reads the column header line.
+/// Can be overridden to skip lines etc.
+Method GetParser(Output Parser As Strix.CSV.Parser) As %Status
+{
 	Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, ..SkipCount)
 	If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
 	If Parser.Data < 2 Quit $$$BuildStatus("Only one column found; is separator correct?")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="DetermineDataType">
-<FormalSpec>ColumnNr:%Integer,ColumnName:%String,PropDef:%Dictionary.PropertyDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method DetermineDataType(ColumnNr As %Integer, ColumnName As %String, PropDef As %Dictionary.PropertyDefinition) As %Status
+{
 	Set PropDef.Type = "%String"
 	Do PropDef.Parameters.SetAt("", "MAXLEN")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetPropertyName">
-<Description>
-Derive a valid Caché property name from a column header.</Description>
-<FormalSpec>ColumnName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Derive a valid Caché property name from a column header.
+Method GetPropertyName(ColumnName As %String) As %String
+{
 	If $ZName(ColumnName, 6) Quit ColumnName
 	
 	Set Name = ""
@@ -206,15 +147,12 @@ Derive a valid Caché property name from a column header.</Description>
 	}
 	
 	Quit Name
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetExistingProperties">
-<Description>
-Returns property definitions already present in the class, indexed
-on column name</Description>
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,*Existing</FormalSpec>
-<Implementation><![CDATA[
+/// Returns property definitions already present in the class, indexed
+/// on column name
+Method GetExistingProperties(ClassDef As %Dictionary.ClassDefinition, Output Existing)
+{
 	Set ParmName = $Select(..CsvNameParameter '= "": ..CsvNameParameter, 1: ..CsvIndexParameter)
 	Set key = ""
 	For  {
@@ -228,19 +166,15 @@ on column name</Description>
 		Set Existing(Column) = PropDef
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="%OnNew">
-<Description>
-Initializer</Description>
-<FormalSpec>ClassName:%String,Separator:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Initializer
+Method %OnNew(ClassName As %String, Separator As %String) As %Status
+{
 	If $Data(ClassName) Set ..ClassName = ClassName
 	If $Data(Separator) Set ..Separator = Separator
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

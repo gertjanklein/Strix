@@ -1,169 +1,107 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Studio">
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%Studio.Extension.Base</Super>
-<TimeCreated>60984,44961.499937</TimeCreated>
+Include Strix.SCM
 
-<Property name="Handler">
-<Description>
-The menu item handler; delegates to an appropriate subclass of Strix.SCM.Handler.Base.</Description>
-<Type>Strix.SCM.HandlerProxy</Type>
-</Property>
+Class Strix.SCM.Studio Extends %Studio.Extension.Base
+{
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The menu item handler; delegates to an appropriate subclass of Strix.SCM.Handler.Base.
+Property Handler As Strix.SCM.HandlerProxy;
+
 // ===== Source control menu handling methods
 
-]]></Content>
-</UDLText>
+/// Called when a menu item is to be displayed; determines what to display,
+/// and whether the item should be enabled or not.
+Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
+{
+	Quit ..Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
+}
 
-<Method name="OnMenuItem">
-<Description>
-Called when a menu item is to be displayed; determines what to display,
-and whether the item should be enabled or not.</Description>
-<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
-]]></Implementation>
-</Method>
+/// Called when a menu item is selected; depends what to do based on the
+/// (internal) menu name, and performs that action. This usually entails
+/// displaying some kind of dialog.
+Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
+{
+	Quit ..Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+}
 
-<Method name="UserAction">
-<Description>
-Called when a menu item is selected; depends what to do based on the
-(internal) menu name, and performs that action. This usually entails
-displaying some kind of dialog.</Description>
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
-]]></Implementation>
-</Method>
+/// Called after a menu item is selected and the appropriate dialog (if any)
+/// has been displayed.
+Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
+{
+	Quit ..Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
+}
 
-<Method name="AfterUserAction">
-<Description>
-Called after a menu item is selected and the appropriate dialog (if any)
-has been displayed.</Description>
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio callbacks
 
-]]></Content>
-</UDLText>
-
-<Method name="Login">
-<Description>
-Login method; use to instantiate delegator</Description>
-<FormalSpec>Name:%String,Password:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Login method; use to instantiate delegator
+Method Login(Name As %String, Password As %String) As %Status
+{
 	Set ..Handler = ##class(Strix.SCM.HandlerProxy).%New()
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnBeforeLoad">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnBeforeLoad(InternalName)
-]]></Implementation>
-</Method>
+Method OnBeforeLoad(InternalName As %String) As %Status
+{
+	Quit ..Handler.OnBeforeLoad(InternalName)
+}
 
-<Method name="OnAfterLoad">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnAfterLoad(InternalName, Object)
-]]></Implementation>
-</Method>
+Method OnAfterLoad(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit ..Handler.OnAfterLoad(InternalName, Object)
+}
 
-<Method name="OnBeforeSave">
-<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnBeforeSave(InternalName, Location, Object)
-]]></Implementation>
-</Method>
+Method OnBeforeSave(InternalName As %String, Location As %String = "", Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit ..Handler.OnBeforeSave(InternalName, Location, Object)
+}
 
-<Method name="OnAfterSave">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnAfterSave(InternalName, Object)
-]]></Implementation>
-</Method>
+Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit ..Handler.OnAfterSave(InternalName, Object)
+}
 
-<Method name="OnAfterStorage">
-<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnAfterStorage(InternalName, Location)
-]]></Implementation>
-</Method>
+Method OnAfterStorage(InternalName As %String, Location As %String = "") As %Status
+{
+	Quit ..Handler.OnAfterStorage(InternalName, Location)
+}
 
-<Method name="OnBeforeCompile">
-<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnBeforeCompile(InternalName, .qstruct)
-]]></Implementation>
-</Method>
+Method OnBeforeCompile(InternalName As %String, ByRef qstruct As %String) As %Status
+{
+	Quit ..Handler.OnBeforeCompile(InternalName, .qstruct)
+}
 
-<Method name="OnAfterCompile">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnAfterCompile(InternalName)
-]]></Implementation>
-</Method>
+Method OnAfterCompile(InternalName As %String) As %Status
+{
+	Quit ..Handler.OnAfterCompile(InternalName)
+}
 
-<Method name="OnBeforeDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnBeforeDelete(InternalName)
-]]></Implementation>
-</Method>
+Method OnBeforeDelete(InternalName As %String) As %Status
+{
+	Quit ..Handler.OnBeforeDelete(InternalName)
+}
 
-<Method name="OnAfterDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..Handler.OnAfterDelete(InternalName)
-]]></Implementation>
-</Method>
+Method OnAfterDelete(InternalName As %String) As %Status
+{
+	Quit ..Handler.OnAfterDelete(InternalName)
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Menu query implementations
 
-]]></Content>
-</UDLText>
+/// Provide a list of the top level menu items that Studio will add when connecting to this namespace.
+Query MainMenus(Classname As %String) As %Query(ROWSPEC = "Name:%String,Type:%String")
+{
+}
 
-<Query name="MainMenus">
-<Description>
-Provide a list of the top level menu items that Studio will add when connecting to this namespace.</Description>
-<Type>%Query</Type>
-<FormalSpec>Classname:%String</FormalSpec>
-<Parameter name="ROWSPEC" value="Name:%String,Type:%String"/>
-</Query>
-
-<Method name="MainMenusExecute">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,Classname:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod MainMenusExecute(ByRef qHandle As %Binary, Classname As %String) As %Status
+{
 	#dim Handler As Strix.SCM.Handler.Base
 	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Set qHandle = $lb(0, Handler.GetMainMenus(.Status))
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MainMenusFetch">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
-<PlaceAfter>MainMenusExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod MainMenusFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = MainMenusExecute ]
+{
 	Set Index = $List(qHandle, 1) + 1, Items = $List(qHandle, 2)
 	If $ListData(Items, Index) {
 		Set Row = $List(Items, Index)
@@ -174,46 +112,30 @@ Provide a list of the top level menu items that Studio will add when connecting 
 		Set AtEnd = 1
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MainMenusClose">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
-<PlaceAfter>MainMenusExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+ClassMethod MainMenusClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = MainMenusExecute ]
+{
+	Quit $$$OK
+}
 
-<Query name="MenuItems">
-<Description>
-Query for the items in menu MenuName</Description>
-<Type>%Query</Type>
-<FormalSpec>ClassName:%String,MenuName:%String,InternalName:%String,SelectedText:%String</FormalSpec>
-<Parameter name="ROWSPEC" value="MenuItem_Name:%String,MenuItem_Enabled:%String,MenuItem_Save:%String,MenuItem_Separator:%String"/>
-</Query>
+/// Query for the items in menu MenuName
+Query MenuItems(ClassName As %String, MenuName As %String, InternalName As %String, SelectedText As %String) As %Query(ROWSPEC = "MenuItem_Name:%String,MenuItem_Enabled:%String,MenuItem_Save:%String,MenuItem_Separator:%String")
+{
+}
 
-<Method name="MenuItemsExecute">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,ClassName:%String,MenuName:%String,InternalName:%String,SelectedText:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod MenuItemsExecute(ByRef qHandle As %Binary, ClassName As %String, MenuName As %String, InternalName As %String, SelectedText As %String) As %Status
+{
 	#dim Handler As Strix.SCM.Handler.Base
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Set qHandle = $lb(0, Handler.GetMenuItems(MenuName, InternalName, SelectedText, .Status))
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MenuItemsFetch">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
-<PlaceAfter>MenuItemsExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod MenuItemsFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = MenuItemsExecute ]
+{
 	Set Index = $List(qHandle, 1) + 1, Items = $List(qHandle, 2)
 	If $ListData(Items, Index) {
 		Set Row = $List(Items, Index)
@@ -224,16 +146,12 @@ Query for the items in menu MenuName</Description>
 		Set AtEnd = 1
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MenuItemsClose">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
-<PlaceAfter>MenuItemsExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+ClassMethod MenuItemsClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = MenuItemsExecute ]
+{
+	Quit $$$OK
+}
+
+}
+

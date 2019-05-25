@@ -1,85 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.Adaptor">
-<Abstract>1</Abstract>
-<IncludeGenerator>Strix</IncludeGenerator>
-<PropertyClass>Strix.JSON.PropertyParameters</PropertyClass>
-<Super>%Base</Super>
-<TimeCreated>64394,79428.069912</TimeCreated>
+IncludeGenerator Strix
 
-<Parameter name="SkipUnknownObjects">
-<Description>
-Whether unrecognised object-type properties generate a compile-time error
-or are simply ignored. </Description>
-<Type>BOOLEAN</Type>
-<Default>0</Default>
-</Parameter>
+Class Strix.JSON.Adaptor Extends %Base [ Abstract, PropertyClass = Strix.JSON.PropertyParameters ]
+{
 
-<Parameter name="JSONSpec">
-<Description>
-Override specifications for properties inherited from superclasses.</Description>
-<Type>String</Type>
-</Parameter>
+/// Whether unrecognised object-type properties generate a compile-time error
+/// or are simply ignored. 
+Parameter SkipUnknownObjects As BOOLEAN = 0;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Override specifications for properties inherited from superclasses.
+Parameter JSONSpec As String;
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateFromJSON">
-<Description>
-Instantiate a new object, and loads its properties from the %DynamicObject.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Data:%DynamicObject,Spec:%String="",*Status:%Status</FormalSpec>
-<ReturnType>Strix.JSON.Adaptor</ReturnType>
-<Implementation><![CDATA[
+/// Instantiate a new object, and loads its properties from the %DynamicObject.
+ClassMethod CreateFromJSON(Data As %DynamicObject, Spec As %String = "", Output Status As %Status) As Strix.JSON.Adaptor
+{
 	Set Me = ..%New()
 	Set Status = Me.JSONImport(Data)
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="JSONImport">
-<Description>
-Loads data into this object from the %DynamicObject passed in.</Description>
-<FormalSpec>Data:%DynamicObject,Spec:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads data into this object from the %DynamicObject passed in.
+Method JSONImport(Data As %DynamicObject, Spec As %String = "") As %Status
+{
 	Set Status = ##class(Strix.JSON.IO).JSONImport($this, Data, Spec)
 	Quit Status
-]]></Implementation>
-</Method>
+}
 
-<Method name="JSONExport">
-<Description>
-Creates a %DynamicObject from the data in this object.</Description>
-<FormalSpec>Sparse:%Boolean=0,Spec:%String="",*Status:%Status</FormalSpec>
-<ReturnType>%DynamicObject</ReturnType>
-<Implementation><![CDATA[
+/// Creates a %DynamicObject from the data in this object.
+Method JSONExport(Sparse As %Boolean = 0, Spec As %String = "", Output Status As %Status) As %DynamicObject
+{
 	Set Result = ##class(Strix.JSON.IO).JSONExport($this, Sparse, Spec, .Status)
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetPropertyInfo">
-<Description>
-Generator method that creates an array of lists with information
-about properties to be handled in JSON I/O. Used when im-exporting
-data from/to JSON.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>*Info</FormalSpec>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[
+/// Generator method that creates an array of lists with information
+/// about properties to be handled in JSON I/O. Used when im-exporting
+/// data from/to JSON.
+ClassMethod GetPropertyInfo(Output Info) As %Integer [ CodeMode = objectgenerator ]
+{
 	If %compiledclass.Abstract Quit $$$OK
 	
 	Do %code.WriteLine($Char(9)_"Kill Info")
@@ -165,7 +126,7 @@ data from/to JSON.</Description>
 	Do %code.WriteLine($Char(9)_"Quit Info")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

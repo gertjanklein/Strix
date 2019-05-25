@@ -1,32 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.CSV">
-<Description>
-Tests Strix.CSV.Parser.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
+/// Tests Strix.CSV.Parser.
+Class Strix.Tests.CSV Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.CSVAdaptorTest";
 
-<Property name="Stream">
-<Description>
-Stream to use as input to parser</Description>
-<Type>%GlobalCharacterStream</Type>
-</Property>
+/// Stream to use as input to parser
+Property Stream As %GlobalCharacterStream;
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Tests
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test basic functionality</Description>
-<Implementation><![CDATA[
+/// Test basic functionality
+Method TestBasic()
+{
 	Do ..MakeStream("a,b,c", "1,2,3")
 	
 	#dim p As Strix.CSV.Parser
@@ -50,13 +35,11 @@ Test basic functionality</Description>
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestSkip">
-<Description>
-Test header skipping functionality</Description>
-<Implementation><![CDATA[
+/// Test header skipping functionality
+Method TestSkip()
+{
 	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
 	
 	; Test skipping first row
@@ -85,13 +68,11 @@ Test header skipping functionality</Description>
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestSeparator">
-<Description>
-Test different separator</Description>
-<Implementation><![CDATA[
+/// Test different separator
+Method TestSeparator()
+{
 	Do ..MakeStream("a;b;c", "1;2,a;3", "4;5;6")
 	
 	#dim p As Strix.CSV.Parser
@@ -115,13 +96,11 @@ Test different separator</Description>
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestQuoteSimple">
-<Description>
-Test quoted fields</Description>
-<Implementation><![CDATA[
+/// Test quoted fields
+Method TestQuoteSimple()
+{
 	Do ..MakeStream("1,""x,y,z"",3", "4,5,""6,""", """9"",""8"",""7""", """"""""",b,c")
 	
 	#dim p As Strix.CSV.Parser
@@ -159,13 +138,11 @@ Test quoted fields</Description>
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestMultiline">
-<Description>
-Test multiline quoted fields</Description>
-<Implementation><![CDATA[
+/// Test multiline quoted fields
+Method TestMultiline()
+{
 	#dim p As Strix.CSV.Parser
 	
 	; Field 2 split over 3 lines
@@ -189,13 +166,11 @@ Test multiline quoted fields</Description>
 	Do ..AssertEqual(p.Get(1), "Newlines: "_$$$EOL_$$$EOL, "Result should have expected value.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestErrors">
-<Description>
-Test unparseable data</Description>
-<Implementation><![CDATA[
+/// Test unparseable data
+Method TestErrors()
+{
 	#dim p As Strix.CSV.Parser
 	
 	; Lone quote in quoted field
@@ -219,13 +194,11 @@ Test unparseable data</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestByName">
-<Description>
-Test retrieving column by name</Description>
-<Implementation><![CDATA[
+/// Test retrieving column by name
+Method TestByName()
+{
 	#dim p As Strix.CSV.Parser
 	
 	; Take column names from first row if skipcount is precisely 1
@@ -274,13 +247,11 @@ Test retrieving column by name</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestGetAsList">
-<Description>
-Test GetAsList</Description>
-<Implementation><![CDATA[
+/// Test GetAsList
+Method TestGetAsList()
+{
 	#dim p As Strix.CSV.Parser
 	
 	Do ..MakeStream("a,b,c", "1,2,3", "4,5,6")
@@ -302,20 +273,13 @@ Test GetAsList</Description>
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestAdaptor">
-<Description>
-Basic test of retrieving a Strix.CSV.Adaptor object from the parser.</Description>
-<Implementation><![CDATA[
+/// Basic test of retrieving a Strix.CSV.Adaptor object from the parser.
+Method TestAdaptor()
+{
 	#dim p As Strix.CSV.Parser
 	
 	Set Status = ..CreateClass("PropA::a,PropB::b,PropC::c")
@@ -343,13 +307,11 @@ Basic test of retrieving a Strix.CSV.Adaptor object from the parser.</Descriptio
 	Do ..AssertStatusOk(Status, "Returned status should still be ok.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestAdaptorDataType">
-<Description>
-Test default adaptor datatype conversions</Description>
-<Implementation><![CDATA[
+/// Test default adaptor datatype conversions
+Method TestAdaptorDataType()
+{
 	#dim p As Strix.CSV.Parser
 	
 	Set Status = ..CreateClass("PropA:%Date:a,PropB:%Boolean:b,PropC:%Numeric:c,PropD:%Time:d")
@@ -368,13 +330,11 @@ Test default adaptor datatype conversions</Description>
 	Do ..AssertEqual(Obj.PropD, 44002, "Property d should be converted.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestAdaptorDataTypeExpression">
-<Description>
-Test datatype conversion override by subclassing and changing parameter</Description>
-<Implementation><![CDATA[
+/// Test datatype conversion override by subclassing and changing parameter
+Method TestAdaptorDataTypeExpression()
+{
 	#dim cd As %Dictionary.ClassDefinition
 	Set Status = ..CreateClass("PropA:%Date:a", .cd)
 	If '..AssertStatusOk(Status, "Should be able to create a test class.") Quit
@@ -394,34 +354,22 @@ Test datatype conversion override by subclassing and changing parameter</Descrip
 	Do ..AssertEqual(Obj.PropA, 44002, "Property should be converted.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="MakeStream">
-<FormalSpec>Lines...:%String</FormalSpec>
-<Implementation><![CDATA[
+Method MakeStream(Lines... As %String)
+{
 	Do ..Stream.Clear()
 	For i = 1:1:$Get(Lines) {
 		Do ..Stream.WriteLine($Get(Lines(i)))
 	}
 	Do ..Stream.Rewind()
-]]></Implementation>
-</Method>
+}
 
-<Method name="CreateClass">
-<Description>
-Create a class with the specified properties</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Properties:%String="",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Create a class with the specified properties
+ClassMethod CreateClass(Properties As %String = "", Output ClassDef As %Dictionary.ClassDefinition) As %Status
+{
 	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject,Strix.CSV.Adaptor", .ClassDef)
 	If 'Status Quit Status
 	Set Status = ##class(Strix.Testing.Support).SetClassParameter(ClassDef, "PreferredLoader", "header")
@@ -445,27 +393,18 @@ Create a class with the specified properties</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Cleanup code.
 
-]]></Content>
-</UDLText>
-
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<FormalSpec>FailedTests:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run after all tests in this class have been executed.
+Method TearDown(FailedTests As %String) As %Status
+{
 	If FailedTests '= "" Quit $$$OK
 	Set Status = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,19 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.IO">
-<Super>%RegisteredObject</Super>
-<TimeCreated>64307,60337.004726</TimeCreated>
+Class Strix.Lib.IO Extends %RegisteredObject
+{
 
-<Method name="GetCommandOutput">
-<Description>
-Creates a pipe to the specified OS command. If an error occurs opening
-or reading the pipe, a message is placed in output parameter ErrorMsg.
-If Strip is true, leading and trailing whitespace is removed from the
-result.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Command:%String,Strip:%Boolean=1,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Creates a pipe to the specified OS command. If an error occurs opening
+/// or reading the pipe, a message is placed in output parameter ErrorMsg.
+/// If Strip is true, leading and trailing whitespace is removed from the
+/// result.
+ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Output ErrorMsg As %String) As %String
+{
 	Set $ZTrap = "Error"
 	
 	Set IO = $IO
@@ -56,7 +49,7 @@ Error
 	If $Data(PrevZEOF) Do $System.Process.SetZEOF(PrevZEOF)
 	Set ErrorMsg = "Error trapped reading pipe: "_$ZError
 	Quit ""
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

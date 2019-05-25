@@ -1,20 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Collections">
-<Super>%RegisteredObject</Super>
-<TimeCreated>64689,65760.815582</TimeCreated>
+Class Strix.Lib.Collections Extends %RegisteredObject
+{
 
-<Method name="CommonListElements">
-<Description>
-Returns the elements present in all the input lists. These may
-be specified as a single list of lists, or as separate parameters.
-The items are returned in the order they appear in in the first list.
-If objects are passed in, they are compared by Oref, i.e. they have
-to be the same object to qualify.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input...:%Collection.Super</FormalSpec>
-<ReturnType>%Collection.AbstractList</ReturnType>
-<Implementation><![CDATA[
+/// Returns the elements present in all the input lists. These may
+/// be specified as a single list of lists, or as separate parameters.
+/// The items are returned in the order they appear in in the first list.
+/// If objects are passed in, they are compared by Oref, i.e. they have
+/// to be the same object to qualify.
+ClassMethod CommonListElements(Input... As %Collection.Super) As %Collection.AbstractList
+{
 	; Determine how the lists were passed in
 	
 	If Input > 1 {
@@ -55,19 +48,14 @@ to be the same object to qualify.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetCopy">
-<Description>
-Returns an empty copy of a collection object, of the same type as
-the input collection, but one that can exist stand-alone. (The
-%Collection classes can only exists as properties of an object.)
-The collection contents are not copied unless CopyContents is true.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%Collection.AbstractIterator,CopyContents:%Boolean=0,*Status:%Status</FormalSpec>
-<ReturnType>%Collection.AbstractIterator</ReturnType>
-<Implementation><![CDATA[
+/// Returns an empty copy of a collection object, of the same type as
+/// the input collection, but one that can exist stand-alone. (The
+/// %Collection classes can only exists as properties of an object.)
+/// The collection contents are not copied unless CopyContents is true.
+ClassMethod GetCopy(Input As %Collection.AbstractIterator, CopyContents As %Boolean = 0, Output Status As %Status) As %Collection.AbstractIterator
+{
 	Set Status = $$$OK
 	Set ReturnType = ""
 	
@@ -110,7 +98,7 @@ The collection contents are not copied unless CopyContents is true.</Description
 	}
 	
 	Quit Copy
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

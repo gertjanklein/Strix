@@ -1,28 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Processor.RemoveCfgFile">
-<Description>
-Removes the SCM configuration file from the release.</Description>
-<Super>Strix.SCM.Processor.Base</Super>
-<TimeCreated>64374,71436.986665</TimeCreated>
+/// Removes the SCM configuration file from the release.
+Class Strix.SCM.Processor.RemoveCfgFile Extends Strix.SCM.Processor.Base
+{
 
-<Parameter name="HandlerType">
-<Description>
-This processor works on a release.</Description>
-<Default>Release</Default>
-</Parameter>
+/// This processor works on a release.
+Parameter HandlerType = "Release";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Run">
-<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Run(Revision As %String, Directory As %String) As %Status
+{
 	Set ConfigFileName = ##class(%File).GetFilename(..Project.ConfigFilePath)
 	Set ConfigFilePath = ##class(%File).SubDirectoryName(Directory, ConfigFileName)
 	
@@ -39,7 +25,7 @@ This processor works on a release.</Description>
 	If 'rc Quit $$$BuildErr("Error {} deleting {}.", , ec, ConfigFilePath)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

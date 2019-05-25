@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.File">
-<Description>
-Tests for Strix.Lib.File</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64293,51004.167135</TimeCreated>
+/// Tests for Strix.Lib.File
+Class Strix.Tests.File Extends Strix.Testing.TestCase
+{
 
-<Method name="TestPathIsAbsolute">
-<Implementation><![CDATA[
+Method TestPathIsAbsolute()
+{
 	
 #if $$$isWINDOWS
 	Do ..AssertTrue(##class(Strix.Lib.File).IsPathAbsolute("C:\Temp"), "Path rooted from drive should return true")
@@ -26,7 +22,7 @@ Tests for Strix.Lib.File</Description>
 	Do ..Skipped("Unrecognised operating system "_$ZVersion(1))
 	
 #endif
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,28 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.JSONToClass">
-<Description>
-Tests Strix.JSON.ToClass.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
+/// Tests Strix.JSON.ToClass.
+Class Strix.Tests.JSONToClass Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassPackage">
-<Description>
-Base package for created test classes</Description>
-<Default>TestJSONToClass</Default>
-</Parameter>
+/// Base package for created test classes
+Parameter TestClassPackage = "TestJSONToClass";
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Tests
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test creating simple test class with one property</Description>
-<Implementation><![CDATA[
+/// Test creating simple test class with one property
+Method TestBasic()
+{
 	Set JSON = { "a": 1, "b": "2", "c": [ 1, 2, 3 ] }
 	
 	;Create class
@@ -84,13 +71,11 @@ Test creating simple test class with one property</Description>
 	Do ..AssertEqual(OutAsStr, InAsStr, "JSON should round-trip.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestpropertyNames">
-<Description>
-Test auto-rename of properties</Description>
-<Implementation><![CDATA[
+/// Test auto-rename of properties
+Method TestpropertyNames()
+{
 	Set JSON = {
 		"many-separated-parts-dash": "",
 		"many_separated_parts_underscore": "",
@@ -128,13 +113,11 @@ Test auto-rename of properties</Description>
 	Do ..AssertEqual(OutAsStr, InAsStr, "JSON should round-trip.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestSparseBasic">
-<Description>
-Test basic sparse output (skipping empty properties).</Description>
-<Implementation><![CDATA[
+/// Test basic sparse output (skipping empty properties).
+Method TestSparseBasic()
+{
 	Set JSON = { "a": "1", "b": "", "c": "3" }
 	
 	;Create class
@@ -164,13 +147,11 @@ Test basic sparse output (skipping empty properties).</Description>
 	Do ..AssertEqual(OutAsStr, Expected, "Empty property should not be present in output.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestSubObj">
-<Description>
-Test creating single sub-object</Description>
-<Implementation><![CDATA[
+/// Test creating single sub-object
+Method TestSubObj()
+{
 	Set JSON = { "a": "1", "b": { "x": "1", "y": "", "z": "3" }, "c": "3" }
 	
 	;Create class
@@ -207,14 +188,12 @@ Test creating single sub-object</Description>
 	Do ..AssertEqual(OutAsStr, InAsStr, "JSON should round-trip.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestListDataTypes">
-<Description>
-Tests whether mixed datatype, but all string or number,
-are accepted in a list.</Description>
-<Implementation><![CDATA[
+/// Tests whether mixed datatype, but all string or number,
+/// are accepted in a list.
+Method TestListDataTypes()
+{
 	Set JSON = { "a": [1, "a"] }
 	
 	;Create class
@@ -247,50 +226,34 @@ are accepted in a list.</Description>
 	Do ..AssertEqual(Result, Expected, "JSON should have all values as string.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="ClassExists">
-<Description>
-Checks whether the specified class exists.</Description>
-<FormalSpec>Name:%String,Package:%String=""</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether the specified class exists.
+Method ClassExists(Name As %String, Package As %String = "") As %Boolean
+{
 	If Name '[ "." {
 		If Package = "" Set Package = ..#TestClassPackage
 		Set Name = Package_"."_Name
 	}
 	Quit ##class(%Dictionary.ClassDefinition).%ExistsId(Name)
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckProp">
-<FormalSpec>ClassName:%String,PropertyName:%String,*Type:%String,*Collection:%String,*JSONName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method CheckProp(ClassName As %String, PropertyName As %String, Output Type As %String, Output Collection As %String, Output JSONName As %String) As %Boolean
+{
 	Set Pd = ##class(%Dictionary.PropertyDefinition).%OpenId(ClassName_"||"_PropertyName, , .Status)
 	If 'Status Quit 0
 	Set Type = Pd.Type
 	Set Collection = Pd.Collection
 	Set JSONName = Pd.Parameters.GetAt("JSONNAME")
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="HasProperty">
-<Description>
-Checks whether a property exists, returning some information about it
-if it does.</Description>
-<FormalSpec>PropertyId:%String,*Type:%String,*Collection:%String,*Parameters:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether a property exists, returning some information about it
+/// if it does.
+Method HasProperty(PropertyId As %String, Output Type As %String, Output Collection As %String, Output Parameters As %String) As %Boolean
+{
 	Kill Type, Collection, Parameters
 	
 	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(PropertyId)
@@ -305,29 +268,21 @@ if it does.</Description>
 	}
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="HasParameter">
-<Description>
-Checks whether a class parameter exists, returning its value
-if it does.</Description>
-<FormalSpec>ParameterId:%String,*Value:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks whether a class parameter exists, returning its value
+/// if it does.
+Method HasParameter(ParameterId As %String, Output Value As %String) As %Boolean
+{
 	Set Def = ##class(%Dictionary.ParameterDefinition).%OpenId(ParameterId)
 	If '$IsObject(Def) Quit 0
 	Set Value = Def.Default
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetObject">
-<Description>
-Reads the JSON into an object of the specified class, and returns the object.</Description>
-<FormalSpec>ClassName:%String,JSON:%DynamicObject,Spec:%String,*Object:Strix.JSON.Adaptor</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Reads the JSON into an object of the specified class, and returns the object.
+Method GetObject(ClassName As %String, JSON As %DynamicObject, Spec As %String, Output Object As Strix.JSON.Adaptor) As %Boolean
+{
 	Set Status = $System.OBJ.Compile(ClassName, "crbuk-d")
 	If '..AssertStatusOk(Status, "Class {} should compile without error.", ClassName) Quit 0
 	
@@ -335,26 +290,19 @@ Reads the JSON into an object of the specified class, and returns the object.</D
 	If '..AssertStatusOk(Status, "JSON should be read without error.") Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Cleanup code.
 
-]]></Content>
-</UDLText>
-
-<Method name="TearDown">
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method TearDown() As %Status
+{
 	; Remove generated classes
 	
 	Set Status = $System.OBJ.DeletePackage(..#TestClassPackage, "-d")
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,39 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.CSVToClass">
-<Description>
-Tests Strix.CSV.Parser.</Description>
-<Super>Strix.Testing.TestCase,Strix.CSV.ToClass</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
-<Inheritance>left</Inheritance>
+/// Tests Strix.CSV.Parser.
+Class Strix.Tests.CSVToClass Extends (Strix.Testing.TestCase, Strix.CSV.ToClass) [ Inheritance = left ]
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.CSVAdaptorTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.CSVAdaptorTest";
 
-<Property name="TestFileName">
-<Description>
-Name of file to use as input</Description>
-<Type>%String</Type>
-</Property>
+/// Name of file to use as input
+Property TestFileName As %String;
 
-<Property name="Stream">
-<Description>
-Stream to use as input to parser</Description>
-<Type>%Stream.Object</Type>
-</Property>
+/// Stream to use as input to parser
+Property Stream As %Stream.Object;
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Tests
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test basic functionality</Description>
-<Implementation><![CDATA[
+/// Test basic functionality
+Method TestBasic()
+{
 	#dim p As Strix.CSV.ToClass
 	Set p = ..MakeProcessor("a,b,c", "1,2,3")
 	
@@ -78,13 +59,11 @@ Test basic functionality</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestCreateForFile">
-<Description>
-Test basic functionality</Description>
-<Implementation><![CDATA[
+/// Test basic functionality
+Method TestCreateForFile()
+{
 	Set sc = ..MakeProcessorForFile("a,b,c", "1,2,3")
 	If '..AssertStatusOk(sc, "Created processor.") Quit
 	
@@ -104,13 +83,11 @@ Test basic functionality</Description>
 	Do ..AssertNotEmpty(pd, "Property c exists.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestChangeDatatype">
-<Description>
-Tests DetermineDataType can be overridden</Description>
-<Implementation><![CDATA[
+/// Tests DetermineDataType can be overridden
+Method TestChangeDatatype()
+{
 	Set p = ..MakeProcessor("String,Date,Integer", "1,2,3")
 	
 	Set sc = p.Create()
@@ -132,13 +109,11 @@ Tests DetermineDataType can be overridden</Description>
 	Do ..AssertEqual(pd.Type, "%Integer", "Property Integer type is %Integer")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestGetParser">
-<Description>
-Tests GetParser can be overridden</Description>
-<Implementation><![CDATA[
+/// Tests GetParser can be overridden
+Method TestGetParser()
+{
 	Set p = ..MakeProcessor("x,y,z", "a,b,c", "1,2,3")
 	
 	Set sc = p.Create()
@@ -160,22 +135,13 @@ Tests GetParser can be overridden</Description>
 	Do ..AssertNotEmpty(pd, "Property c exists.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="DetermineDataType">
-<Description>
-Overridden method from Strix.CSV.ToClass</Description>
-<FormalSpec>ColumnNr:%Integer,ColumnName:%String,PropDef:%Dictionary.PropertyDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Overridden method from Strix.CSV.ToClass
+Method DetermineDataType(ColumnNr As %Integer, ColumnName As %String, PropDef As %Dictionary.PropertyDefinition) As %Status
+{
 	If ..Runner.CurrentTestMethod = "TestChangeDatatype" {
 		If ColumnName = "String" {
 			Set PropDef.Type = "%String"
@@ -188,15 +154,11 @@ Overridden method from Strix.CSV.ToClass</Description>
 		Quit $$$OK
 	}
 	Quit ##super(ColumnNr, ColumnName, PropDef)
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetParser">
-<Description>
-Overridden method from Strix.CSV.ToClass</Description>
-<FormalSpec>*Parser:Strix.CSV.Parser</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Overridden method from Strix.CSV.ToClass
+Method GetParser(Output Parser As Strix.CSV.Parser) As %Status
+{
 	If ..Runner.CurrentTestMethod = "TestGetParser" {
 		Set Parser = ##class(Strix.CSV.Parser).GetParser(..Data, ..Separator, 1)
 		If 'Parser.Next(.Status) Quit $$$BuildStatus("Can't read first row from input:", Status)
@@ -204,19 +166,12 @@ Overridden method from Strix.CSV.ToClass</Description>
 		Quit $$$OK
 	}
 	Quit ##super(.Parser)
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers.
 
-]]></Content>
-</UDLText>
-
-<Method name="MakeProcessorForFile">
-<FormalSpec>Lines...:%String</FormalSpec>
-<Implementation><![CDATA[
+Method MakeProcessorForFile(Lines... As %String)
+{
 	Set ..TestFileName = ##class(%File).TempFilename("csv")
 	Set File = ##class(%Stream.FileCharacter).%New()
 	Set Status = File.LinkToFile(..TestFileName)
@@ -230,52 +185,39 @@ Overridden method from Strix.CSV.ToClass</Description>
 	Set Status = ##class(Strix.CSV.ToClass).CreateFromFile(..TestFileName, ..#TestClassName, ",")
 	
 	Quit Status
-]]></Implementation>
-</Method>
+}
 
-<Method name="MakeProcessor">
-<FormalSpec>Lines...:%String</FormalSpec>
-<Implementation><![CDATA[
+Method MakeProcessor(Lines... As %String)
+{
 	Set Processor = $this
 	Set Processor.Separator = ","
 	Do ..MakeStream(Lines...)
 	Set Processor.Data = ..Stream
 	Set Processor.ClassName = ..#TestClassName
 	Quit Processor
-]]></Implementation>
-</Method>
+}
 
-<Method name="MakeStream">
-<FormalSpec>Lines...:%String</FormalSpec>
-<Implementation><![CDATA[
+Method MakeStream(Lines... As %String)
+{
 	Set ..Stream = ##class(%Stream.TmpCharacter).%New()
 	Do ..Stream.Clear()
 	For i = 1:1:$Get(Lines) {
 		Do ..Stream.WriteLine($Get(Lines(i)))
 	}
 	Do ..Stream.Rewind()
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Cleanup code.
 
-]]></Content>
-</UDLText>
-
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<FormalSpec>FailedTests:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run after all tests in this class have been executed.
+Method TearDown(FailedTests As %String) As %Status
+{
 	If FailedTests '= "" Quit $$$OK
 	Set sc = ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
 	If 'sc Quit sc
 	Do ##class(%File).Delete(..TestFileName)
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

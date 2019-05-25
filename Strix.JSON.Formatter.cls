@@ -1,40 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.Formatter">
-<Description>
-Formats a %DynamicAbstractObject as indented JSON.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64382,59627.319201</TimeCreated>
+/// Formats a %DynamicAbstractObject as indented JSON.
+Class Strix.JSON.Formatter Extends %RegisteredObject
+{
 
-<Parameter name="Indent">
-<Default>2</Default>
-</Parameter>
+Parameter Indent = 2;
 
-<Method name="Format">
-<Description>
-Entry point. Returns the JSON object converted to a formatted,
-indented JSON string.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>JSON:%DynamicAbstractObject</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Entry point. Returns the JSON object converted to a formatted,
+/// indented JSON string.
+ClassMethod Format(JSON As %DynamicAbstractObject) As %String
+{
 	If JSON.%IsA("%DynamicObject") {
 		Set Result = ..FormatObject(JSON)
 	} ElseIf JSON.%IsA("%DynamicArray") {
 		Set Result = ..FormatArray(JSON)
 	}
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="FormatObject">
-<Description>
-Formats a %DynamicObject. Input are the array itself and the current
-indentation level.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Object:%DynamicObject,Indent:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Formats a %DynamicObject. Input are the array itself and the current
+/// indentation level.
+ClassMethod FormatObject(Object As %DynamicObject, Indent As %String = "") As %String
+{
 	Set ThisIndent = Indent_$Justify("", ..#Indent)
 	
 	Set Result = "{"_$$$EOL
@@ -53,17 +38,12 @@ indentation level.</Description>
 	Set Result = Result_Indent_"}"
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="FormatArray">
-<Description>
-Formats a %DynamicArray. Input are the array itself and the current
-indentation level.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Array:%DynamicArray,Indent:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Formats a %DynamicArray. Input are the array itself and the current
+/// indentation level.
+ClassMethod FormatArray(Array As %DynamicArray, Indent As %String = "") As %String
+{
 	Set ThisIndent = Indent_$Justify("", ..#Indent)
 	
 	Set Result = "["
@@ -86,18 +66,13 @@ indentation level.</Description>
 	Set Result = Result_$$$EOL_Indent_"]"
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="FormatValue">
-<Description>
-Formats a value in a %DynamicObject. Input are the value, the type,
-and the current indent. Handles all standard %DynamicAbstractObject
-types, does not handle Caché objects.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Value:%String,Type:%String,Indent:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Formats a value in a %DynamicObject. Input are the value, the type,
+/// and the current indent. Handles all standard %DynamicAbstractObject
+/// types, does not handle Caché objects.
+ClassMethod FormatValue(Value As %String, Type As %String, Indent As %String) As %String
+{
 	If Type = "string" Quit """"_$ZConvert(Value, "O", "JSON")_""""
 	If Type = "boolean" Quit $Select(Value: "true", 1: "false")
 	If Type = "number" Quit +Value
@@ -121,7 +96,7 @@ types, does not handle Caché objects.</Description>
 	
 	;Fallback, we should not get here
 	Quit Type_":"_$ZConvert(Value, "O", "JSON")
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

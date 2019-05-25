@@ -1,31 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Handler.File">
-<Description>
-Handles sources by synchronizing with a file system directory.
-Checkin/out etc. is expected to be handled by an external program.</Description>
-<Super>Strix.SCM.Handler.Base</Super>
-<TimeCreated>63864,76212.606502</TimeCreated>
+/// Handles sources by synchronizing with a file system directory.
+/// Checkin/out etc. is expected to be handled by an external program.
+Class Strix.SCM.Handler.File Extends Strix.SCM.Handler.Base
+{
 
-<Property name="SyncToDisk">
-<Description>
-Whether to synchronize the file on each save. This ensures the file is
-always kept up to date with the Caché-version.</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Whether to synchronize the file on each save. This ensures the file is
+/// always kept up to date with the Caché-version.
+Property SyncToDisk As %Boolean [ InitialExpression = 0 ];
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio menu actions
 
-]]></Content>
-</UDLText>
-
-<Method name="UserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
+{
 	;Assume we won't handle this action
 	Set Action = 0, Target = "", Msg = "", Reload = 0
 	
@@ -118,15 +103,11 @@ always kept up to date with the Caché-version.</Description>
 	;===== Fallback to Base handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
-]]></Implementation>
-</Method>
+}
 
-<Method name="AfterUserAction">
-<Description>
-Implements actions that should only be done after user confirmation and/or input.</Description>
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Implements actions that should only be done after user confirmation and/or input.
+Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
+{
 	Set Reload = 0
 	
 	;Studio-generated action (as opposed to menu item)
@@ -183,16 +164,12 @@ Implements actions that should only be done after user confirmation and/or input
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnMenuItem">
-<Description>
-Called when a menu item is to be displayed; determines what to display,
-and whether the item should be enabled or not.</Description>
-<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Called when a menu item is to be displayed; determines what to display,
+/// and whether the item should be enabled or not.
+Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
+{
 	;Top level menus always enabled
 	If MenuName '[ "," Set Enabled = 1 Quit $$$OK
 	
@@ -245,20 +222,12 @@ and whether the item should be enabled or not.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio callbacks
 
-]]></Content>
-</UDLText>
-
-<Method name="OnAfterSave">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
 	If '..SyncToDisk Quit $$$OK
 	If InternalName = "" Quit $$$OK
 	
@@ -274,24 +243,17 @@ and whether the item should be enabled or not.</Description>
 	Write !,"== "_InternalName_" exported to "_Filename_"."
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnAfterCompile">
-<Description>
-Compilation may have changed storage.</Description>
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..OnAfterSave(InternalName)
-]]></Implementation>
-</Method>
+/// Compilation may have changed storage.
+Method OnAfterCompile(InternalName As %String) As %Status
+{
+	Quit ..OnAfterSave(InternalName)
+}
 
-<Method name="OnAfterDelete">
-<Description>
-Delete on-disk version as well.</Description>
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Delete on-disk version as well.
+Method OnAfterDelete(InternalName As %String) As %Status
+{
 	If '..SyncToDisk Quit $$$OK
 	If InternalName = "" Quit $$$OK
 	
@@ -316,25 +278,15 @@ Delete on-disk version as well.</Description>
 	Write !,"== Deleted "_Filename_"."
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Menus and menu items
 
-]]></Content>
-</UDLText>
-
-<Method name="GetMenuItems">
-<Description>
-Returns a list of menu items for the top-level menu. In addition to
-the menu name, the name of the current document and the currently
-selected text are passed in.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns a list of menu items for the top-level menu. In addition to
+/// the menu name, the name of the current document and the currently
+/// selected text are passed in.
+ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+{
 	Set Status = $$$OK
 	
 	;Items is a list of lists containing:
@@ -357,24 +309,14 @@ selected text are passed in.</Description>
 	)
 	
 	Quit Items
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="GetExplorerCommand">
-<Description>
-Returns a command to open explorer in the given directory. Optionally,
-a file to pre-select can be specified.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Directory:%String,File:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a command to open explorer in the given directory. Optionally,
+/// a file to pre-select can be specified.
+ClassMethod GetExplorerCommand(Directory As %String, File As %String = "") As %String
+{
 	If File '= "" {
 		Set Path = ##class(%File).SubDirectoryName(Directory, File)
 		If '##class(%File).Exists(Path) Set File = ""
@@ -387,7 +329,7 @@ a file to pre-select can be specified.</Description>
 	}
 	
 	Quit Cmd
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

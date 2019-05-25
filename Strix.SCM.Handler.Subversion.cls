@@ -1,54 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Handler.Subversion">
-<IncludeCode>Strix</IncludeCode>
-<Super>Strix.SCM.Handler.File</Super>
-<TimeCreated>64301,43556.823379</TimeCreated>
+Include Strix
 
-<Property name="SvnPath">
-<Description>
-Full path and filename of the SVN executable.</Description>
-<Type>%String</Type>
-</Property>
+Class Strix.SCM.Handler.Subversion Extends Strix.SCM.Handler.File
+{
 
-<Property name="ReleasePath">
-<Description>
-Full path to release base directory; releases are created below it.</Description>
-<Type>%String</Type>
-</Property>
+/// Full path and filename of the SVN executable.
+Property SvnPath As %String;
 
-<Property name="ReleaseName">
-<Description>
-The name to use for the release directory. Default is R{rev}.\
-Available variables:
-{rev}: revision number
-{date}: date (format YYYY-MM-DD)</Description>
-<Type>%String</Type>
-</Property>
+/// Full path to release base directory; releases are created below it.
+Property ReleasePath As %String;
 
-<Property name="PostProcessors">
-<Description>
-Comma-separated list of release post-processors to run. Available \
-processors are:
-• EnsProdDir: Moves Ensemble Production classes to a subdirectory "Productions".
-• RemoveCfgFile: Removes the SCM configuration file from the release.
-• RemoveEnsProd: Removes Ensemble Production classes from the export.
-• Zip: Zips the release directory.</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="80"/>
-</Property>
+/// The name to use for the release directory. Default is R{rev}.\
+/// Available variables:
+/// {rev}: revision number
+/// {date}: date (format YYYY-MM-DD)
+Property ReleaseName As %String;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Comma-separated list of release post-processors to run. Available \
+/// processors are:
+/// • EnsProdDir: Moves Ensemble Production classes to a subdirectory "Productions".
+/// • RemoveCfgFile: Removes the SCM configuration file from the release.
+/// • RemoveEnsProd: Removes Ensemble Production classes from the export.
+/// • Zip: Zips the release directory.
+Property PostProcessors As %String(MAXLEN = 80);
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="UserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
+{
 	;Assume we won't handle this action
 	Set Action = 0, Target = "", Msg = "", Reload = 0
 	
@@ -179,13 +157,10 @@ processors are:
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
-]]></Implementation>
-</Method>
+}
 
-<Method name="AfterUserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
+{
 	Set Reload = 0
 	
 	;Studio-generated action (as opposed to menu item)
@@ -237,16 +212,12 @@ processors are:
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, Answer, .Msg, .Reload)
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnMenuItem">
-<Description>
-Called when a menu item is to be displayed; determines what to display,
-and whether the item should be enabled or not.</Description>
-<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Called when a menu item is to be displayed; determines what to display,
+/// and whether the item should be enabled or not.
+Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
+{
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
 	  "ShowRevisions": "Revisions for "_InternalName_"",
@@ -272,23 +243,13 @@ and whether the item should be enabled or not.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetMenuItems">
-<Description>
-Appends this handlers menus to those of the superclass.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Appends this handlers menus to those of the superclass.
+ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+{
 	;Get items for file handler
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
@@ -310,22 +271,13 @@ Appends this handlers menus to those of the superclass.</Description>
 	)
 	
 	Quit Items
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="MakeRelease">
-<Description>
-Implements the MakeRelease menu item</Description>
-<FormalSpec>Project:Strix.SCM.Project,Revision:%String,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Implements the MakeRelease menu item
+Method MakeRelease(Project As Strix.SCM.Project, Revision As %String, Output ErrorMsg As %String) As %Status
+{
 	Set ErrorMsg = ""
 	
 	;Get project directory
@@ -369,15 +321,11 @@ Implements the MakeRelease menu item</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="HandlePostProcessors">
-<Description>
-Helper for MakeRelease: runs post-processors</Description>
-<FormalSpec>Project:Strix.SCM.Project,Revision:%String,ReleasePath:%String,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Helper for MakeRelease: runs post-processors
+Method HandlePostProcessors(Project As Strix.SCM.Project, Revision As %String, ReleasePath As %String, Output ErrorMsg As %String) As %Status
+{
 	Set ErrorMsg = ""
 	
 	For i = 1:1:$Length(..PostProcessors, ",") {
@@ -409,27 +357,18 @@ Helper for MakeRelease: runs post-processors</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetCommandOutput">
-<Description>
-Returns the output of an svn command (to be passed in without
-specifying the executable path). If Split is true, returns it
-as a list of lines, already stripped. If an error occurs, the
-output parameter ErrorMsg will contain information. A timeout
-may occur on the Read if Cache does not have permission to
-read the repository.</Description>
-<FormalSpec>Command:%String,Split:%Boolean=0,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%ListOfObjects</ReturnType>
-<Implementation><![CDATA[
+/// Returns the output of an svn command (to be passed in without
+/// specifying the executable path). If Split is true, returns it
+/// as a list of lines, already stripped. If an error occurs, the
+/// output parameter ErrorMsg will contain information. A timeout
+/// may occur on the Read if Cache does not have permission to
+/// read the repository.
+Method GetCommandOutput(Command As %String, Split As %Boolean = 0, Output ErrorMsg As %String) As %ListOfObjects
+{
 	; Prefix command with normalized path to svn executable
 	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(..SvnPath)
 	Set Command = Executable_" "_Command
@@ -441,13 +380,10 @@ read the repository.</Description>
 	If Split Set Result = ##class(Strix.Lib.String).SplitLines(Result)
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetCurrentRevision">
-<FormalSpec>ItemPath:%String,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+Method GetCurrentRevision(ItemPath As %String, Output ErrorMsg As %String) As %String
+{
 	;Split executable in file and directory
 	Set Dir = ##class(%File).GetDirectory(..SvnPath)
 	Set File = ##class(%File).GetFilename(..SvnPath)
@@ -475,13 +411,10 @@ read the repository.</Description>
 	Set Result = +Result
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetGUICommand">
-<FormalSpec>Command:%String,*ErrorMsg:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+Method GetGUICommand(Command As %String, Output ErrorMsg As %String) As %String
+{
 	Set ErrorMsg = ""
 	
 	Set Dir = ##class(%File).GetDirectory(..SvnPath)
@@ -496,7 +429,7 @@ read the repository.</Description>
 	Set Command = Executable_" "_Command
 	
 	Quit Command
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

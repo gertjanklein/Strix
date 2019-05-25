@@ -1,13 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.UI.Resources">
-<Super>%CSP.Page</Super>
-<TimeCreated>63868,66875.573245</TimeCreated>
+Class Strix.SCM.UI.Resources Extends %CSP.Page
+{
 
-<Method name="CSS">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod CSS() As %String
+{
 	&html<<style type="text/css">
 html, body {
   margin: 0;
@@ -200,13 +195,10 @@ div.Summary {
 	>
 	
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnPreHTTP">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+ClassMethod OnPreHTTP() As %Boolean
+{
 	Set Data = ..ImageData(%request.Get("img"), .ContentType)
 	If Data '= "" {
 		Set %response.ContentType = ContentType
@@ -216,27 +208,19 @@ div.Summary {
 	}
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnPage">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod OnPage() As %Status
+{
 	Set Data = ..ImageData(%request.Get("img"))
 	If Data = "" Set Data = "Not found."
 	Write Data
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ImageData">
-<Description>
-Image data; part of class for easier deployment.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,*ContentType:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Image data; part of class for easier deployment.
+ClassMethod ImageData(Name As %String, Output ContentType As %String) As %String
+{
 	Set Data = ""
 	
 	If Name = "ok" {
@@ -294,7 +278,7 @@ Image data; part of class for easier deployment.</Description>
 	Set Result = $System.Encryption.Base64Decode(Data)
 	
 	Quit Result
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

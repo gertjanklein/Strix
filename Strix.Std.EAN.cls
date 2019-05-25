@@ -1,24 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Std.EAN">
-<Description>
-European Article Number (13) validation. This is also called
-International Article Number; see:
-https://en.wikipedia.org/wiki/International_Article_Number_%28EAN%29</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63924,46681.654937</TimeCreated>
+/// European Article Number (13) validation. This is also called
+/// International Article Number; see:
+/// https://en.wikipedia.org/wiki/International_Article_Number_%28EAN%29
+Class Strix.Std.EAN Extends %RegisteredObject
+{
 
-<Method name="IsValid13">
-<Description>
-Returns a boolean indicating whether the EAN-13 is valid. Supports
-grouping with spaces, dots, and dashes; output parameter Normalized
-returns the EAN with those removed.
-The checksum algorithm is the same as that of ISBN-13, and described here:
-https://en.wikipedia.org/wiki/International_Standard_Book_Number#ISBN-13_check_digit_calculation</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>EAN13:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether the EAN-13 is valid. Supports
+/// grouping with spaces, dots, and dashes; output parameter Normalized
+/// returns the EAN with those removed.
+/// The checksum algorithm is the same as that of ISBN-13, and described here:
+/// https://en.wikipedia.org/wiki/International_Standard_Book_Number#ISBN-13_check_digit_calculation
+ClassMethod IsValid13(EAN13 As %String, Output Normalized As %String) As %Boolean
+{
 	Set Normalized = $Translate(EAN13, " -.", "")
 	
 	If Normalized '? 13N Quit 0
@@ -38,19 +30,14 @@ https://en.wikipedia.org/wiki/International_Standard_Book_Number#ISBN-13_check_d
 	If $Extract(Normalized, 13) '= Check Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="IsValid8">
-<Description>
-Returns a boolean indicating whether the EAN-8 is valid. Supports
-grouping with spaces, dots, and dashes; output parameter Normalized
-returns the EAN with those removed.
-The checksum algorithm is similar to that of EAN-13.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>EAN8:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether the EAN-8 is valid. Supports
+/// grouping with spaces, dots, and dashes; output parameter Normalized
+/// returns the EAN with those removed.
+/// The checksum algorithm is similar to that of EAN-13.
+ClassMethod IsValid8(EAN8 As %String, Output Normalized As %String) As %Boolean
+{
 	Set Normalized = $Translate(EAN8, " -.", "")
 	
 	If Normalized '? 8N Quit 0
@@ -71,7 +58,7 @@ The checksum algorithm is similar to that of EAN-13.</Description>
 	
 	
 	Quit 1
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

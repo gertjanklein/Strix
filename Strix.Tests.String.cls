@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.String">
-<Description>
-Test code for class Strix.Lib.String</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,82042.977252</TimeCreated>
+/// Test code for class Strix.Lib.String
+Class Strix.Tests.String Extends Strix.Testing.TestCase
+{
 
-<Method name="TestTemplateReplace">
-<Implementation><![CDATA[
+Method TestTemplateReplace()
+{
 	Set Template = "{}{}{}"
 	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, "a", "b", "c")
 	Do ..AssertEqual(Result, "abc", "Basic sequential replacement.")
@@ -37,11 +33,10 @@ Test code for class Strix.Lib.String</Description>
 	Do ..AssertEqual(Result, "a", "Ignore extraneous parameters in %List.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestTemplateReplaceKwArgs">
-<Implementation><![CDATA[
+Method TestTemplateReplaceKwArgs()
+{
 	; Keyword argument
 	Set Template = "{a}"
 	Set Result = ##class(Strix.Lib.String).TemplateReplace(Template, {"a":42})
@@ -63,11 +58,10 @@ Test code for class Strix.Lib.String</Description>
 	Do ..AssertEqual(Result, "142", "Basic keyword argument replacement.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestListObjToString">
-<Implementation><![CDATA[
+Method TestListObjToString()
+{
 	Set List = ##class(%ListOfDataTypes).%New()
 	
 	Set Result = ##class(Strix.Lib.String).ListObjToString(List)
@@ -88,11 +82,10 @@ Test code for class Strix.Lib.String</Description>
 	Do ..AssertListEqual(Result, $ListFromString("a,b,c"), "Proper result as %List.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestListObjFromString">
-<Implementation><![CDATA[
+Method TestListObjFromString()
+{
 	#dim List As %Collection.AbstractListOfDT
 	
 	Do ##class(Strix.Lib.String).ListObjFromString("", , .List)
@@ -121,13 +114,11 @@ Test code for class Strix.Lib.String</Description>
 	Do ..AssertEqual(List.Count(), 3, "%List should be automatically recognised.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestRxReplace">
-<Description>
-Minimal tests for the RxReplace method.</Description>
-<Implementation><![CDATA[
+/// Minimal tests for the RxReplace method.
+Method TestRxReplace()
+{
 	; Test simple backref
 	Set Result = ##class(Strix.Lib.String).RxReplace("XnXValue", "^XnX(.*)", "$1")
 	Do ..AssertEqual(Result, "Value", "Backreference works.")
@@ -153,7 +144,7 @@ Minimal tests for the RxReplace method.</Description>
 	Do ..AssertEqual(Result, "The Blue parrot is Blue", "Matching is case sensitive by default.")
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

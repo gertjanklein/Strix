@@ -1,13 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.UI.Support">
-<Super>%CSP.Page</Super>
-<TimeCreated>64293,67266.95157</TimeCreated>
+Class Strix.SCM.UI.Support Extends %CSP.Page
+{
 
-<Method name="DecomposeStatus">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Message:%String="",Status:%Status="",EscapeHTML=1,Separator:%String="<br>",Nl2Br=1,AddZE:%Boolean=0]]></FormalSpec>
-<Implementation><![CDATA[
+ClassMethod DecomposeStatus(Message As %String = "", Status As %Status = "", EscapeHTML = 1, Separator As %String = "<br>", Nl2Br = 1, AddZE As %Boolean = 0)
+{
 	If EscapeHTML Set Message = ..EscapeHTML(Message)
 	
 	If Status '= "" {
@@ -37,14 +32,10 @@
 	If AddZE Set Message = Message_Separator_$Select(EscapeHTML: $ZConvert($ZError, "O", "HTML"), 1: $ZError)
 	
 	Quit Message
-]]></Implementation>
-</Method>
+}
 
-<Method name="TextInput">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,Size:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod TextInput(Name As %String, Size As %Integer) As %String
+{
 	Set Result = "<input type=""text"" name="""_Name_""""
 	
 	Set Result = Result_" class=""Text"""
@@ -57,14 +48,10 @@
 	Set Result = Result_">"
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="TextArea">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,Rows:%Integer,Cols:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod TextArea(Name As %String, Rows As %Integer, Cols As %Integer) As %String
+{
 	Set Value = %request.Get(Name)
 	
 	;Simple auto-resize
@@ -80,14 +67,10 @@
 	Set Result = Result_"</textarea>"
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="HiddenInput">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod HiddenInput(Name As %String) As %String
+{
 	Set Result = "<input type=""hidden"" name="""_Name_""""
 	
 	Set Value = %request.Get(Name)
@@ -96,14 +79,10 @@
 	Set Result = Result_">"
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckBox">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,ForceChecked:%Boolean=0</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod CheckBox(Name As %String, ForceChecked As %Boolean = 0) As %String
+{
 	Set Result = "<input type=""checkbox"" name="""_Name_""""
 	
 	If %request.IsDefined(Name) || ForceChecked Set Result = Result_" checked"
@@ -111,7 +90,7 @@
 	Set Result = Result_">"
 	
 	Quit Result
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

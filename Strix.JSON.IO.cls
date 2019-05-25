@@ -1,18 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.IO">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64395,34993.066133</TimeCreated>
+Include Strix
 
-<Method name="JSONExport">
-<Description>
-Creates a %DynamicObject for the Caché object passed in. The Caché
-object is expected be a subclass of Strix.JSON.Adaptor.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Object:Strix.JSON.Adaptor,Sparse:%Boolean=0,Spec:%String="",*Status:%Status</FormalSpec>
-<ReturnType>%DynamicObject</ReturnType>
-<Implementation><![CDATA[
+Class Strix.JSON.IO Extends %RegisteredObject
+{
+
+/// Creates a %DynamicObject for the Caché object passed in. The Caché
+/// object is expected be a subclass of Strix.JSON.Adaptor.
+ClassMethod JSONExport(Object As Strix.JSON.Adaptor, Sparse As %Boolean = 0, Spec As %String = "", Output Status As %Status) As %DynamicObject
+{
 	Set Result = {}, Status = $$$OK
 	
 	; Get class-level and runtime I/O specs
@@ -81,17 +75,12 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="JSONImport">
-<Description>
-Loads data in a Caché object from a %DynamicObject. The Caché
-object is expected be a subclass of Strix.JSON.Adaptor.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Object:Strix.JSON.Adaptor,Data:%DynamicObject,Spec:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads data in a Caché object from a %DynamicObject. The Caché
+/// object is expected be a subclass of Strix.JSON.Adaptor.
+ClassMethod JSONImport(Object As Strix.JSON.Adaptor, Data As %DynamicObject, Spec As %String = "") As %Status
+{
 	Set ClassName = Object.%ClassName(1)
 	
 	; Get class-level and runtime I/O specs
@@ -172,25 +161,16 @@ object is expected be a subclass of Strix.JSON.Adaptor.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetSpec">
-<Description>
-Gets JSON I/O specifications.
-Merges them from two locations: the object parameter and
-a runtime override. Returns the data as an array, indexed
-by name, in output parameter ByName.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Override:%String,FromObject:%String,*ByName:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Gets JSON I/O specifications.
+/// Merges them from two locations: the object parameter and
+/// a runtime override. Returns the data as an array, indexed
+/// by name, in output parameter ByName.
+ClassMethod GetSpec(Override As %String, FromObject As %String, Output ByName As %String)
+{
 	If FromObject '= "", Override '= "" {
 		Set Specs = FromObject_","_Override
 	} Else {
@@ -206,23 +186,13 @@ by name, in output parameter ByName.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ListIn">
-<Description>
-Loads items from the %DynamicArray (JSON list) into the Caché list.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String="",PropInfo:%List,List:%AbstractList,Data:%DynamicArray</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads items from the %DynamicArray (JSON list) into the Caché list.
+ClassMethod ListIn(ClassName As %String = "", PropInfo As %List, List As %AbstractList, Data As %DynamicArray) As %Status
+{
 	Do List.Clear()
 	Set it = Data.%GetIterator()
 	
@@ -252,17 +222,12 @@ Loads items from the %DynamicArray (JSON list) into the Caché list.</Descriptio
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ArrayIn">
-<Description>
-Loads items from the %DynamicObject (JSON object) into the Caché array. The
-%DynamicObject property name is used as the Caché array key.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,PropInfo:%List,Array:%AbstractArray,Data:%DynamicObject</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads items from the %DynamicObject (JSON object) into the Caché array. The
+/// %DynamicObject property name is used as the Caché array key.
+ClassMethod ArrayIn(ClassName As %String, PropInfo As %List, Array As %AbstractArray, Data As %DynamicObject) As %Status
+{
 	Do Array.Clear()
 	Set it = Data.%GetIterator()
 	
@@ -291,17 +256,12 @@ Loads items from the %DynamicObject (JSON object) into the Caché array. The
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ValueIn">
-<Description>
-Converts, if necessary, a value retrieved from a %DynamicObject to the
-appropriate Caché value, and checks whether it is valid for the Caché datatype.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String="",PropInfo:%List,Value:%String,*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts, if necessary, a value retrieved from a %DynamicObject to the
+/// appropriate Caché value, and checks whether it is valid for the Caché datatype.
+ClassMethod ValueIn(ClassName As %String = "", PropInfo As %List, Value As %String, Output Status As %Status) As %String
+{
 	Set Status = $$$OK
 	If Value = "" Quit ""
 	
@@ -328,23 +288,13 @@ appropriate Caché value, and checks whether it is valid for the Caché datatype
 	}
 	
 	Quit Value
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ListOut">
-<Description>
-Places items in the Caché list into a %DynamicArray.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>PropInfo:%List,Sparse:%Boolean,List:%AbstractList,*Data:%DynamicArray</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Places items in the Caché list into a %DynamicArray.
+ClassMethod ListOut(PropInfo As %List, Sparse As %Boolean, List As %AbstractList, Output Data As %DynamicArray) As %Status
+{
 	If Sparse, 'List.Count() Set Data = "" Quit $$$OK
 	
 	Set Data = []
@@ -373,17 +323,12 @@ Places items in the Caché list into a %DynamicArray.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ArrayOut">
-<Description>
-Places items in the Caché array into a %DynamicObject; the caché key will
-be used as the property name.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>PropInfo:%List,Sparse:%Boolean,Array:%AbstractArray,*Data:%DynamicObject</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Places items in the Caché array into a %DynamicObject; the caché key will
+/// be used as the property name.
+ClassMethod ArrayOut(PropInfo As %List, Sparse As %Boolean, Array As %AbstractArray, Output Data As %DynamicObject) As %String
+{
 	If Sparse, 'Array.Count() Set Data = "" Quit $$$OK
 	
 	Set Data = {}
@@ -416,17 +361,12 @@ be used as the property name.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ValueOut">
-<Description>
-Converts, if necessary, a Caché property value to the JSON equivalent.
-Also returns the JSON datatype (string, number, boolean, or null).</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Value:%String,Datatype:%String,*JSONType:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts, if necessary, a Caché property value to the JSON equivalent.
+/// Also returns the JSON datatype (string, number, boolean, or null).
+ClassMethod ValueOut(Value As %String, Datatype As %String, Output JSONType As %String) As %String
+{
 	Set JSONType = "string"
 	If Value = "" Quit ""
 	If Value = $Char(0) Quit ""
@@ -446,7 +386,7 @@ Also returns the JSON datatype (string, number, boolean, or null).</Description>
 	}
 	
 	Quit Value
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

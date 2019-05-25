@@ -1,199 +1,116 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.HandlerProxy">
-<Description>
-Base handler: determines the appropriate handler to use.</Description>
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63864,78375.457203</TimeCreated>
+Include Strix.SCM
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Base handler: determines the appropriate handler to use.
+Class Strix.SCM.HandlerProxy Extends %RegisteredObject
+{
+
 // ===== Studio menu handlers
 
-]]></Content>
-</UDLText>
-
-<Method name="UserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnMenuItem">
-<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="AfterUserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
+}
 
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio callbacks
 
-]]></Content>
-</UDLText>
-
-<Method name="OnBeforeLoad">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnBeforeLoad(InternalName As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeLoad(InternalName)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterLoad">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterLoad(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterLoad(InternalName, Object)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnBeforeSave">
-<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnBeforeSave(InternalName As %String, Location As %String = "", Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeSave(InternalName, Location, Object)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterSave">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterSave(InternalName, Object)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterStorage">
-<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterStorage(InternalName As %String, Location As %String = "") As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterStorage(InternalName, Location)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnBeforeCompile">
-<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnBeforeCompile(InternalName As %String, ByRef qstruct As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeCompile(InternalName, .qstruct)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterCompile">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterCompile(InternalName As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterCompile(InternalName)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnBeforeDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnBeforeDelete(InternalName As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnBeforeDelete(InternalName)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="OnAfterDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnAfterDelete(InternalName As %String) As %Status
+{
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
 	Quit Handler.OnAfterDelete(InternalName)
+}
 
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Other forwarded methods
 
-]]></Content>
-</UDLText>
-
-<Method name="GetMainMenus">
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+Method GetMainMenus(Output Status As %Status) As %List
+{
 	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Quit Handler.GetMainMenus(.Status)
+}
 
-]]></Implementation>
-</Method>
-
-<Method name="GetMenuItems">
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+Method GetMenuItems(Output Status As %Status) As %List
+{
 	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	Quit Handler.GetMenuItems(.Status)
+}
 
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="GetHandlers">
-<Description>
-Returns a list of classnames of all available handlers.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>*Handlers:%ListOfDataTypes</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns a list of classnames of all available handlers.
+ClassMethod GetHandlers(Output Handlers As %ListOfDataTypes) As %Status
+{
 	Set Handlers = ##class(%ListOfDataTypes).%New()
 	
 	Set stm = ##class(%SQL.Statement).%New()
@@ -208,8 +125,7 @@ Returns a list of classnames of all available handlers.</Description>
 	}
 	
 	Quit $$$OK
+}
 
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+

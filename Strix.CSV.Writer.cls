@@ -1,32 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.CSV.Writer">
-<Abstract>1</Abstract>
-<IncludeCode>Strix</IncludeCode>
-<IncludeGenerator>Strix</IncludeGenerator>
-<PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
-<TimeCreated>65153,70175.250605</TimeCreated>
+Include Strix
 
-<Parameter name="CSVSeparator">
-<Description>
-Separator to use on output</Description>
-<Default>,</Default>
-</Parameter>
+IncludeGenerator Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.CSV.Writer [ Abstract, PropertyClass = Strix.CSV.PropertyParm ]
+{
+
+/// Separator to use on output
+Parameter CSVSeparator = ",";
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CSVGetHeaderRow">
-<Description>
-Returns the header row, consisting of the property names or
-the strings specified by property parameter CsvColumnHeader.</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the header row, consisting of the property names or
+/// the strings specified by property parameter CsvColumnHeader.
+ClassMethod CSVGetHeaderRow() As %String
+{
 	Set Result = ""
 	Set ColumnList = ..CSVGetInfo()
 	For i = 1:1:$ListLength(ColumnList) {
@@ -38,14 +25,11 @@ the strings specified by property parameter CsvColumnHeader.</Description>
 		Set Result = Result_Name
 	}
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="CSVGetRow">
-<Description>
-Returns the CSV for this object.</Description>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the CSV for this object.
+Method CSVGetRow() As %String
+{
 	Set ColumnList = ..CSVGetInfo()
 	For i = 1:1:$ListLength(ColumnList) {
 		Set Column = $List(ColumnList, i)
@@ -68,18 +52,13 @@ Returns the CSV for this object.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="CSVEscape">
-<Description>
-Escapes a value, by surrounding it with quotes, if needed:
-if a quote, the separator character, or cr/lf are present.
-Quotes inside a quoted value are escaped by doubling them.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Value:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Escapes a value, by surrounding it with quotes, if needed:
+/// if a quote, the separator character, or cr/lf are present.
+/// Quotes inside a quoted value are escaped by doubling them.
+ClassMethod CSVEscape(Value As %String) As %String
+{
 	If (Value [ """")
 	   || (Value [ ..#CSVSeparator)
 	   || (Value [ $Char(13))
@@ -87,17 +66,12 @@ Quotes inside a quoted value are escaped by doubling them.</Description>
 		Quit """"_$Replace(Value, """", """""")_""""
 	}
 	Quit Value
-]]></Implementation>
-</Method>
+}
 
-<Method name="CSVDataTypeOut">
-<Description>
-Datatype conversion callback. Receives property name, column name,
-datatype, and value. Expected to return the converted value.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,ColumnName:%String,Type:%String,Value:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Datatype conversion callback. Receives property name, column name,
+/// datatype, and value. Expected to return the converted value.
+ClassMethod CSVDataTypeOut(Name As %String, ColumnName As %String, Type As %String, Value As %String) As %String
+{
 	If Value = "" Quit ""
 	
 	If Type = "%Date" Quit $ZDate(Value, 3)
@@ -105,26 +79,18 @@ datatype, and value. Expected to return the converted value.</Description>
 	If Type = "%TimeStamp" Quit $Translate($ZDateTime(Value, 3, 1), " ", "T")
 	
 	Quit Value
-]]></Implementation>
-</Method>
+}
 
-<Method name="CSVUpdateRow">
-<Description>
-Generic callback for updates to a row before it is being output.
-Receives data keyed on property name, after datatype conversion.</Description>
-<FormalSpec><![CDATA[&RowData:%String]]></FormalSpec>
-<Implementation><![CDATA[	Quit
-]]></Implementation>
-</Method>
+/// Generic callback for updates to a row before it is being output.
+/// Receives data keyed on property name, after datatype conversion.
+Method CSVUpdateRow(ByRef RowData As %String)
+{
+	Quit
+}
 
-<Method name="CSVGetInfo">
-<Description>
-Helper: returns CSV column info</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<Private>1</Private>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Helper: returns CSV column info
+ClassMethod CSVGetInfo() As %List [ CodeMode = objectgenerator, Private ]
+{
 	#dim Properties As %Collection.AbstractList
 	Set Properties = ##class(Strix.Generator.Utilities).GetOrderedList(%compiledclass.Properties, .sc)
 	If 'sc Quit $$$BuildStatus("Error retrieving property list for class {}:", sc, %class.Name)
@@ -160,7 +126,7 @@ Helper: returns CSV column info</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

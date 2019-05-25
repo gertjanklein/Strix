@@ -1,17 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.String">
-<Description>
-Various string manipulation methods.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63850,48932.807424</TimeCreated>
+/// Various string manipulation methods.
+Class Strix.Lib.String Extends %RegisteredObject
+{
 
-<Method name="Explode">
-<Description>
-Converts a piece-separated string to individual pieces, indexed sequentially.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%String,Separator:%String,*Pieces:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Converts a piece-separated string to individual pieces, indexed sequentially.
+ClassMethod Explode(Input As %String, Separator As %String, Output Pieces As %String)
+{
 	Kill Pieces
 	Set Pieces = 0
 	
@@ -22,17 +15,12 @@ Converts a piece-separated string to individual pieces, indexed sequentially.</D
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="ListFromArray">
-<Description>
-Converts the keys of an array to a %List or (if Separator is not empty)
-a piece-separated string.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&Array:%String,Separator:%String=","]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts the keys of an array to a %List or (if Separator is not empty)
+/// a piece-separated string.
+ClassMethod ListFromArray(ByRef Array As %String, Separator As %String = ",") As %String
+{
 	Set Result = ""
 	Set Key = ""
 	For  {
@@ -44,18 +32,13 @@ a piece-separated string.</Description>
 	If Separator '= "" Set Result = $ListToString(Result, Separator)
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="SplitLines">
-<Description>
-Splits a string containing newlines into a list of lines. StripCfg
-configures how whitespace in the lines is handled; if empty it is left
-untouched.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Input:%String,StripCfg:%String=">WC",SkipEmptyLines:%Boolean=0]]></FormalSpec>
-<ReturnType>%ListOfDataTypes</ReturnType>
-<Implementation><![CDATA[
+/// Splits a string containing newlines into a list of lines. StripCfg
+/// configures how whitespace in the lines is handled; if empty it is left
+/// untouched.
+ClassMethod SplitLines(Input As %String, StripCfg As %String = ">WC", SkipEmptyLines As %Boolean = 0) As %ListOfDataTypes
+{
 	Set Result = ##class(%ListOfDataTypes).%New()
 	For i = 1:1:$Length(Input, $Char(10)) {
 		Set Line = $Piece(Input, $Char(10), i)
@@ -64,32 +47,27 @@ untouched.</Description>
 		Do Result.Insert(Line)
 	}
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="TemplateReplace">
-<Description>
-Replaces parameter references in property Text with their values in property Parameters.
-
-Parameter references use braces, as in:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{2}{3}", "a", "b", "c")
-The number between the braces is the parameter number, and is optional if
-this number would equal the parameter reference number. The following example
-therefore gives the same result as the previous one:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{}{3}", "a", "b", "c")
-and this example as well:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {}{}{}", "a", "b", "c")
-
-Values may be passed in as multiple method parameters, e.g.:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, "a", "b", "c", ...)
-or as a single $List, e.g.:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, $ListBuild("a", "b", "c", ...))
-or as JSON, to use as keyword parameters:
-  Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, {"a":42})</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Template:%String,Parameters...:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Replaces parameter references in property Text with their values in property Parameters.
+/// 
+/// Parameter references use braces, as in:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{2}{3}", "a", "b", "c")
+/// The number between the braces is the parameter number, and is optional if
+/// this number would equal the parameter reference number. The following example
+/// therefore gives the same result as the previous one:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {1}{}{3}", "a", "b", "c")
+/// and this example as well:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace("abc = {}{}{}", "a", "b", "c")
+/// 
+/// Values may be passed in as multiple method parameters, e.g.:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, "a", "b", "c", ...)
+/// or as a single $List, e.g.:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, $ListBuild("a", "b", "c", ...))
+/// or as JSON, to use as keyword parameters:
+///   Set Result  = ##class(Strix.Lib.String).TemplateReplace(Text, {"a":42})
+ClassMethod TemplateReplace(Template As %String, Parameters... As %String) As %String
+{
 	;Allow passing in a $list with parameters
 	If $Get(Parameters) = 1, $Get(Parameters(1)) '= "", $ListValid(Parameters(1)) {
 		Set Data = Parameters(1)
@@ -164,17 +142,12 @@ or as JSON, to use as keyword parameters:
 	}
 	
 	Quit Template
-]]></Implementation>
-</Method>
+}
 
-<Method name="HexEncode">
-<Description>
-Converts a binary sequence of bytes into a string of hexadecimal digits
-representing the byte's value.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%Binary,Lowercase:%Boolean=1</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts a binary sequence of bytes into a string of hexadecimal digits
+/// representing the byte's value.
+ClassMethod HexEncode(Input As %Binary, Lowercase As %Boolean = 1) As %String
+{
 	Set Result = ""
 	
 	For i = 1:1:$Length(Input) {
@@ -187,17 +160,12 @@ representing the byte's value.</Description>
 	If Lowercase Set Result = $ZConvert(Result, "l")
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="ListObjToString">
-<Description>
-Converts a %ListOfDataType-type object to a character-separated
-string if Separator is non-empty, or to a %List if it is empty.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>List:%Collection.AbstractListOfDT,Separator:%String=","</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts a %ListOfDataType-type object to a character-separated
+/// string if Separator is non-empty, or to a %List if it is empty.
+ClassMethod ListObjToString(List As %Collection.AbstractListOfDT, Separator As %String = ",") As %String
+{
 	Set Result = ""
 	
 	Set Key = "", Nr = 0
@@ -215,17 +183,13 @@ string if Separator is non-empty, or to a %List if it is empty.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="ListObjFromString">
-<Description>
-Converts a character-separated string or a %List into a
-%ListOfDataType-type object. If no list object is passed in,
-a %ListOfDataTypes object is created.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%String,Separator:%String=",",*Result:%Collection.AbstractListOfDT</FormalSpec>
-<Implementation><![CDATA[
+/// Converts a character-separated string or a %List into a
+/// %ListOfDataType-type object. If no list object is passed in,
+/// a %ListOfDataTypes object is created.
+ClassMethod ListObjFromString(Input As %String, Separator As %String = ",", Output Result As %Collection.AbstractListOfDT)
+{
 	If '$IsObject($Get(Result)) Set Result = ##class(%ListOfDataTypes).%New()
 	
 	If Input = "" Quit
@@ -242,36 +206,26 @@ a %ListOfDataTypes object is created.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="RxReplace">
-<Description>
-Replace based on a regular expression. Example:
-  . RxReplace("XnXValue", "^XnX(.*)", "$1") = "Value"</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>String:%String,RegEx:%String,With:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Replace based on a regular expression. Example:
+///   . RxReplace("XnXValue", "^XnX(.*)", "$1") = "Value"
+ClassMethod RxReplace(String As %String, RegEx As %String, With As %String) As %String
+{
 	Set rx = ##class(%Regex.Matcher).%New(RegEx, String)
 	Set Result = rx.ReplaceAll(With)
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="UnQuote">
-<Description>
-Returns a quoted string unquoted ("XXX" becomes XXX).</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%String,Unescape:%Boolean=0</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a quoted string unquoted ("XXX" becomes XXX).
+ClassMethod UnQuote(Input As %String, Unescape As %Boolean = 0) As %String
+{
 	If $Extract(Input) '= """" Quit Input
 	If $Extract(Input, *) '= """" Quit Input
 	Set Input = $Extract(Input, 2, *-1)
 	If Unescape Set Input = $Replace(Input, """""", """")
 	Quit Input
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

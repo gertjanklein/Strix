@@ -1,52 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Work.WebEdit">
-<Description>
-Simple class to make editing of persistent classes through CSP possible.
-To use, create a subclass and specify at least parameter ClassName.</Description>
-<Abstract>1</Abstract>
-<IncludeCode>Strix</IncludeCode>
-<IncludeGenerator>Strix</IncludeGenerator>
-<Super>%CSP.Page</Super>
-<TimeCreated>65140,44787.654621</TimeCreated>
+Include Strix
 
-<Parameter name="ClassName">
-<Description>
-The name of the class to edit instances of.</Description>
-<Type>CLASSNAME</Type>
-</Parameter>
+IncludeGenerator Strix
 
-<Parameter name="ListFields">
-<Description>
-The fields to use for listing, separated by commas. Default is to use
-all fields. Can be either positive (fields to use) or negative (fields
-to exclude); in the latter case, prefix the field name with a minus (-).</Description>
-<Type>STRING</Type>
-</Parameter>
+/// Simple class to make editing of persistent classes through CSP possible.
+/// To use, create a subclass and specify at least parameter ClassName.
+Class Strix.Work.WebEdit Extends %CSP.Page [ Abstract ]
+{
 
-<Parameter name="FieldTypes">
-<Description>
-HTML type overrides to use for fields. Contains a comma-separated list
-of specifications of the form:
-  PropertyName:HTMLWidget:Attr=Value:Attr=Value:...
-PropertyName is the name of the property to specify the widget for
-HTMLWidget is "text" (default) or "textarea"
-Attr=Value specifies (optional) attributes for the widget, e.g. "cols=50".</Description>
-<Type>STRING</Type>
-</Parameter>
+/// The name of the class to edit instances of.
+Parameter ClassName As CLASSNAME;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The fields to use for listing, separated by commas. Default is to use
+/// all fields. Can be either positive (fields to use) or negative (fields
+/// to exclude); in the latter case, prefix the field name with a minus (-).
+Parameter ListFields As STRING;
+
+/// HTML type overrides to use for fields. Contains a comma-separated list
+/// of specifications of the form:
+///   PropertyName:HTMLWidget:Attr=Value:Attr=Value:...
+/// PropertyName is the name of the property to specify the widget for
+/// HTMLWidget is "text" (default) or "textarea"
+/// Attr=Value specifies (optional) attributes for the widget, e.g. "cols=50".
+Parameter FieldTypes As STRING;
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="OnPreHTTP">
-<ClassMethod>1</ClassMethod>
-<PublicList>msg,emsg</PublicList>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+ClassMethod OnPreHTTP() As %Boolean [ PublicList = (msg, emsg) ]
+{
 	Set (msg, emsg) = ""
 	
 	#dim %request As %CSP.Request
@@ -83,14 +63,10 @@ Attr=Value specifies (optional) attributes for the widget, e.g. "cols=50".</Desc
 	
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnPage">
-<ClassMethod>1</ClassMethod>
-<PublicList>msg,emsg</PublicList>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod OnPage() As %Status [ PublicList = (msg, emsg) ]
+{
 	Set $ZTrap = "Error"
 	
 	; Error message: show in special page
@@ -113,14 +89,10 @@ Error
 	Set $ZTrap = ""
 	Write ..ErrMsg("Error trapped:", , 1, $Char(13,10), 0, 1)
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="List">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod List(Message As %String = "") As %Status
+{
 	Do ..Header("List "_..ClassName(0), , Message)
 	
 	&html<
@@ -189,14 +161,10 @@ function ays(cls,id)
 	Do ..Footer()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Edit">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Edit(Message As %String = "") As %Status
+{
 	Set Id = %request.Get("id")
 	
 	Set ClassName = ..ClassName()
@@ -245,14 +213,10 @@ function ays(cls,id)
 	Do ..Footer()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="FieldEdit">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Object:%Persistent,PropInfo:%List,FieldSpec:%List</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod FieldEdit(Object As %Persistent, PropInfo As %List, FieldSpec As %List) As %String
+{
 	Set Name = $List(PropInfo, 1), Type = $List(PropInfo, 2)
 	
 	; html type
@@ -285,13 +249,10 @@ function ays(cls,id)
 	
 	
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="ErrorPage">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Msg:%String,Title:%String="An error has occurred."</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod ErrorPage(Msg As %String, Title As %String = "An error has occurred.")
+{
 	Do ..Header(Title, "error")
 	
 	&html<<div class=error>#(Msg)#</div>>
@@ -299,13 +260,10 @@ function ays(cls,id)
 	Do ..Footer()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Header">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Title:%String="",Class:%String="",Message:%String=""</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod Header(Title As %String = "", Class As %String = "", Message As %String = "")
+{
 	&html<<!DOCTYPE HTML>
 <html>
 <head>
@@ -321,21 +279,16 @@ function ays(cls,id)
 	}
 	
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="Footer">
-<ClassMethod>1</ClassMethod>
-<Implementation><![CDATA[
+ClassMethod Footer()
+{
 	&html<</body>
 </html>>
-]]></Implementation>
-</Method>
+}
 
-<Method name="ErrMsg">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Message:%String="",Status:%Status="",EscapeHTML=1,Separator:%String="<br>",Nl2Br=1,AddZE:%Boolean=0]]></FormalSpec>
-<Implementation><![CDATA[
+ClassMethod ErrMsg(Message As %String = "", Status As %Status = "", EscapeHTML = 1, Separator As %String = "<br>", Nl2Br = 1, AddZE As %Boolean = 0)
+{
 	If EscapeHTML Set Message = ..EscapeHTML(Message)
 	
 	If Status '= "" {
@@ -365,12 +318,10 @@ function ays(cls,id)
 	If AddZE Set Message = Message_Separator_$Select(EscapeHTML: $ZConvert($ZError, "O", "HTML"), 1: $ZError)
 	
 	Quit Message
-]]></Implementation>
-</Method>
+}
 
-<Method name="CSS">
-<ClassMethod>1</ClassMethod>
-<Implementation><![CDATA[
+ClassMethod CSS()
+{
 	&html<
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 <style>
@@ -474,15 +425,11 @@ div.msg .fa-check {
 
 </style>>
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetListFields">
-<Description>
-Return a list of property names to display in the list page</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Return a list of property names to display in the list page
+ClassMethod GetListFields() As %List
+{
 	; Get specification from parameter
 	Set Spec = $Translate(..#ListFields, " ")
 	
@@ -504,13 +451,10 @@ Return a list of property names to display in the list page</Description>
 	}
 	
 	Quit ListFields
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetFieldTypes">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>*Types</FormalSpec>
-<Implementation><![CDATA[
+ClassMethod GetFieldTypes(Output Types)
+{
 	Set Spec = ..#FieldTypes
 	If Spec = "" Quit ""
 	
@@ -530,14 +474,10 @@ Return a list of property names to display in the list page</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="SaveObject">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Id:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+ClassMethod SaveObject(Id As %String) As %String
+{
 	
 	If Id '= "" {
 		Set Obj = $ZObjClassMethod(..ClassName(), "%OpenId", Id, , .sc)
@@ -569,14 +509,10 @@ Return a list of property names to display in the list page</Description>
 	If 'sc Quit ..ErrMsg("Error saving object:", sc)
 	
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetProperties">
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+ClassMethod GetProperties() As %List [ CodeMode = objectgenerator ]
+{
 	If %class.Abstract Quit $$$OK
 	If %parameter("ClassName") = "" Quit $$$BuildStatus("Parameter ClassName required.")
 	
@@ -620,20 +556,15 @@ Return a list of property names to display in the list page</Description>
 	Do %code.WriteLine($Select(ListText '= "": " Quit $lb("_ListText_")", 1: " Quit """""))
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ClassName">
-<Description>
-Returns the classname of the edited class</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Full:%Boolean=1</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the classname of the edited class
+ClassMethod ClassName(Full As %Boolean = 1) As %String
+{
 	Set ClassName = ..#ClassName
 	If 'Full Quit $Piece(ClassName, ".", *)
 	Quit ClassName
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

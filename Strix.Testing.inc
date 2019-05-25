@@ -1,10 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Routine name="Strix.Testing" type="INC"><![CDATA[
+ROUTINE Strix.Testing [Type=INC]
 #include Strix
 
 
 
 
-]]></Routine>
-</Export>

@@ -1,36 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Spooler">
-<Description>
-Class interface to the Caché spooler device.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63026,41246.75306</TimeCreated>
+/// Class interface to the Caché spooler device.
+Class Strix.Lib.Spooler Extends %RegisteredObject
+{
 
-<Property name="SavedIO">
-<Description>
-The value of $IO when the spooler is started</Description>
-<Type>%String</Type>
-</Property>
+/// The value of $IO when the spooler is started
+Property SavedIO As %String;
 
-<Property name="DocumentNumber">
-<Description>
-The spool document number</Description>
-<Type>%Integer</Type>
-</Property>
+/// The spool document number
+Property DocumentNumber As %Integer;
 
-<Property name="Data">
-<Description>
-Data collected by the spool device after method Start is called
-will be placed here when method Stop is called.</Description>
-<Type>%String</Type>
-</Property>
+/// Data collected by the spool device after method Start is called
+/// will be placed here when method Stop is called.
+Property Data As %String;
 
-<Method name="Start">
-<Description>
-Starts the spooler; replaces the current device</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>Strix.Lib.Spooler</ReturnType>
-<Implementation><![CDATA[
+/// Starts the spooler; replaces the current device
+ClassMethod Start() As Strix.Lib.Spooler
+{
 	Set Spooler = ..%New()
 	Set Spooler.SavedIO = $IO
 	Set Spooler.Data = ""
@@ -38,15 +22,12 @@ Starts the spooler; replaces the current device</Description>
 	Open 2:(Spooler.DocumentNumber)
 	Use 2
 	Quit Spooler
-]]></Implementation>
-</Method>
+}
 
-<Method name="Stop">
-<Description>
-Stops the spooler, restores the previous device, and returns any
-data collected when the spooler was active</Description>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Stops the spooler, restores the previous device, and returns any
+/// data collected when the spooler was active
+Method Stop() As %String
+{
 	;Stop spooler and restore previous device
 	Close 2
 	Use ..SavedIO
@@ -70,18 +51,15 @@ data collected when the spooler was active</Description>
 	If $Quit Quit Data
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetDocNumber">
-<Private>1</Private>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[
+Method GetDocNumber() As %Integer [ Private ]
+{
 	Lock +^SPOOL
 	Set DocumentNumber = $Order(^SPOOL(""), -1) + 1
 	Lock -^SPOOL
 	Quit DocumentNumber
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

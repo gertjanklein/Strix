@@ -1,26 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.XML.Util">
-<Description>
-Various XML-related helper methods</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64646,40025.46564</TimeCreated>
+Include Strix
 
-<Method name="ObjectsFromXML">
-<Description>
-Creates objects for the classes specified in ClassNames, from the
-XML in Input (a string, stream or filename), and returns them
-in Objects.
-The names of the classes to look for should be specified as either
-a comma-separated string or a $list. The XML name is taken from
-the XMLNAME class parameter.
-The Objects collection will be created if it doesn't exists; if it
-does, it will not be cleared.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input,ClassNames:%String,*Objects:%Collection.AbstractListOfObj=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Various XML-related helper methods
+Class Strix.XML.Util Extends %RegisteredObject
+{
+
+/// Creates objects for the classes specified in ClassNames, from the
+/// XML in Input (a string, stream or filename), and returns them
+/// in Objects.
+/// The names of the classes to look for should be specified as either
+/// a comma-separated string or a $list. The XML name is taken from
+/// the XMLNAME class parameter.
+/// The Objects collection will be created if it doesn't exists; if it
+/// does, it will not be cleared.
+ClassMethod ObjectsFromXML(Input, ClassNames As %String, Output Objects As %Collection.AbstractListOfObj = "") As %Status
+{
 	; Only create collection if not passed in
 	If '$IsObject(Objects) || 'Objects.%IsA("%Collection.AbstractListOfObj") {
 		Set Objects = ##class(%ListOfObjects).%New()
@@ -69,17 +62,12 @@ does, it will not be cleared.</Description>
 	If 'Status Quit $$$BuildErr("Error correlating object:", Status)
 
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetClassSchema">
-<Description>
-Outputs the schema for the given class (and dependent classes) to
-a stream.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,*Output:%Stream.Object=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Outputs the schema for the given class (and dependent classes) to
+/// a stream.
+ClassMethod GetClassSchema(ClassName As %String, Output Output As %Stream.Object = "") As %Status
+{
 	If '$IsObject(Output) {
 		Set Output = ##class(%Stream.TmpBinary).%New()
 	}
@@ -104,18 +92,13 @@ a stream.</Description>
 	If 'Status Quit $$$BuildStatus("Error writing schema:", Status)
 
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetPropertyFromDoc">
-<Description>
-Retrieves a property from an XML %XML.Document, either from an element
-or from an attribute. Can be used from a %XML.Adaptor:XMLNew() override
-to get the value of the id element or attribute.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Document:%XML.Document,NodeId:%Integer,Property:%String,IsAttribute:%Boolean=0</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Retrieves a property from an XML %XML.Document, either from an element
+/// or from an attribute. Can be used from a %XML.Adaptor:XMLNew() override
+/// to get the value of the id element or attribute.
+ClassMethod GetPropertyFromDoc(Document As %XML.Document, NodeId As %Integer, Property As %String, IsAttribute As %Boolean = 0) As %String
+{
 	Set Value = ""
 	
 	#dim Node As %XML.Node	
@@ -132,7 +115,7 @@ to get the value of the id element or attribute.</Description>
 	} While Node.MoveToNextSibling()
 	
 	Quit Value
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

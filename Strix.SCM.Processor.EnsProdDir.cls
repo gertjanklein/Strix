@@ -1,42 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Processor.EnsProdDir">
-<Description>
-Moves Ensemble Production classes to a subdirectory "Productions".</Description>
-<Super>Strix.SCM.Processor.Base</Super>
-<TimeCreated>64374,67492.869936</TimeCreated>
+/// Moves Ensemble Production classes to a subdirectory "Productions".
+Class Strix.SCM.Processor.EnsProdDir Extends Strix.SCM.Processor.Base
+{
 
-<Parameter name="HandlerType">
-<Description>
-This processor works on a release.</Description>
-<Default>Release</Default>
-</Parameter>
+/// This processor works on a release.
+Parameter HandlerType = "Release";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Run">
-<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Run(Revision As %String, Directory As %String) As %Status
+{
 	Set Status = ..MoveProductions(Directory)
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MoveProductions">
-<Description>
-Checks all export files in a directory, and moves any file containing
-a production to a subdirectory "Productions".</Description>
-<FormalSpec>Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Checks all export files in a directory, and moves any file containing
+/// a production to a subdirectory "Productions".
+Method MoveProductions(Directory As %String) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("%File:FileSet")
 	Set Status = rs.Execute(Directory, "*.xml")
 	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
@@ -75,14 +57,10 @@ a production to a subdirectory "Productions".</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="EnsureProductionDir">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ReleaseDirectory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod EnsureProductionDir(ReleaseDirectory As %String) As %Status
+{
 	Set ProdDir = ##class(%File).SubDirectoryName(ReleaseDirectory, "Productions")
 	If ##class(%File).DirectoryExists(ProdDir) Quit $$$OK
 	
@@ -90,7 +68,7 @@ a production to a subdirectory "Productions".</Description>
 	If 'rc Quit $$$BuildErr("Error {} creating directory {}", , ec, ProdDir)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

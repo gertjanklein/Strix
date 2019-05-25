@@ -1,34 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.JSONAdaptor">
-<Description>
-Test code for class Strix.JSON.Adaptor</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,77720.622688</TimeCreated>
+/// Test code for class Strix.JSON.Adaptor
+Class Strix.Tests.JSONAdaptor Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.JSONAdaptorTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.JSONAdaptorTest";
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-]]></Implementation>
-</Method>
+/// Code to run after all tests in this class have been executed.
+Method TearDown() As %Status
+{
+	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasicExport">
-<Description>
-Test basic JSON conversion</Description>
-<Implementation><![CDATA[
+/// Test basic JSON conversion
+Method TestBasicExport()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("String:%String,Bool:%Boolean")
@@ -54,13 +40,11 @@ Test basic JSON conversion</Description>
 	Do ..AssertEqual(DynObj.%GetTypeOf("bool"), "boolean", "Boolean property should have type boolean.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestExportListOfDT">
-<Description>
-Tests lists of datatypes are projected as arrays</Description>
-<Implementation><![CDATA[
+/// Tests lists of datatypes are projected as arrays
+Method TestExportListOfDT()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("Strings:%String:list,Bools:%Boolean:list")
@@ -94,13 +78,11 @@ Tests lists of datatypes are projected as arrays</Description>
 	}	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestRename">
-<Description>
-Tests specifying different JSON name</Description>
-<Implementation><![CDATA[
+/// Tests specifying different JSON name
+Method TestRename()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("String1:%String,String2:%String", .ClassDef)
@@ -126,13 +108,11 @@ Tests specifying different JSON name</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestExportJSONIONONE">
-<Description>
-Tests specifying a JSON projection of NONE on export</Description>
-<Implementation><![CDATA[
+/// Tests specifying a JSON projection of NONE on export
+Method TestExportJSONIONONE()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("String1:%String,String2:%String", .ClassDef)
@@ -158,13 +138,11 @@ Tests specifying a JSON projection of NONE on export</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestExportJSONIOIN">
-<Description>
-Tests specifying a JSON projection of IN on export</Description>
-<Implementation><![CDATA[
+/// Tests specifying a JSON projection of IN on export
+Method TestExportJSONIOIN()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("String1:%String,String2:%String", .ClassDef)
@@ -190,13 +168,11 @@ Tests specifying a JSON projection of IN on export</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestExportDelegation">
-<Description>
-Tests export of nested objects</Description>
-<Implementation><![CDATA[
+/// Tests export of nested objects
+Method TestExportDelegation()
+{
 	; Create class
 	
 	Set Status = ..CreateClass("String1:%String,SubObj:"_..#TestClassName, .ClassDef)
@@ -223,23 +199,13 @@ Tests export of nested objects</Description>
 	
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateClass">
-<Description>
-Create a class with the specified properties</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Properties:%String="",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Create a class with the specified properties
+ClassMethod CreateClass(Properties As %String = "", Output ClassDef As %Dictionary.ClassDefinition) As %Status
+{
 	Set Status = ##class(Strix.Testing.Support).CreateClass(..#TestClassName, "%RegisteredObject,Strix.JSON.Adaptor", .ClassDef)
 	If 'Status Quit Status
 	
@@ -257,7 +223,7 @@ Create a class with the specified properties</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

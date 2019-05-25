@@ -1,103 +1,48 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.CSV.Parser">
-<Description>
-A class to parse CSV data formatted according to RFC4180.
-Provides a resultset-like interface.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64661,63159.857904</TimeCreated>
+Include Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+/// A class to parse CSV data formatted according to RFC4180.
+/// Provides a resultset-like interface.
+Class Strix.CSV.Parser Extends %RegisteredObject
+{
+
 // ----- Input and configuration
 
-]]></Content>
-</UDLText>
+/// The input data as a stream
+Property Input As %Stream.Object;
 
-<Property name="Input">
-<Description>
-The input data as a stream</Description>
-<Type>%Stream.Object</Type>
-</Property>
+/// The separator to use
+Property Separator As %String [ InitialExpression = "," ];
 
-<Property name="Separator">
-<Description>
-The separator to use</Description>
-<Type>%String</Type>
-<InitialExpression>","</InitialExpression>
-</Property>
+/// The number of initial (header) lines to skip on parsing
+Property SkipCount As %Integer [ InitialExpression = 0 ];
 
-<Property name="SkipCount">
-<Description>
-The number of initial (header) lines to skip on parsing</Description>
-<Type>%Integer</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Whether to take column names from the first row
+Property NamesFromFirstRow As %Boolean [ InitialExpression = 0 ];
 
-<Property name="NamesFromFirstRow">
-<Description>
-Whether to take column names from the first row</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// If an adaptor class exists for this CSV, specify the name here
+/// so ..GetObject works.
+Property AdaptorClassName As %String;
 
-<Property name="AdaptorClassName">
-<Description>
-If an adaptor class exists for this CSV, specify the name here
-so ..GetObject works.</Description>
-<Type>%String</Type>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ----- State
 
-]]></Content>
-</UDLText>
+/// The number of the current record. This includes header rows,
+/// if any.
+Property RecordNr As %Integer;
 
-<Property name="RecordNr">
-<Description>
-The number of the current record. This includes header rows,
-if any.</Description>
-<Type>%Integer</Type>
-</Property>
+/// Optional mapping of column name to column index
+Property Names As %String [ MultiDimensional ];
 
-<Property name="Names">
-<Description>
-Optional mapping of column name to column index</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+/// The data indexed by column number
+Property Data As %String [ MultiDimensional ];
 
-<Property name="Data">
-<Description>
-The data indexed by column number</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+/// The data indexed by column name
+Property DataByName As %String [ MultiDimensional ];
 
-<Property name="DataByName">
-<Description>
-The data indexed by column name</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetParser">
-<Description>
-Returns an instance of this class with some properties setup.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Input:%AbstractStream,Separator:%String=",",SkipCount:%Integer=0,ColumnNames:%String</FormalSpec>
-<ReturnType>Strix.CSV.Parser</ReturnType>
-<Implementation><![CDATA[
+/// Returns an instance of this class with some properties setup.
+ClassMethod GetParser(Input As %AbstractStream, Separator As %String = ",", SkipCount As %Integer = 0, ColumnNames As %String) As Strix.CSV.Parser
+{
 	Set Me = ..%New()
 	Set Me.Input = Input
 	Set Me.Separator = Separator
@@ -105,26 +50,18 @@ Returns an instance of this class with some properties setup.</Description>
 	If SkipCount = 1, '$Data(ColumnNames) Set Me.NamesFromFirstRow = 1
 	If $Get(ColumnNames) '= "" Do Me.SetColumnNames(ColumnNames)
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="FromFile">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,Separator:%String=",",SkipCount:%Integer=0,ColumnNames:%String</FormalSpec>
-<ReturnType>Strix.CSV.Parser</ReturnType>
-<Implementation><![CDATA[
+ClassMethod FromFile(FileName As %String, Separator As %String = ",", SkipCount As %Integer = 0, ColumnNames As %String) As Strix.CSV.Parser
+{
 	Set File = ##class(%FileCharacterStream).%New()
 	Set Status = File.LinkToFile(FileName)
 	Quit ..GetParser(File, Separator, SkipCount, .ColumnNames)
-]]></Implementation>
-</Method>
+}
 
-<Method name="Next">
-<Description>
-Get the next record. Returns 0 if no more records available.</Description>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Get the next record. Returns 0 if no more records available.
+Method Next(Output Status As %Status) As %Boolean
+{
 	For  {
 		Set ok = ..GetRecord(.Status)
 		If 'ok Quit
@@ -151,56 +88,41 @@ Get the next record. Returns 0 if no more records available.</Description>
 	If 'ok Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="Get">
-<Description>
-Returns the data in the specified column for the current record.
-Parameter Default specifies what to return if a column is requested
-that wasn't present in the input.</Description>
-<CodeMode>expression</CodeMode>
-<FormalSpec>ColumnNr:%Integer,Default:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[$Get(i%Data(ColumnNr), Default)
-]]></Implementation>
-</Method>
+/// Returns the data in the specified column for the current record.
+/// Parameter Default specifies what to return if a column is requested
+/// that wasn't present in the input.
+Method Get(ColumnNr As %Integer, Default As %String = "") As %String [ CodeMode = expression ]
+{
+$Get(i%Data(ColumnNr), Default)
+}
 
-<Method name="GetByName">
-<Description>
-Returns the data in the column, specified by name, for the current
-record. If no column with that name is present, or if no data was
-supplied for it, returns the default value.</Description>
-<FormalSpec>ColumnName:%String,Default:%String=""</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the data in the column, specified by name, for the current
+/// record. If no column with that name is present, or if no data was
+/// supplied for it, returns the default value.
+Method GetByName(ColumnName As %String, Default As %String = "") As %String
+{
 	Set ColumnNr = $Get(..Names(ColumnName))
 	If ColumnNr = "" Quit Default
 	Quit $Get(..Data(ColumnNr), Default)
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetAsList">
-<Description>
-Returns the row as a %List.</Description>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns the row as a %List.
+Method GetAsList() As %List
+{
 	Set List = ""
 	For i = 1:1:..Data {
 		Set List = List_$ListBuild(..Data(i))
 	}
 	Quit List
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetObject">
-<Description>
-If an adaptor class has been created for this CSV (and ..AdaptorClassName
-has been set), this method returns an instance of that class for the
-current record.</Description>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>Strix.CSV.Adaptor</ReturnType>
-<Implementation><![CDATA[
+/// If an adaptor class has been created for this CSV (and ..AdaptorClassName
+/// has been set), this method returns an instance of that class for the
+/// current record.
+Method GetObject(Output Status As %Status) As Strix.CSV.Adaptor
+{
 	Set Status = $$$OK
 	
 	#dim Adaptor As Strix.CSV.Adaptor
@@ -217,22 +139,14 @@ current record.</Description>
 	}
 	
 	Quit Adaptor
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="SetColumnNames">
-<Description>
-Sets the column names to use for method GetByName. Specify as a
-string, the separator defaults to ..Separator but can be overridden.</Description>
-<FormalSpec>Names:%String,Separator:%String=""</FormalSpec>
-<Implementation><![CDATA[
+/// Sets the column names to use for method GetByName. Specify as a
+/// string, the separator defaults to ..Separator but can be overridden.
+Method SetColumnNames(Names As %String, Separator As %String = "")
+{
 	If Separator = "" Set Separator = ..Separator
 	
 	For ColumnNr = 1:1:$Length(Names, Separator) {
@@ -243,38 +157,27 @@ string, the separator defaults to ..Separator but can be overridden.</Descriptio
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetColumnNamesFromData">
-<Description>
-Sets column names from the data in ..Data.</Description>
-<Implementation><![CDATA[
+/// Sets column names from the data in ..Data.
+Method SetColumnNamesFromData()
+{
 	For ColumnNr = 1:1:..Data {
 		Set ColumnName = $ZStrip(..Data(ColumnNr), "<>W")
 		If ColumnName = "" Set ColumnName = "__"_ColumnNr
 		Set ..Names(ColumnName) = ColumnNr
 	}
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Private helper code
 
-]]></Content>
-</UDLText>
-
-<Method name="GetRecord">
-<Description>
-Retrieve the next record from the input stream. If no more records
-are present, returns false. In case of quoted fields, a record may
-span multiple lines. Returns parsing errors, if any, in output
-parameter Status.</Description>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Retrieve the next record from the input stream. If no more records
+/// are present, returns false. In case of quoted fields, a record may
+/// span multiple lines. Returns parsing errors, if any, in output
+/// parameter Status.
+Method GetRecord(Output Status As %Status) As %Boolean
+{
 	Set Status = $$$OK
 	Kill ..Data Set ..Data = 0
 	If ..Input.AtEnd Quit 0
@@ -379,7 +282,7 @@ parameter Status.</Description>
 	}
 	
 	Quit 1
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

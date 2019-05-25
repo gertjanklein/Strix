@@ -1,42 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Processor.RemoveEnsProd">
-<Description>
-Removes Ensemble Production classes from the export.</Description>
-<Super>Strix.SCM.Processor.Base</Super>
-<TimeCreated>64374,67492.869936</TimeCreated>
+/// Removes Ensemble Production classes from the export.
+Class Strix.SCM.Processor.RemoveEnsProd Extends Strix.SCM.Processor.Base
+{
 
-<Parameter name="HandlerType">
-<Description>
-This processor works on a release.</Description>
-<Default>Release</Default>
-</Parameter>
+/// This processor works on a release.
+Parameter HandlerType = "Release";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Run">
-<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Run(Revision As %String, Directory As %String) As %Status
+{
 	Set Status = ..RemoveProductions(Directory)
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RemoveProductions">
-<Description>
-Checks all export files in a directory, and removes any file containing
-an Ensemble production.</Description>
-<FormalSpec>Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Checks all export files in a directory, and removes any file containing
+/// an Ensemble production.
+Method RemoveProductions(Directory As %String) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("%File:FileSet")
 	Set Status = rs.Execute(Directory, "*.xml")
 	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
@@ -74,7 +56,7 @@ an Ensemble production.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

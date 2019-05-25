@@ -1,63 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.Iterator">
-<Description>
-Iterator over dynamic objects with additional helper methods.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64391,38497.266051</TimeCreated>
+/// Iterator over dynamic objects with additional helper methods.
+Class Strix.JSON.Iterator Extends %RegisteredObject
+{
 
-<Property name="Object">
-<Type>%DynamicAbstractObject</Type>
-</Property>
+Property Object As %DynamicAbstractObject;
 
-<Property name="Iterator">
-<Type>%Iterator.Array</Type>
-</Property>
+Property Iterator As %Iterator.Array;
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetIterator">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Object:%DynamicAbstractObject</FormalSpec>
-<ReturnType>Strix.JSON.Iterator</ReturnType>
-<Implementation><![CDATA[
+ClassMethod GetIterator(Object As %DynamicAbstractObject) As Strix.JSON.Iterator
+{
 	Set Me = ..%New()
 	Set Me.Object = Object
 	Set Me.Iterator = Object.%GetIterator()
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetNext">
-<Description>
-GetNext mirrors the iterators %GetNext method, but additionally
-outputs the type of the value</Description>
-<FormalSpec>*Key,*Value,*Type:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// GetNext mirrors the iterators %GetNext method, but additionally
+/// outputs the type of the value
+Method GetNext(Output Key, Output Value, Output Type As %String) As %Boolean
+{
 	Set HasValue = ..Iterator.%GetNext(.Key, .Value)
 	If 'HasValue Set Type = "" Quit 0
 	Set Type = ..Object.%GetTypeOf(Key)
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetPrevious">
-<FormalSpec>*Key,*Value,*Type:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method GetPrevious(Output Key, Output Value, Output Type As %String) As %Boolean
+{
 	If ..Iterator.pointer < 1 Set (Key, Value) = "" Quit 0
 	
 	;Find a position before the previous item
@@ -80,54 +52,41 @@ outputs the type of the value</Description>
 	If 'Found Set (Key, Value) = "", Type = "unassigned" Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="Reset">
-<Description>
-Resets the iterator to its initial state</Description>
-<Implementation><![CDATA[	Set ..Iterator.pointer = -1
-]]></Implementation>
-</Method>
+/// Resets the iterator to its initial state
+Method Reset()
+{
+	Set ..Iterator.pointer = -1
+}
 
-<Method name="IsFirst">
-<CodeMode>expression</CodeMode>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[..PeekPrevious()
-]]></Implementation>
-</Method>
+Method IsFirst() As %Boolean [ CodeMode = expression ]
+{
+..PeekPrevious()
+}
 
-<Method name="IsLast">
-<CodeMode>expression</CodeMode>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[..PeekNext()
-]]></Implementation>
-</Method>
+Method IsLast() As %Boolean [ CodeMode = expression ]
+{
+..PeekNext()
+}
 
-<Method name="PeekNext">
-<Description>
-Gets the next key/value/type for the given (array or object) iterator,
-without changing the current state.
-Returns false if no next value is present.</Description>
-<FormalSpec>*Key,*Value,*Type</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Gets the next key/value/type for the given (array or object) iterator,
+/// without changing the current state.
+/// Returns false if no next value is present.
+Method PeekNext(Output Key, Output Value, Output Type) As %Boolean
+{
 	Set SavedPointer = ..Iterator.pointer
 	Set HasValue = ..Iterator.%GetNext(.Key, .Value)
 	Set ..Iterator.pointer = SavedPointer
 	Set Type = $Select(HasValue: ..Object.%GetTypeOf(Key), 1: "unassigned")
 	Quit HasValue
-]]></Implementation>
-</Method>
+}
 
-<Method name="PeekPrevious">
-<Description>
-Gets the previous key/value/type for the given (array or object) iterator,
-without changing the current state.
-Returns false if no next value is present.</Description>
-<FormalSpec>*Key,*Value,*Type</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Gets the previous key/value/type for the given (array or object) iterator,
+/// without changing the current state.
+/// Returns false if no next value is present.
+Method PeekPrevious(Output Key, Output Value, Output Type) As %Boolean
+{
 	If ..Iterator.pointer < 1 Set (Key, Value) = "", Type = "unassigned" Quit 0
 	
 	;Find a position before the previous item
@@ -151,7 +110,7 @@ Returns false if no next value is present.</Description>
 	If 'Found Set (Key, Value) = "", Type = "unassigned" Quit 0
 	
 	Quit 1
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

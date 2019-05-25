@@ -1,18 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.Sorting">
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63863,51706.130408</TimeCreated>
+Class Strix.Tests.Sorting Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.SortTest</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.SortTest";
 
-<Method name="Setup">
-<Description>
-Code to run before any test in this class is executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run before any test in this class is executed.
+Method Setup() As %Status
+{
 	;Create a persistent class with a property of type String.
 	
 	#dim ClassDef As %Dictionary.ClassDefinition
@@ -24,28 +17,19 @@ Code to run before any test in this class is executed.</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
-]]></Implementation>
-</Method>
+/// Code to run after all tests in this class have been executed.
+Method TearDown() As %Status
+{
+	Quit ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestBasic">
-<Description>
-Test basic sort</Description>
-<Implementation><![CDATA[
+/// Test basic sort
+Method TestBasic()
+{
 	Set Count = 2
 	Set List = ##class(%ListOfObjects).%New()
 	For i = 1:1:Count {
@@ -61,13 +45,11 @@ Test basic sort</Description>
 	Do ..AssertEqual(List.GetAt(1).Prop1, "Value "_$Justify(Count, $Length(Count) + 1), "Largest value should come first.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestLargeDescending">
-<Description>
-Test descending sort with large number of objects</Description>
-<Implementation><![CDATA[
+/// Test descending sort with large number of objects
+Method TestLargeDescending()
+{
 	Set Count = 1000
 	Set List = ##class(%ListOfObjects).%New()
 	For i = 1:1:Count {
@@ -92,13 +74,11 @@ Test descending sort with large number of objects</Description>
 	Do ..AssertEqual(Sorted, 1, "List should be sorted.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestLargeAscending">
-<Description>
-Test ascending sort with large number of objects</Description>
-<Implementation><![CDATA[
+/// Test ascending sort with large number of objects
+Method TestLargeAscending()
+{
 	Set Count = 1000
 	Set List = ##class(%ListOfObjects).%New()
 	For i = Count:-1:1 {
@@ -123,13 +103,11 @@ Test ascending sort with large number of objects</Description>
 	Do ..AssertEqual(Sorted, 1, "List should be sorted.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestStable">
-<Description>
-Test objects with equal sort keys stay in the same order</Description>
-<Implementation><![CDATA[
+/// Test objects with equal sort keys stay in the same order
+Method TestStable()
+{
 	
 	Set List = ##class(%ListOfObjects).%New()
 	For i = 1:1:10 {
@@ -155,14 +133,12 @@ Test objects with equal sort keys stay in the same order</Description>
 	For i = 1:1:10 {
 		If '..AssertEqual(List.GetAt(i).Prop2, i, "Order should not have changed.") Quit
 	}
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestMultiSort">
-<Description>
-Test sort on multiple properties, using stable sort by sorting
-from rightmost to leftmost sort property</Description>
-<Implementation><![CDATA[
+/// Test sort on multiple properties, using stable sort by sorting
+/// from rightmost to leftmost sort property
+Method TestMultiSort()
+{
 	Set List = ##class(%ListOfObjects).%New()
 	
 	;Insert in prop1 ascending, prop2 decending order
@@ -194,13 +170,11 @@ from rightmost to leftmost sort property</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestMultiSort2">
-<Description>
-Test sort on multiple properties specified at once.</Description>
-<Implementation><![CDATA[
+/// Test sort on multiple properties specified at once.
+Method TestMultiSort2()
+{
 	Set List = ##class(%ListOfObjects).%New()
 	
 	;Insert in prop1 ascending, prop2 decending order
@@ -228,7 +202,7 @@ Test sort on multiple properties specified at once.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

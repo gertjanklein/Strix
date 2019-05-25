@@ -1,44 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.DateTime">
-<Description>
-DateTime represented internally as a $Horolog value.</Description>
-<OdbcType>TIMESTAMP</OdbcType>
-<SqlCategory>TIMESTAMP</SqlCategory>
-<Super>%DataType</Super>
-<TimeCreated>63796,51829.763145</TimeCreated>
+/// DateTime represented internally as a $Horolog value.
+Class Strix.Lib.DateTime Extends %DataType [ OdbcType = TIMESTAMP, SqlCategory = TIMESTAMP ]
+{
 
-<Parameter name="XMLTIMEZONE">
-<Description>
-XMLTIMEZONE specifies the handling of timezone part of the XML format dateTime.
-"UTC" means convert to UTC on input.  "IGNORE means ignore the timezone.</Description>
-<Constraint>IGNORE,UTC</Constraint>
-<Default>IGNORE</Default>
-<Flags>ENUM</Flags>
-</Parameter>
+/// XMLTIMEZONE specifies the handling of timezone part of the XML format dateTime.
+/// "UTC" means convert to UTC on input.  "IGNORE means ignore the timezone.
+Parameter XMLTIMEZONE [ Constraint = "IGNORE,UTC", Flags = ENUM ] = "IGNORE";
 
-<Parameter name="XSDTYPE">
-<Description>
-Declares the XSD type used when projecting XML Schemas.</Description>
-<Default>dateTime</Default>
-</Parameter>
+/// Declares the XSD type used when projecting XML Schemas.
+Parameter XSDTYPE = "dateTime";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="XSDToLogical">
-<Description>
-Converts the SOAP encoded input dateTime value into a DateTime value.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:%String</FormalSpec>
-<ReturnType>Strix.Lib.DateTime</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts the SOAP encoded input dateTime value into a DateTime value.
+ClassMethod XSDToLogical(%val As %String) As Strix.Lib.DateTime [ CodeMode = generator, ServerOnly = 1 ]
+{
 	If ($$$getClassType(%class)=$$$cCLASSCLASSTYPEDATATYPE) || $$$comMemberKeyGet(%class,$$$cCLASSparameter,"XMLENABLED",$$$cPARAMdefault) {
 		$$$GENERATE(" If $length($get(%val),""T"")'=2 Quit """"")
 		$$$GENERATE(" Set dt=$translate(%val,""T"","" "")")
@@ -71,18 +46,11 @@ Converts the SOAP encoded input dateTime value into a DateTime value.</Descripti
 		Set %code=0 
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogicalToXSD">
-<Description>
-Converts the DateTime value to the canonical SOAP encoded value.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:Strix.Lib.DateTime</FormalSpec>
-<ReturnType>%String</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts the DateTime value to the canonical SOAP encoded value.
+ClassMethod LogicalToXSD(%val As Strix.Lib.DateTime) As %String [ CodeMode = generator, ServerOnly = 1 ]
+{
 	If ($$$getClassType(%class)=$$$cCLASSCLASSTYPEDATATYPE) || $$$comMemberKeyGet(%class,$$$cCLASSparameter,"XMLENABLED",$$$cPARAMdefault) {
 		Set %codemode=$$$cMETHCODEMODEEXPRESSION
 		If %parameter("XMLTIMEZONE")="IGNORE" {
@@ -94,99 +62,50 @@ Converts the DateTime value to the canonical SOAP encoded value.</Description>
 		Set %code=0 
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="OdbcToLogical">
-<Description><![CDATA[
-Converts <var>%val</var>, which represents either a Timestamp in ODBC format,
-or a Date in ODBC format, into a DateTime value.]]></Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:%String</FormalSpec>
-<ReturnType>Strix.Lib.DateTime</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts <var>%val</var>, which represents either a Timestamp in ODBC format,
+/// or a Date in ODBC format, into a DateTime value.
+ClassMethod OdbcToLogical(%val As %String) As Strix.Lib.DateTime [ CodeMode = generator, ServerOnly = 1 ]
+{
 	$$$GENERATE(" Quit $zdth(%val,3,1,,,,,,,"""")")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogicalToOdbc">
-<Description>
-Converts a DateTime value into ODBC format.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:Strix.Lib.DateTime</FormalSpec>
-<ReturnType>%String</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts a DateTime value into ODBC format.
+ClassMethod LogicalToOdbc(%val As Strix.Lib.DateTime) As %String [ CodeMode = generator, ServerOnly = 1 ]
+{
 	$$$GENERATE(" Quit $s(%val="""":"""",1:$zdt(%val,3,1,,,,,,,,""""))")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="DisplayToLogical">
-<Description><![CDATA[
-Converts <var>%val</var>, which represents a date or date+time in
-display format, into a DateTime value.]]></Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:%String</FormalSpec>
-<ReturnType>Strix.Lib.DateTime</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts <var>%val</var>, which represents a date or date+time in
+/// display format, into a DateTime value.
+ClassMethod DisplayToLogical(%val As %String) As Strix.Lib.DateTime [ CodeMode = generator, ServerOnly = 1 ]
+{
 	$$$GENERATE(" Quit $zdth(%val,3,1,,,,,,,"""")")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogicalToDisplay">
-<Description>
-Converts a DateTime value into display format.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:Strix.Lib.DateTime</FormalSpec>
-<ReturnType>%String</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Converts a DateTime value into display format.
+ClassMethod LogicalToDisplay(%val As Strix.Lib.DateTime) As %String [ CodeMode = generator, ServerOnly = 1 ]
+{
 	$$$GENERATE(" Quit $s(%val="""":"""",1:$zdt(%val,3,1,,,,,,,,""""))")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="IsValid">
-<ClassMethod>1</ClassMethod>
-<CodeMode>generator</CodeMode>
-<FormalSpec>%val:Strix.Lib.DateTime</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>0</ServerOnly>
-<Implementation><![CDATA[
+ClassMethod IsValid(%val As Strix.Lib.DateTime) As %Status [ CodeMode = generator, ServerOnly = 0 ]
+{
 	$$$GENERATE(" If $zdt(%val,3,1,,,,,,,,""error"")=""error"" Quit $$$ERROR($$$DTFailure,%val)")
 	$$$GENERATE(" Quit $$$OK")
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

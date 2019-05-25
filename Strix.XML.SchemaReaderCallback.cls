@@ -1,61 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.XML.SchemaReaderCallback">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>65045,38962.002691</TimeCreated>
+Include Strix
 
-<Property name="Reader">
-<Description>
-The reader we receive the callback from</Description>
-<Type>Strix.XML.SchemaReader</Type>
-</Property>
+Class Strix.XML.SchemaReaderCallback Extends %RegisteredObject
+{
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The reader we receive the callback from
+Property Reader As Strix.XML.SchemaReader;
+
 // -----
 
-]]></Content>
-</UDLText>
+/// Name of the currently handled class
+Property ClassName As %String;
 
-<Property name="ClassName">
-<Description>
-Name of the currently handled class</Description>
-<Type>%String</Type>
-</Property>
+/// Global node containing the class information
+Property ClassNode As %String;
 
-<Property name="ClassNode">
-<Description>
-Global node containing the class information</Description>
-<Type>%String</Type>
-</Property>
+/// Name of the currently handled property
+Property PropertyName As %String;
 
-<Property name="PropertyName">
-<Description>
-Name of the currently handled property</Description>
-<Type>%String</Type>
-</Property>
+/// Global node containing the property information
+Property PropertyNode As %String;
 
-<Property name="PropertyNode">
-<Description>
-Global node containing the property information</Description>
-<Type>%String</Type>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Create">
-<Description>
-Basic entry point; can be overridden in a subclass to further
-configure the schema reader.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>SchemaLocation:%String,Package:%String="Test"</FormalSpec>
-<Implementation><![CDATA[
+/// Basic entry point; can be overridden in a subclass to further
+/// configure the schema reader.
+ClassMethod Create(SchemaLocation As %String, Package As %String = "Test")
+{
 	; Create and configure reader
 	Set Reader = ##class(Strix.XML.SchemaReader).%New()
 	Set Reader.Callback = ..%New()
@@ -67,58 +37,35 @@ configure the schema reader.</Description>
 	If 'sc Quit ..ShowError("Error running schema reader:", sc)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
+/// Overridable method: handles a single class, after the parse tree
+/// has been built but before the class is generated.
+Method HandleClass(Name As %String, XmlName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="HandleClass">
-<Description>
-Overridable method: handles a single class, after the parse tree
-has been built but before the class is generated.</Description>
-<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+/// Overridable method: handles a single property, after the parse tree
+/// has been built but before the class is generated.
+Method HandleProperty(Name As %String, XmlName As %String, Type As %String, IsDataType As %Boolean) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="HandleProperty">
-<Description>
-Overridable method: handles a single property, after the parse tree
-has been built but before the class is generated.</Description>
-<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+ClassMethod PostProcessClass(ClassName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="PostProcessClass">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="GetValidName">
-<Description>
-Receives a class short name or property name and its XML name,
-and returns what it should be named.</Description>
-<FormalSpec>Name:%String,XmlName:%String,*Changed:%Boolean</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Receives a class short name or property name and its XML name,
+/// and returns what it should be named.
+Method GetValidName(Name As %String, XmlName As %String, Output Changed As %Boolean) As %String
+{
 	Set Changed = 0
 	
 	; If the XML name is a valid Caché name, the only possible change
@@ -145,22 +92,13 @@ and returns what it should be named.</Description>
 	Set Changed = Name '= NewName
 	
 	Quit NewName
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="RenameClass">
-<Description>
-Changes the name of the current class.</Description>
-<FormalSpec>NewName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Changes the name of the current class.
+Method RenameClass(NewName As %String) As %Status
+{
 	; Allow providing new name without package
 	If NewName '[ "." {
 		Set Package = $Piece(..ClassName, ".", 1, *-1)
@@ -178,36 +116,25 @@ Changes the name of the current class.</Description>
 	Set ..ClassName = NewName
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="RemoveClass">
-<Description>
-Removes the current class; it won't be created.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Removes the current class; it won't be created.
+Method RemoveClass() As %Status
+{
 	Set @..ClassNode@("Removed") = 1
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetClassParameter">
-<Description>
-Sets a parameter for the current class</Description>
-<FormalSpec>Name:%String,Value:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets a parameter for the current class
+Method SetClassParameter(Name As %String, Value As %String) As %Status
+{
 	Set @..ClassNode@("Parameter", Name) = Value
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetSuperClass">
-<Description>
-Returns the superclass for the currently processed class</Description>
-<FormalSpec>*NamespaceIdx:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the superclass for the currently processed class
+Method GetSuperClass(Output NamespaceIdx As %Integer) As %String
+{
 	Set Info = $Get(@..ClassNode@("Super"))
 	If Info ? 1.N1"^".E {
 		Set NamespaceIdx = $Piece(Info, "^", 1)
@@ -217,28 +144,20 @@ Returns the superclass for the currently processed class</Description>
 		Set SuperClass = Info
 	}
 	Quit SuperClass
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetSuperClass">
-<Description>
-Changes the superclass for the currently processed class</Description>
-<FormalSpec>SuperClass:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Changes the superclass for the currently processed class
+Method SetSuperClass(SuperClass As %String) As %Status
+{
 	Set @..ClassNode@("Super") = SuperClass
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetClassType">
-<Description>
-Retrieves the type of the current class. Output parameter
-NamespaceIdx receives the index in the schemareader ..NSInfo
-property for the class.</Description>
-<FormalSpec>*NamespaceIdx:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Retrieves the type of the current class. Output parameter
+/// NamespaceIdx receives the index in the schemareader ..NSInfo
+/// property for the class.
+Method GetClassType(Output NamespaceIdx As %Integer) As %String
+{
 	Set Info = $Get(@..ClassNode@("Type"))
 	Set NamespaceIdx = $Piece(Info, "^", 1)
 	Set Type = $Piece(Info, "^", 2)
@@ -251,22 +170,13 @@ property for the class.</Description>
 	}
 	
 	Quit Type
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="RenameProperty">
-<Description>
-Changes the name of the current property.</Description>
-<FormalSpec>NewName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Changes the name of the current property.
+Method RenameProperty(NewName As %String) As %Status
+{
 	; Make sure XML name stays the same
 	If '$Data(@..PropertyNode@("Parameter", "XMLNAME")) {
 		Set @..PropertyNode@("Parameter", "XMLNAME") = ..PropertyName
@@ -277,45 +187,27 @@ Changes the name of the current property.</Description>
 	Set ..PropertyName = NewName
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetPropertyParameter">
-<Description>
-Sets a property parameter for the current class</Description>
-<FormalSpec>Name:%String,Value:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets a property parameter for the current class
+Method SetPropertyParameter(Name As %String, Value As %String) As %Status
+{
 	Set @..PropertyNode@("Parameter", Name) = Value
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetPropertyRequired">
-<Description>
-Sets a property required flag</Description>
-<FormalSpec>Required:%Boolean=1</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets a property required flag
+Method SetPropertyRequired(Required As %Boolean = 1) As %Status
+{
 	Set @..PropertyNode@("Required") = Required
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Additional helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="RunReader">
-<Description>
-Runs the schema reader for the given schema and package.</Description>
-<Internal>1</Internal>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Reader:Strix.XML.SchemaReader,SchemaLocation:%String,Package:%String,&Features:%String]]></FormalSpec>
-<Implementation><![CDATA[
+/// Runs the schema reader for the given schema and package.
+ClassMethod RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Package As %String, ByRef Features As %String) [ Internal ]
+{
 	; Get class creation times of currently existing classes in Package
 	Set sc = ..GetTimes(Package, .Times)
 	If 'sc Quit ..ShowError("Error determining class creation times:", sc)
@@ -344,28 +236,18 @@ Runs the schema reader for the given schema and package.</Description>
 	If 'sc Quit $$$BuildStatus("Error postprocessing class {}:", sc, ClassName)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="GetTimes">
-<Description>
-Load the creation times of all classes in Package, and return them
-in output parameter Times. This can be used in conjunction with
-the UpdateTimes method, to persist class creation times through
-subsequent runs of the schemareader (which deletes the classes
-before recreating them). This is useful to prevent source code diffs
-showing changes when there aren't.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Package:%String,Times:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Load the creation times of all classes in Package, and return them
+/// in output parameter Times. This can be used in conjunction with
+/// the UpdateTimes method, to persist class creation times through
+/// subsequent runs of the schemareader (which deletes the classes
+/// before recreating them). This is useful to prevent source code diffs
+/// showing changes when there aren't.
+ClassMethod GetTimes(Package As %String, Times As %String) As %Status
+{
 	Set sc = $System.OBJ.GetPackageList(.Items, Package, "/includesubpackages")
 	If 'sc Quit $$$BuildStatus("Error loading list of existing classes in {}:", Status, Package)
 	Set ClassName = ""
@@ -376,18 +258,13 @@ showing changes when there aren't.</Description>
 		Set Times(ClassName) = Time
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="UpdateTimes">
-<Description>
-Update the class creation time for classes in Package, if this
-information is present in the Times array. Expected to be used
-with the output of the GetTimes method.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Package:%String,Times:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Update the class creation time for classes in Package, if this
+/// information is present in the Times array. Expected to be used
+/// with the output of the GetTimes method.
+ClassMethod UpdateTimes(Package As %String, Times As %String) As %Status
+{
 	Set sc = $System.OBJ.GetPackageList(.Items, Package, "/includesubpackages")
 	If 'sc Quit $$$BuildStatus("Error loading list of existing classes in {}:", Status, Package)
 	Set ClassName = ""
@@ -398,23 +275,13 @@ with the output of the GetTimes method.</Description>
 		$$$defClassKeySet(ClassName, $$$cCLASStimecreated, Times(ClassName))
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="ShowError">
-<Description>
-Displays an error message and/or %Status.</Description>
-<Internal>1</Internal>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String="",Status:%Status="",Args...</FormalSpec>
-<Implementation><![CDATA[
+/// Displays an error message and/or %Status.
+ClassMethod ShowError(Message As %String = "", Status As %Status = "", Args...) [ Internal ]
+{
 	If $Get(Args) Set Message = $$$BuildStr(Message, Args...)
 	If Message '= "", Status '= "" {
 		Write Message_":",!
@@ -425,25 +292,15 @@ Displays an error message and/or %Status.</Description>
 		Do $System.Status.DisplayError(Status)
 	}
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Internal =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ProcessParseTree">
-<Description>
-Callback from schema reader. Called after parsing is done, and
-before any classes are created. Gets passed the name of the
-global node that contains the classes part of the parse tree.</Description>
-<Internal>1</Internal>
-<FormalSpec>ClassTree:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Callback from schema reader. Called after parsing is done, and
+/// before any classes are created. Gets passed the name of the
+/// global node that contains the classes part of the parse tree.
+Method ProcessParseTree(ClassTree As %String) As %Status [ Internal ]
+{
 	; Loop through classes to be generated
 	Set ckey = ""
 	For  {
@@ -460,16 +317,11 @@ global node that contains the classes part of the parse tree.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ProcessClassNode">
-<Description>
-Called by PostProcessParseTree for each class.</Description>
-<Internal>1</Internal>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Called by PostProcessParseTree for each class.
+Method ProcessClassNode(Name As %String) As %Status [ Internal ]
+{
 	Set (..PropertyName, ..PropertyNode) = ""
 	
 	; Call basic callback method
@@ -499,7 +351,7 @@ Called by PostProcessParseTree for each class.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,19 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.ErrorInfo">
-<IncludeCode>%occErrors</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63509,36123.933947</TimeCreated>
+Include %occErrors
 
-<Method name="ParseSOAPError">
-<Description>
-Returns as much info about a fault as possible. Expected to be called from
-an error trap, as SOAP faults are thrown. An optional status can be passed
-in if known, but is only used if no fault is known.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Fault:%SOAP.Fault="",Status:%Status=$Get(%objlasterror),AsStatus:%Boolean=0,Language:%String="en"</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+Class Strix.ErrorInfo Extends %RegisteredObject
+{
+
+/// Returns as much info about a fault as possible. Expected to be called from
+/// an error trap, as SOAP faults are thrown. An optional status can be passed
+/// in if known, but is only used if no fault is known.
+ClassMethod ParseSOAPError(Fault As %SOAP.Fault = "", Status As %Status = {$Get(%objlasterror)}, AsStatus As %Boolean = 0, Language As %String = "en") As %String
+{
 	If $IsObject(Fault) {
 		;Data may be XML-escaped; attempt an un-escape
 		Try { Set ErrorMsg = $ZConvert(Fault.detail, "I", "XML") }
@@ -62,7 +56,7 @@ in if known, but is only used if no fault is known.</Description>
 	}
 	
 	Quit ErrorMsg
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

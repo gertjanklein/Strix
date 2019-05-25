@@ -1,38 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Handler.Base">
-<Description>
-Base handler for Studio callbacks, with do-nothing implementations.
-Proper handlers subclass this one and implement what they need.</Description>
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63864,78142.324488</TimeCreated>
-<DependsOn>Strix.Generator.Utilities</DependsOn>
+Include Strix.SCM
 
-<Parameter name="GlobalSettings">
-<Description>
-This parameter specifies, by property name, which settings for this
-handler need to be included in the project configuration file. All
-other settings are considered local to the project. Property names
-must be separated by commas.</Description>
-<Type>STRING</Type>
-</Parameter>
+/// Base handler for Studio callbacks, with do-nothing implementations.
+/// Proper handlers subclass this one and implement what they need.
+Class Strix.SCM.Handler.Base Extends %RegisteredObject [ DependsOn = Strix.Generator.Utilities ]
+{
 
-<UDLText name="T">
-<Content><![CDATA[
+/// This parameter specifies, by property name, which settings for this
+/// handler need to be included in the project configuration file. All
+/// other settings are considered local to the project. Property names
+/// must be separated by commas.
+Parameter GlobalSettings As STRING;
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetSettings">
-<Description>
-Returns a %List of settings applicable to this class. Each setting
-is returned as a %List with: name, type, origin</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns a %List of settings applicable to this class. Each setting
+/// is returned as a %List with: name, type, origin
+ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
+{
 	Set Result = ""
 	
 	;Get list of settings to save in config file
@@ -68,16 +52,11 @@ is returned as a %List with: name, type, origin</Description>
 	Do %code.WriteLine($Char(9)_Result)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetSettingDescription">
-<Description>
-Returns the (property) description for a specific setting,</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Setting:%String,AsHTML:%Boolean=1,*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the (property) description for a specific setting,
+ClassMethod GetSettingDescription(ClassName As %String, Setting As %String, AsHTML As %Boolean = 1, Output Status As %Status) As %String
+{
 	Set Def = ##class(%Dictionary.PropertyDefinition).%OpenId(ClassName_"||"_Setting, , .Status)
 	If 'Status Set Status = $$$BuildErr("Error opening definion for "_ClassName_":"_Setting_":", Status) Quit ""
 	Set Desc = $ZStrip(Def.Description, "<>W")
@@ -87,20 +66,12 @@ Returns the (property) description for a specific setting,</Description>
 		Set Desc = $Replace(Desc, $Char(13,10), "<br>"_$Char(13, 10))
 	}
 	Quit Desc
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio menu actions
 
-]]></Content>
-</UDLText>
-
-<Method name="OnMenuItem">
-<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
+{
 	;All menus defined here are always enabled
 	Set Enabled = 1
 	
@@ -115,13 +86,10 @@ Returns the (property) description for a specific setting,</Description>
 	)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="UserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
+{
 	;Defaults
 	Set Action = 0, Target = "", Msg = "", Reload = 0
 	
@@ -143,132 +111,85 @@ Returns the (property) description for a specific setting,</Description>
 	
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="AfterUserAction">
-<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
+{
+	Quit $$$OK
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Studio callbacks
 
-]]></Content>
-</UDLText>
+Method OnBeforeLoad(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnBeforeLoad">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnAfterLoad(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterLoad">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnBeforeSave(InternalName As %String, Location As %String = "", Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnBeforeSave">
-<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterSave">
-<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnAfterStorage(InternalName As %String, Location As %String = "") As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterStorage">
-<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnBeforeCompile(InternalName As %String, ByRef qstruct As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnBeforeCompile">
-<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnAfterCompile(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterCompile">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnBeforeDelete(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnBeforeDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+Method OnAfterDelete(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterDelete">
-<FormalSpec>InternalName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== PostProcessor callbacks
 
-]]></Content>
-</UDLText>
+/// Callback to handle messages from a postprocessor.
+Method HandlePostProcessorOutput(Text As %String)
+{
+	Write "   "_Text,!
+}
 
-<Method name="HandlePostProcessorOutput">
-<Description>
-Callback to handle messages from a postprocessor.</Description>
-<FormalSpec>Text:%String</FormalSpec>
-<Implementation><![CDATA[	Write "   "_Text,!
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Menus and menu items
 
-]]></Content>
-</UDLText>
-
-<Method name="GetMainMenus">
-<Description>
-Returns a list with the top level menus appropriate for this
-handler. These are shared between handlers (unless overridden).
-Used by the Studio plugin.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns a list with the top level menus appropriate for this
+/// handler. These are shared between handlers (unless overridden).
+/// Used by the Studio plugin.
+ClassMethod GetMainMenus(Output Status As %Status) As %List
+{
 	Set Status = $$$OK
 	;Call the menus "Source control", insert in both menu bar
 	;and context menu.
 	Set Menus = $lb($lb("Source control", 0), $lb("Source control", 1))
 	Quit Menus
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetMenuItems">
-<Description>
-Returns the menu items for a given menu and document</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>MenuName:%String,InternalName:%String,SelectedText:%String,*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns the menu items for a given menu and document
+ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+{
 	Set Status = $$$OK
 	
 	;Menus that are always valid, regardless of which item is selected
@@ -277,7 +198,7 @@ Returns the menu items for a given menu and document</Description>
 	)
 	
 	Quit Items
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

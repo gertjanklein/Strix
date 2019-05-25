@@ -1,19 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Generator.Utilities">
-<Description>
-Utility code for generator methods in other classes.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>62935,33467.821661</TimeCreated>
+Include Strix
 
-<Method name="GetClassDef">
-<Description>
-Helper: opens a class definition or returns a new one with the specified name.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,*IsNew:%Boolean,*Status:%Status</FormalSpec>
-<ReturnType>%Dictionary.ClassDefinition</ReturnType>
-<Implementation><![CDATA[
+/// Utility code for generator methods in other classes.
+Class Strix.Generator.Utilities Extends %RegisteredObject
+{
+
+/// Helper: opens a class definition or returns a new one with the specified name.
+ClassMethod GetClassDef(Name As %String, Output IsNew As %Boolean, Output Status As %Status) As %Dictionary.ClassDefinition
+{
 	If ##class(%Dictionary.ClassDefinition).%ExistsId(Name) {
 		Set ClassDef = ##class(%Dictionary.ClassDefinition).%OpenId(Name, , .Status)
 		Set IsNew = 0
@@ -24,33 +17,23 @@ Helper: opens a class definition or returns a new one with the specified name.</
 		Set IsNew = 1, Status = $$$OK
 	}
 	Quit ClassDef
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetOrderedList">
-<Description>
-Returns a copy of a collection, expected to consist of class definition
-members, ordered by their SequenceNumber property. This is the order in
-which they are shown in Studio.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Collection:%RelationshipObject,*Status:%Status</FormalSpec>
-<ReturnType>%Collection.AbstractList</ReturnType>
-<Implementation><![CDATA[
+/// Returns a copy of a collection, expected to consist of class definition
+/// members, ordered by their SequenceNumber property. This is the order in
+/// which they are shown in Studio.
+ClassMethod GetOrderedList(Collection As %RelationshipObject, Output Status As %Status) As %Collection.AbstractList
+{
 	Set Result = ##class(Strix.Lib.Collections).GetCopy(Collection, 1, .Status)
 	If 'Status Quit Result
 	Set Status = ##class(Strix.Lib.Sorting).SortListOfObjects(Result, "SequenceNumber:::N")
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetInCollection">
-<Description>
-Returns an item, specified by name, from a relationship collection
-(such as CompiledClass:Properties, etc.).</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Collection:%RelationshipObject,Name:%String,Create:%Boolean=0,*Status:%Status</FormalSpec>
-<ReturnType>%RegisteredObject</ReturnType>
-<Implementation><![CDATA[
+/// Returns an item, specified by name, from a relationship collection
+/// (such as CompiledClass:Properties, etc.).
+ClassMethod GetInCollection(Collection As %RelationshipObject, Name As %String, Create As %Boolean = 0, Output Status As %Status) As %RegisteredObject
+{
 	Set Status = $$$OK
 	
 	Set Found = 0
@@ -69,18 +52,13 @@ Returns an item, specified by name, from a relationship collection
 	Set Status = Collection.Insert(Object)
 	
 	Quit Object
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetParameter">
-<Description>
-Returns a ParameterDefinition (or CompiledParameter) object with the
-specified name, if present. ClassNameOrObj can be either a class name
-or a class definition object.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String,*ParameterDefinition:%Dictionary.ParameterDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns a ParameterDefinition (or CompiledParameter) object with the
+/// specified name, if present. ClassNameOrObj can be either a class name
+/// or a class definition object.
+ClassMethod GetParameter(ClassNameOrObj As %Dictionary.ClassDefinition, ParameterName As %String, Output ParameterDefinition As %Dictionary.ParameterDefinition) As %Status
+{
 	If '$IsObject(ClassNameOrObj) {
 		;Not an object, so a class name
 		Set ClassNameOrObj = ##class(%Dictionary.CompiledClass).%OpenId(ClassNameOrObj, , .sc)
@@ -95,33 +73,23 @@ or a class definition object.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetParameterValue">
-<Description>
-Shortcut method to quickly retrieve a parameter value. Returns an empty string
-in case the parameter doesn't exist or an error occurs.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ParameterName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Shortcut method to quickly retrieve a parameter value. Returns an empty string
+/// in case the parameter doesn't exist or an error occurs.
+ClassMethod GetParameterValue(ClassNameOrObj As %Dictionary.ClassDefinition, ParameterName As %String) As %String
+{
 	Set sc = ..GetParameter(ClassNameOrObj, ParameterName, .ParameterDefinition)
 	If 'sc Quit ""
 	If '$IsObject(ParameterDefinition) Quit ""
 	Quit ParameterDefinition.Default
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetProperty">
-<Description>
-Returns a PropertyDefinition (or CompiledProperty) object with the
-specified name, if present. ClassNameOrObj can be either a class name
-or a class definition object.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,PropertyName:%String,*PropertyDefinition:%Dictionary.PropertyDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns a PropertyDefinition (or CompiledProperty) object with the
+/// specified name, if present. ClassNameOrObj can be either a class name
+/// or a class definition object.
+ClassMethod GetProperty(ClassNameOrObj As %Dictionary.ClassDefinition, PropertyName As %String, Output PropertyDefinition As %Dictionary.PropertyDefinition) As %Status
+{
 	Set PropertyDefinition = ""
 	If '$IsObject(ClassNameOrObj) {
 		;Not an object, so a class name
@@ -139,16 +107,11 @@ or a class definition object.</Description>
 	If 'Found Quit $$$ERROR($$$GeneralError, "Property "_PropertyName_" not found.")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetIndexDefinition">
-<Description>
-Returns the global the indices for this class reside in.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,IndexName:%String,*IndexDefinition:%Dictionary.IndexDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns the global the indices for this class reside in.
+ClassMethod GetIndexDefinition(ClassNameOrObj As %Dictionary.ClassDefinition, IndexName As %String, Output IndexDefinition As %Dictionary.IndexDefinition) As %Status
+{
 	Set IndexDefinition = ""
 	If '$IsObject(ClassNameOrObj) {
 		;Not an object, so a class name
@@ -166,16 +129,11 @@ Returns the global the indices for this class reside in.</Description>
 	If 'Found Quit $$$ERROR($$$GeneralError, "Property "_IndexName_" not found.")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetIndexLocation">
-<Description>
-Returns the global the indices for this class reside in.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,*IndexLocation:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns the global the indices for this class reside in.
+ClassMethod GetIndexLocation(ClassNameOrObj As %Dictionary.ClassDefinition, Output IndexLocation As %String) As %Status
+{
 	Set IndexLocation = ""
 	
 	If '$IsObject(ClassNameOrObj) {
@@ -194,18 +152,13 @@ Returns the global the indices for this class reside in.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetMethod">
-<Description>
-Returns a MethodDefinition (or CompiledMethod) object with the
-specified name, if present. ClassNameOrObj can be either a class name
-or a class definition object.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,MethodName:%String,*MethodDefinition:%Dictionary.MethodDefinition</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns a MethodDefinition (or CompiledMethod) object with the
+/// specified name, if present. ClassNameOrObj can be either a class name
+/// or a class definition object.
+ClassMethod GetMethod(ClassNameOrObj As %Dictionary.ClassDefinition, MethodName As %String, Output MethodDefinition As %Dictionary.MethodDefinition) As %Status
+{
 	Set MethodDefinition = ""
 	If '$IsObject(ClassNameOrObj) {
 		;Not an object, so a class name
@@ -223,34 +176,24 @@ or a class definition object.</Description>
 	If 'Found Quit $$$ERROR($$$GeneralError, "Method "_MethodName_" not found.")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="HasConcreteMethod">
-<Description>
-Returns whether the given method is present and non-abstract.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassDef:%Dictionary.CompiledClass,MethodName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns whether the given method is present and non-abstract.
+ClassMethod HasConcreteMethod(ClassDef As %Dictionary.CompiledClass, MethodName As %String) As %Boolean
+{
 	If '$IsObject(ClassDef) Set ClassDef = ..GetClassDef(ClassDef)
 	Set Method = ..GetInCollection(ClassDef.Methods, MethodName)
 	If Method = "" Quit 0
 	Quit 'Method.Abstract
-]]></Implementation>
-</Method>
+}
 
-<Method name="IsDatatype">
-<Description>
-Attempts to determine if the given property is a datatype. Non-datatype
-properties have a few extra system-generated methods such as
-[Property]SetObjectId. ClassNameOrObj can be either a class name or a
-class definition object.
-</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,PropertyName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Attempts to determine if the given property is a datatype. Non-datatype
+/// properties have a few extra system-generated methods such as
+/// [Property]SetObjectId. ClassNameOrObj can be either a class name or a
+/// class definition object.
+/// 
+ClassMethod IsDatatype(ClassNameOrObj As %Dictionary.ClassDefinition, PropertyName As %String) As %Boolean
+{
 	#dim PropDef As %Dictionary.PropertyDefinition
 	Set sc = ..GetProperty(ClassNameOrObj, PropertyName, .PropDef)
 	If 'sc Quit 1
@@ -259,16 +202,11 @@ class definition object.
 	If Type = "" Quit 1
 	
 	Quit ..ClassIsDataType(Type)
-]]></Implementation>
-</Method>
+}
 
-<Method name="ClassIsDataType">
-<Description>
-Returns a flag indicating whether a class can be determined to be a datatype.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a flag indicating whether a class can be determined to be a datatype.
+ClassMethod ClassIsDataType(ClassName As %String) As %Boolean
+{
 	Set ClassName = $$$NormalizeClassname(ClassName)
 	&sql(SELECT Super INTO :Super FROM %Dictionary.ClassDefinition WHERE Name = :ClassName)
 	If SQLCODE Quit ""
@@ -283,29 +221,24 @@ Returns a flag indicating whether a class can be determined to be a datatype.</D
 	}
 	
 	Quit IsDataType
-]]></Implementation>
-</Method>
+}
 
-<Method name="MRO">
-<Description>
-Member resolution order / inheritance order.
-Returns a list of all superclasses of the given class. The order in
-which they are returned is intended to be the order the compiler
-uses to determine the origin of a member (if it has multiple origins).
-Duplicates in the result (if e.g. a class inherits from %XML.Adaptor
-via multiple superclasses) are removed.
-
-By default, system classes are not returned in the results, but they
-can be included by clearing ExcludeSystem. If errors occur they are
-returned in output parameter Status.
-
-See:
-http://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes#GOBJ_model_inheritance_mult
-</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassNameOrObj:%Dictionary.ClassDefinition,ExcludeSystem:%Boolean=1,*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Member resolution order / inheritance order.
+/// Returns a list of all superclasses of the given class. The order in
+/// which they are returned is intended to be the order the compiler
+/// uses to determine the origin of a member (if it has multiple origins).
+/// Duplicates in the result (if e.g. a class inherits from %XML.Adaptor
+/// via multiple superclasses) are removed.
+/// 
+/// By default, system classes are not returned in the results, but they
+/// can be included by clearing ExcludeSystem. If errors occur they are
+/// returned in output parameter Status.
+/// 
+/// See:
+/// http://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_classes#GOBJ_model_inheritance_mult
+/// 
+ClassMethod MRO(ClassNameOrObj As %Dictionary.ClassDefinition, ExcludeSystem As %Boolean = 1, Output Status As %Status) As %List
+{
 	Set Result = ""
 	
 	If '$IsObject(ClassNameOrObj) {
@@ -356,16 +289,11 @@ http://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=GOBJ_cla
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="SqlName">
-<Description>
-Returns the SQL variant of a classname</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the SQL variant of a classname
+ClassMethod SqlName(ClassName As %String) As %String
+{
 	;Try CompiledClass definition:
 	&sql(SELECT SqlQualifiedNameQ INTO :SqlName FROM %Dictionary.CompiledClass WHERE Name = :ClassName)
 	If SQLCODE = 0 Quit SqlName
@@ -385,7 +313,7 @@ Returns the SQL variant of a classname</Description>
 	}
 	
 	Quit Schema_"."_SqlName
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

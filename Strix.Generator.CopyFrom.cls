@@ -1,17 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Generator.CopyFrom">
-<Abstract>1</Abstract>
-<TimeCreated>64702,37801.43184</TimeCreated>
+Class Strix.Generator.CopyFrom [ Abstract ]
+{
 
-<Method name="CopyFrom">
-<Description>
-Copies properties (with the same name) from another object
-into this one. The other object doesn't have to have the same
-class; properties are matched by name.</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>Other:%RegisteredObject</FormalSpec>
-<Implementation><![CDATA[
+/// Copies properties (with the same name) from another object
+/// into this one. The other object doesn't have to have the same
+/// class; properties are matched by name.
+Method CopyFrom(Other As %RegisteredObject) [ CodeMode = objectgenerator ]
+{
 	Do %code.WriteLine(" Set Cls = Other.%ClassName(1)")
 	Set key = ""
 	For  {
@@ -37,7 +31,7 @@ class; properties are matched by name.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

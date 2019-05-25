@@ -1,66 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Testing.TestCase">
-<Description>
-Superclass for tests to be run by Strix.Test.Runner.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63861,43205.846095</TimeCreated>
+Include Strix
 
-<Property name="Runner">
-<Description>
-The test runner</Description>
-<Type>Strix.Testing.Runner</Type>
-</Property>
+/// Superclass for tests to be run by Strix.Test.Runner.
+Class Strix.Testing.TestCase Extends %RegisteredObject
+{
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The test runner
+Property Runner As Strix.Testing.Runner;
+
 // =====
 
-]]></Content>
-</UDLText>
+/// Code to run before any test in this class is executed.
+Method Setup() As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="Setup">
-<Description>
-Code to run before any test in this class is executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+/// Code to run after a single test method has been run. The name
+/// of the method is passed in.
+Method OnAfterTest(Name As %String) As %Status [ Abstract ]
+{
+	Quit $$$OK
+}
 
-<Method name="OnAfterTest">
-<Description>
-Code to run after a single test method has been run. The name
-of the method is passed in.</Description>
-<Abstract>1</Abstract>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
+/// Code to run after all tests in this class have been executed.
+/// Gets passed in a comma-separated list of methods with assertion
+/// failures or errors.
+Method TearDown(FailedTests As %String) As %Status
+{
+	Quit $$$OK
+}
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.
-Gets passed in a comma-separated list of methods with assertion
-failures or errors.</Description>
-<FormalSpec>FailedTests:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$OK
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Assert">
-<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method Assert(Result, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Result {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -74,23 +47,16 @@ failures or errors.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertTrue">
-<Description>
-Alias for ..Assert</Description>
-<CodeMode>expression</CodeMode>
-<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[..Assert(.Result, .Description, Parms...)
-]]></Implementation>
-</Method>
+/// Alias for ..Assert
+Method AssertTrue(Result, Description As %String = "", Parms... As %String) As %Boolean [ CodeMode = expression ]
+{
+..Assert(.Result, .Description, Parms...)
+}
 
-<Method name="AssertFalse">
-<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertFalse(Result, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If 'Result {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -104,20 +70,12 @@ Alias for ..Assert</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ==
 
-]]></Content>
-</UDLText>
-
-<Method name="AssertEqual">
-<FormalSpec>Result,Expected,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertEqual(Result, Expected, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Expected = Result {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -131,13 +89,10 @@ Alias for ..Assert</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertNotEqual">
-<FormalSpec>Result,Expected,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertNotEqual(Result, Expected, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Expected '= Result {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -151,13 +106,10 @@ Alias for ..Assert</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertNotEmpty">
-<FormalSpec>Result,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertNotEmpty(Result, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Result '= "" {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -171,22 +123,13 @@ Alias for ..Assert</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ==
 
-]]></Content>
-</UDLText>
-
-<Method name="AssertContains">
-<Description>
-Asserts that string InValue contains string Expected.</Description>
-<FormalSpec>Container,Value,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Asserts that string InValue contains string Expected.
+Method AssertContains(Container, Value, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Container [ Value {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -200,20 +143,12 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ==
 
-]]></Content>
-</UDLText>
-
-<Method name="AssertListEqual">
-<FormalSpec>Result:%List,Expected:%List,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertListEqual(Result As %List, Expected As %List, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If $ListSame(Expected, Result) {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -227,13 +162,10 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertListNotEqual">
-<FormalSpec>Result:%List,Expected:%List,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertListNotEqual(Result As %List, Expected As %List, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If '$ListSame(Expected, Result) {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -247,20 +179,12 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ==
 
-]]></Content>
-</UDLText>
-
-<Method name="AssertStatusOk">
-<FormalSpec>Status:%Status,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertStatusOk(Status As %Status, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Status = $$$OK {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -275,13 +199,10 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertStatusEqual">
-<FormalSpec>Status1:%Status,Status2:%Status,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertStatusEqual(Status1 As %Status, Status2 As %Status, Description As %String = "", Parms... As %String) As %Boolean
+{
 	If Status1 = Status2 {
 		$$$ToTerm(".")
 		If $IsObject(..Runner) Do ..Runner.RecordAssertionOk()
@@ -298,13 +219,10 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertErrorStatus">
-<FormalSpec>Status:%Status,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertErrorStatus(Status As %Status, Description As %String = "", Parms... As %String) As %Boolean
+{
 	Set Codes = $System.Status.GetErrorCodes(Status)
 	If Status '= "", Codes '= "", Codes '= $$$InvalidStatusCodeStruct {
 		;A valid error %Status
@@ -321,13 +239,10 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertStatusParameter">
-<FormalSpec>Status:%Status,ParmNr:%Integer,ParmValue:%String,Description:%String="",Parms...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertStatusParameter(Status As %Status, ParmNr As %Integer, ParmValue As %String, Description As %String = "", Parms... As %String) As %Boolean
+{
 	Set sc = $System.Status.DecomposeStatus(Status, .Errors)
 	If 'sc {
 		$$$ToTerm("E")
@@ -356,25 +271,17 @@ Asserts that string InValue contains string Expected.</Description>
 	If ..Runner.Debug Do Info.ReportToTerminal() Break
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ==
 
-]]></Content>
-</UDLText>
-
-<Method name="Skipped">
-<FormalSpec>Reason:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method Skipped(Reason As %String) As %Boolean
+{
 	$$$ToTerm("S")
 	If '$IsObject(..Runner) Quit 0
 	Do ..Runner.RecordTestSkipped(Reason)
 	Quit 0
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

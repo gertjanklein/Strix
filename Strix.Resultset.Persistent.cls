@@ -1,85 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Resultset.Persistent">
-<Description>
-Wrapper for %ScrollableResultSet, intended for pagination of webservice
-results. Works by wrapping the system resultset (delegation).</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%Persistent</Super>
-<TimeCreated>63699,40874.34797</TimeCreated>
+Include Strix
 
-<Property name="PageSize">
-<Description>
-Paging support: the number of rows in a page</Description>
-<Type>%Integer</Type>
-<Parameter name="MINVAL" value="1"/>
-</Property>
+/// Wrapper for %ScrollableResultSet, intended for pagination of webservice
+/// results. Works by wrapping the system resultset (delegation).
+Class Strix.Resultset.Persistent Extends %Persistent
+{
 
-<Property name="CurrentPage">
-<Description>
-Paging support: the current page number</Description>
-<Type>%Integer</Type>
-<Parameter name="MINVAL" value="1"/>
-</Property>
+/// Paging support: the number of rows in a page
+Property PageSize As %Integer(MINVAL = 1);
 
-<Property name="CurrentIndex">
-<Description>
-Paging support: the current row index (within the current page)</Description>
-<Type>%Integer</Type>
-<Parameter name="MINVAL" value="1"/>
-</Property>
+/// Paging support: the current page number
+Property CurrentPage As %Integer(MINVAL = 1);
 
-<Property name="SessionKey">
-<Description>
-SessionKey can contain the LoginID of a user.</Description>
-<Type>%String</Type>
-</Property>
+/// Paging support: the current row index (within the current page)
+Property CurrentIndex As %Integer(MINVAL = 1);
 
-<Property name="DateTimeCreated">
-<Description>
-Date/time this object was created</Description>
-<Type>%TimeStamp</Type>
-<InitialExpression>$ZDateTime($ZUtil(188), 3, 1)</InitialExpression>
-</Property>
+/// SessionKey can contain the LoginID of a user.
+Property SessionKey As %String;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Date/time this object was created
+Property DateTimeCreated As %TimeStamp [ InitialExpression = {$ZDateTime($ZUtil(188), 3, 1)} ];
+
 // =====
 
-]]></Content>
-</UDLText>
+/// The actual embedded scrollable resultset. This is such a weird object it
+/// can't be saved as a property; instead we have to save the id *and* save
+/// the object...
+Property EmbeddedResultset As %Library.ScrollableResultSet [ Transient ];
 
-<Property name="EmbeddedResultset">
-<Description>
-The actual embedded scrollable resultset. This is such a weird object it
-can't be saved as a property; instead we have to save the id *and* save
-the object...</Description>
-<Type>%Library.ScrollableResultSet</Type>
-<Transient>1</Transient>
-</Property>
+/// The Id of the embedded %ScrollableResultSet
+Property EmbeddedResultsetId As %String;
 
-<Property name="EmbeddedResultsetId">
-<Description>
-The Id of the embedded %ScrollableResultSet</Description>
-<Type>%String</Type>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetResultset">
-<Description>
-Creates and returns a new or existing resultset object. QueryName specifies the
-name of the class query. For dynamic SQL, use %DynamicQuery:SQL and specify the
-query string as the first query parameter.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Request:Strix.Resultset.Request,*Resultset:Strix.Resultset.Persistent,QueryName:%String,QueryParameters...</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Creates and returns a new or existing resultset object. QueryName specifies the
+/// name of the class query. For dynamic SQL, use %DynamicQuery:SQL and specify the
+/// query string as the first query parameter.
+ClassMethod GetResultset(Request As Strix.Resultset.Request, Output Resultset As Strix.Resultset.Persistent, QueryName As %String, QueryParameters...) As %Status
+{
 	Set ResultsetId = Request.ResultsetID
 	
 	If ResultsetId '= "" {
@@ -127,14 +84,11 @@ query string as the first query parameter.</Description>
 	If 'Status Quit $$$BuildErr("Error saving resultset:", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetResultsetInfo">
-<Description>
-Returns basic information about an existing resultset.</Description>
-<ReturnType>Strix.Resultset.Info</ReturnType>
-<Implementation><![CDATA[
+/// Returns basic information about an existing resultset.
+Method GetResultsetInfo() As Strix.Resultset.Info
+{
 	Set Info = ##class(Strix.Resultset.Info).%New()
 	Set Info.ResultsetID = ..%Id()
 	
@@ -145,15 +99,11 @@ Returns basic information about an existing resultset.</Description>
 	Set Info.ItemCount = ..EmbeddedResultset.Count()
 	
 	Quit Info
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetupResultset">
-<Description>
-Sets up the scrollable resultset</Description>
-<FormalSpec>QueryName:%String,QueryParameters...:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sets up the scrollable resultset
+Method SetupResultset(QueryName As %String, QueryParameters... As %String) As %Status
+{
 	;Use apatched version of %ScrollableResultSet to make OpenObject() work.
 	Set ..EmbeddedResultset = ##class(Strix.Patches.ScrollableResultSet).%New(QueryName)
 	If '$IsObject(..EmbeddedResultset) Quit $$$BuildErr("Error creating resultset for query '"_QueryName_"'", $Get(%objlasterror))
@@ -187,24 +137,15 @@ Sets up the scrollable resultset</Description>
 	If 'Status Quit $$$BuildErr("Error saving embedded resultset:", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Paging code
 
-]]></Content>
-</UDLText>
-
-<Method name="Move">
-<Description>
-Move to a different page; How can be first, previous, next, last, page.
-If How is page, PageNr specifies the page to move to. Returns a boolean
-indicating whether the page index was actually changed.</Description>
-<FormalSpec>How:%String,PageNr:%Integer</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Move to a different page; How can be first, previous, next, last, page.
+/// If How is page, PageNr specifies the page to move to. Returns a boolean
+/// indicating whether the page index was actually changed.
+Method Move(How As %String, PageNr As %Integer) As %Boolean
+{
 	Set How = $ZConvert(How, "l")
 	
 	;No paging: original resultset delivers everything
@@ -254,17 +195,13 @@ indicating whether the page index was actually changed.</Description>
 	ZTrap "ARG" ;Invalid argument for How
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="Next">
-<Description>
-Moves to the next row. If paging is set up, navigates within the current page,
-otherwise it delegates to %ResultSet's Next(). Returns false if there is
-no next row.</Description>
-<FormalSpec>*Status:%Status=$$$OK</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Moves to the next row. If paging is set up, navigates within the current page,
+/// otherwise it delegates to %ResultSet's Next(). Returns false if there is
+/// no next row.
+Method Next(Output Status As %Status = {$$$OK}) As %Boolean
+{
 	;If paging not set up, delegate up
 	If ..PageSize = "" Quit ..EmbeddedResultset.Next(.Status)
 	
@@ -292,124 +229,76 @@ no next row.</Description>
 	Set ..CurrentIndex = CurrentIndex
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetPageSize">
-<Description>
-Sets the page size; resets CurrentPage and CurrentIndex.</Description>
-<FormalSpec>PageSize:%Integer</FormalSpec>
-<Implementation><![CDATA[
+/// Sets the page size; resets CurrentPage and CurrentIndex.
+Method SetPageSize(PageSize As %Integer)
+{
 	If PageSize < 1 Quit
 	Set ..PageSize = PageSize
 	Set ..CurrentPage = ""
 	Set ..CurrentIndex = ""
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Delegation
 
-]]></Content>
-</UDLText>
+Method Get(name As %String) As %String [ CodeMode = expression ]
+{
+..EmbeddedResultset.Get(name)
+}
 
-<Method name="Get">
-<CodeMode>expression</CodeMode>
-<FormalSpec>name:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.Get(name)
-]]></Implementation>
-</Method>
+Method GetData(n As %Integer) As %String [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetData(n)
+}
 
-<Method name="GetData">
-<CodeMode>expression</CodeMode>
-<FormalSpec>n:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetData(n)
-]]></Implementation>
-</Method>
+Method GetObject() As %RegisteredObject [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetObject()
+}
 
-<Method name="GetObject">
-<CodeMode>expression</CodeMode>
-<ReturnType>%RegisteredObject</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetObject()
-]]></Implementation>
-</Method>
+Method GetColumnCount() As %Integer [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetColumnCount()
+}
 
-<Method name="GetColumnCount">
-<CodeMode>expression</CodeMode>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetColumnCount()
-]]></Implementation>
-</Method>
+Method GetColumnName(n As %Integer) As %String [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetColumnName(n)
+}
 
-<Method name="GetColumnName">
-<CodeMode>expression</CodeMode>
-<FormalSpec>n:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetColumnName(n)
-]]></Implementation>
-</Method>
+Method GetColumnExtInfo(n As %Integer) As %String [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetColumnExtInfo(n)
+}
 
-<Method name="GetColumnExtInfo">
-<CodeMode>expression</CodeMode>
-<FormalSpec>n:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetColumnExtInfo(n)
-]]></Implementation>
-</Method>
+Method GetColumnHeader(n As %Integer) As %String [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetColumnHeader(n)
+}
 
-<Method name="GetColumnHeader">
-<CodeMode>expression</CodeMode>
-<FormalSpec>n:%Integer</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetColumnHeader(n)
-]]></Implementation>
-</Method>
+Method GetColumnType(n As %Integer) As %Integer [ CodeMode = expression ]
+{
+..EmbeddedResultset.GetColumnType(n)
+}
 
-<Method name="GetColumnType">
-<CodeMode>expression</CodeMode>
-<FormalSpec>n:%Integer</FormalSpec>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[..EmbeddedResultset.GetColumnType(n)
-]]></Implementation>
-</Method>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Queries
 
-]]></Content>
-</UDLText>
-
-<Query name="ForSessionKey">
-<Description>
-Returns the ID of all resultsets for a given session key. If SessionKey
-is empty, all resultsets are returned.</Description>
-<Type>%SQLQuery</Type>
-<FormalSpec>SessionKey:%String</FormalSpec>
-<SqlQuery>SELECT %ID
+/// Returns the ID of all resultsets for a given session key. If SessionKey
+/// is empty, all resultsets are returned.
+Query ForSessionKey(SessionKey As %String) As %SQLQuery(CONTAINID = 1)
+{
+SELECT %ID
   FROM Persistent
- WHERE ISNULL(SessionKey, '') = ISNULL(:SessionKey, '')</SqlQuery>
-<Parameter name="CONTAINID" value="1"/>
-</Query>
+ WHERE ISNULL(SessionKey, '') = ISNULL(:SessionKey, '')
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Cleanup
 
-]]></Content>
-</UDLText>
-
-<Method name="DeleteOnSessionKey">
-<Description>
-Deletes all persisted resultsets with a specific SessionKey.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>SessionKey:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Deletes all persisted resultsets with a specific SessionKey.
+ClassMethod DeleteOnSessionKey(SessionKey As %String) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("Viva.Utilities.PersistentResultset:ForSessionKey")
 	If '$IsObject(rs) Quit $$$BuildErr("Error creating resultset:", $Get(%objlasterror))
 	
@@ -425,54 +314,31 @@ Deletes all persisted resultsets with a specific SessionKey.</Description>
 	If 'Result Quit $$$BuildErr("Errors found deleting data:", Result)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Object callbacks
 
-]]></Content>
-</UDLText>
-
-<Method name="%OnAddToSaveSet">
-<Description>
-Called when the object is about to be saved</Description>
-<FormalSpec>depth:%Integer=3,insert:%Integer=0,callcount:%Integer=0</FormalSpec>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Called when the object is about to be saved
+Method %OnAddToSaveSet(depth As %Integer = 3, insert As %Integer = 0, callcount As %Integer = 0) As %Status [ Private, ServerOnly = 1 ]
+{
 	Set Status = ..EmbeddedResultset.%Save()
 	If 'Status Quit $$$BuildErr("Error saving embedded %ScrollableResulSet", Status)
 	Set ..EmbeddedResultsetId = ..EmbeddedResultset.%Id()
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="%OnOpen">
-<Description>
-Called when object is being opened</Description>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Called when object is being opened
+Method %OnOpen() As %Status [ Private, ServerOnly = 1 ]
+{
 	If ..EmbeddedResultsetId = "" Quit $$$OK
 	Set ..EmbeddedResultset = ##class(%ScrollableResultSet).%OpenId(..EmbeddedResultsetId, , .Status)
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="%OnDelete">
-<Description>
-Called when object is deleted</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>oid:%ObjectIdentity</FormalSpec>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Called when object is deleted
+ClassMethod %OnDelete(oid As %ObjectIdentity) As %Status [ Private, ServerOnly = 1 ]
+{
 	Set id = $lg(oid)
 	Set EmbeddedId = ##class(Strix.Resultset.Persistent).EmbeddedResultsetIdGetStored(id)
 	If EmbeddedId = "" Quit $$$OK
@@ -481,40 +347,22 @@ Called when object is deleted</Description>
 	If 'Status Quit $$$BuildErr("Error deleting embedded resultset '"_EmbeddedId_"':", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== SQL callbacks
 
-]]></Content>
-</UDLText>
+/// If a resultset is deleted via SQL, make sure the %ScrollableResultSet
+/// data is removed as well.
+Trigger OnDelete [ Event = DELETE, Time = AFTER ]
+{
+	Set Id = {EmbeddedResultsetId*O}
+	If Id '= "" Do ##class(%ScrollableResultSet).%DeleteId(Id)
+}
 
-<Trigger name="OnDelete">
-<Description>
-If a resultset is deleted via SQL, make sure the %ScrollableResultSet
-data is removed as well.</Description>
-<Code>	Set Id = {EmbeddedResultsetId*O}
-	If Id '= "" Do ##class(%ScrollableResultSet).%DeleteId(Id)</Code>
-<Event>DELETE</Event>
-<Time>AFTER</Time>
-</Trigger>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^Strix.Resultset.PersistentD</DataLocation>
-<DefaultData>PersistentDefaultData</DefaultData>
-<IdLocation>^Strix.Resultset.PersistentD</IdLocation>
-<IndexLocation>^Strix.Resultset.PersistentI</IndexLocation>
-<StreamLocation>^Strix.Resultset.PersistentS</StreamLocation>
+Storage Default
+{
 <Data name="PersistentDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
@@ -538,6 +386,13 @@ data is removed as well.</Description>
 <Value>EmbeddedResultsetId</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<DataLocation>^Strix.Resultset.PersistentD</DataLocation>
+<DefaultData>PersistentDefaultData</DefaultData>
+<IdLocation>^Strix.Resultset.PersistentD</IdLocation>
+<IndexLocation>^Strix.Resultset.PersistentI</IndexLocation>
+<StreamLocation>^Strix.Resultset.PersistentS</StreamLocation>
+<Type>%Library.CacheStorage</Type>
+}
+
+}
+

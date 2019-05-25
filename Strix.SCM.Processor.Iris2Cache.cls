@@ -1,16 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Processor.Iris2Cache">
-<Super>Strix.SCM.Processor.Base</Super>
-<TimeCreated>65082,54599.175675</TimeCreated>
+Class Strix.SCM.Processor.Iris2Cache Extends Strix.SCM.Processor.Base
+{
 
-<Method name="ProcessExport">
-<Description>
-Replaces IRIS-specific parts of an XML export so it
-can be imported in Caché.</Description>
-<FormalSpec>Item:%String,Export:%Stream,*Status:%Status</FormalSpec>
-<ReturnType>%Stream</ReturnType>
-<Implementation><![CDATA[
+/// Replaces IRIS-specific parts of an XML export so it
+/// can be imported in Caché.
+Method ProcessExport(Item As %String, Export As %Stream, Output Status As %Status) As %Stream
+{
 	Set Status = $$$OK
 	
 	Set Stream = ##class(%Stream.TmpBinary).%New()
@@ -32,7 +26,7 @@ can be imported in Caché.</Description>
 	}
 	
 	Quit Stream
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

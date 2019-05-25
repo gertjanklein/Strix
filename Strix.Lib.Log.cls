@@ -1,59 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Log">
-<Description>
-Simple logger class</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%Persistent</Super>
-<TimeCreated>63646,42215.393023</TimeCreated>
+Include Strix
 
-<Property name="When">
-<Description>
-When the event occurred</Description>
-<Type>%TimeStamp</Type>
-<InitialExpression>$ZDateTime($ZUtil(188), 3, 1, 3)</InitialExpression>
-</Property>
+/// Simple logger class
+Class Strix.Lib.Log Extends %Persistent
+{
 
-<Property name="Type">
-<Description>
-The type of event: Debug, Info, Error</Description>
-<Type>%String</Type>
-</Property>
+/// When the event occurred
+Property When As %TimeStamp [ InitialExpression = {$ZDateTime($ZUtil(188), 3, 1, 3)} ];
 
-<Property name="Location">
-<Description>
-Where the event occurred (e.g. classname:methodname)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="256"/>
-</Property>
+/// The type of event: Debug, Info, Error
+Property Type As %String;
 
-<Property name="Status">
-<Description>
-%Status, if known</Description>
-<Type>%Status</Type>
-</Property>
+/// Where the event occurred (e.g. classname:methodname)
+Property Location As %String(MAXLEN = 256);
 
-<Property name="Message">
-<Description>
-Information about the event</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="4096"/>
-</Property>
+/// %Status, if known
+Property Status As %Status;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Information about the event
+Property Message As %String(MAXLEN = 4096);
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="LogError">
-<Description>
-Logs an event of type Error</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Location:%String,Message:%String="",Status:%Status=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Logs an event of type Error
+ClassMethod LogError(Location As %String, Message As %String = "", Status As %Status = "") As %Status
+{
 	Set Me = ..%New()
 	
 	Set Me.Type = "Error"
@@ -68,16 +38,11 @@ Logs an event of type Error</Description>
 	If $Quit Quit $$$BuildErr(Message, Status)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogTrappedError">
-<Description>
-Logs a trapped error (e.g., from a $ZTrap trap)</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Location:%String,Message:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Logs a trapped error (e.g., from a $ZTrap trap)
+ClassMethod LogTrappedError(Location As %String, Message As %String = "") As %Status
+{
 	Set Me = ..%New()
 	
 	Set Me.Type = "Error"
@@ -91,16 +56,11 @@ Logs a trapped error (e.g., from a $ZTrap trap)</Description>
 	If $Quit Quit $$$BuildErr(Message, 1)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogAssertionError">
-<Description>
-Logs an assert failure</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Location:%String,Condition:%String,Message:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Logs an assert failure
+ClassMethod LogAssertionError(Location As %String, Condition As %String, Message As %String = "") As %Status
+{
 	Set Me = ..%New()
 	
 	Set Me.Type = "Assert"
@@ -115,15 +75,11 @@ Logs an assert failure</Description>
 	If $Quit Quit $$$BuildErr(Message, 1)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogInfo">
-<Description>
-Logs an event of type Info</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Location:%String,Message:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Logs an event of type Info
+ClassMethod LogInfo(Location As %String, Message As %String)
+{
 	Set Me = ..%New()
 	
 	Set Me.Type = "Info"
@@ -134,15 +90,11 @@ Logs an event of type Info</Description>
 	If 'sc Do Me.HandleSaveFailure(sc)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="LogDebug">
-<Description>
-Logs an event of type Debug</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Location:%String,Message:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Logs an event of type Debug
+ClassMethod LogDebug(Location As %String, Message As %String)
+{
 	Set Me = ..%New()
 	
 	Set Me.Type = "Debug"
@@ -153,16 +105,12 @@ Logs an event of type Debug</Description>
 	If 'sc Do Me.HandleSaveFailure(sc)
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="HandleSaveFailure">
-<Description>
-Fallback method to store info about a failed save in a global
-for later examination.</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>Status:%Status</FormalSpec>
-<Implementation><![CDATA[
+/// Fallback method to store info about a failed save in a global
+/// for later examination.
+Method HandleSaveFailure(Status As %Status) [ CodeMode = objectgenerator ]
+{
 	#define Write(%s) Do %code.WriteLine($Char(9)_%s)
 	
 	$$$Write("Set Index = $Increment(^LogErrors)")
@@ -183,16 +131,10 @@ for later examination.</Description>
 	$$$Write("Set ^LogErrors(Index, ""s"") = Status")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^Strix.Lib.LogD</DataLocation>
-<DefaultData>LogDefaultData</DefaultData>
-<IdLocation>^Strix.Lib.LogD</IdLocation>
-<IndexLocation>^Strix.Lib.LogI</IndexLocation>
-<StreamLocation>^Strix.Lib.LogS</StreamLocation>
+Storage Default
+{
 <Data name="LogDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
@@ -213,6 +155,13 @@ for later examination.</Description>
 <Value>Message</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<DataLocation>^Strix.Lib.LogD</DataLocation>
+<DefaultData>LogDefaultData</DefaultData>
+<IdLocation>^Strix.Lib.LogD</IdLocation>
+<IndexLocation>^Strix.Lib.LogI</IndexLocation>
+<StreamLocation>^Strix.Lib.LogS</StreamLocation>
+<Type>%Library.CacheStorage</Type>
+}
+
+}
+

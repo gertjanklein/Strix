@@ -1,74 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Timer">
-<Description>
-Helper class for timing things.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63480,54365.861044</TimeCreated>
+/// Helper class for timing things.
+Class Strix.Lib.Timer Extends %RegisteredObject
+{
 
-<Property name="StartTime">
-<Description>
-The start time of the timer, set to $ZH-format when starting</Description>
-<Type>%String</Type>
-<InitialExpression>$ZHorolog</InitialExpression>
-<Private>1</Private>
-</Property>
+/// The start time of the timer, set to $ZH-format when starting
+Property StartTime As %String [ InitialExpression = {$ZHorolog}, Private ];
 
-<Property name="Marks">
-<Description>
-Marks, if any</Description>
-<Type>%List</Type>
-<Collection>list</Collection>
-</Property>
+/// Marks, if any
+Property Marks As list Of %List;
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Get">
-<Description>
-Constructor (%New can be used too)
-Set %t = ##class(Strix.Lib.Timer).Get()</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>Strix.Lib.Timer</ReturnType>
-<Implementation><![CDATA[
+/// Constructor (%New can be used too)
+/// Set %t = ##class(Strix.Lib.Timer).Get()
+ClassMethod Get() As Strix.Lib.Timer
+{
 	Set Me = ..%New()
 	Set Me.StartTime = $ZHorolog
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="Mark">
-<Description>
-Records time passed so far; as many marks as needed can be set
-Do %t.Mark("Here")</Description>
-<FormalSpec>Message:%String=""</FormalSpec>
-<Implementation><![CDATA[
+/// Records time passed so far; as many marks as needed can be set
+/// Do %t.Mark("Here")
+Method Mark(Message As %String = "")
+{
 	If Message = "" Set Message = "Mark "_(..Marks.Count() + 1)
 	Set List = $ListBuild($ZHorolog, Message)
 	Do ..Marks.Insert(List)
-]]></Implementation>
-</Method>
+}
 
-<Method name="Reset">
-<Description>
-Clears marks and restart
-Do %t.Reset()</Description>
-<Implementation><![CDATA[
+/// Clears marks and restart
+/// Do %t.Reset()
+Method Reset()
+{
 	Set ..StartTime = $ZHorolog
 	Do ..Marks.Clear()
-]]></Implementation>
-</Method>
+}
 
-<Method name="ReportToTerminal">
-<Description>
-Displays results on terminal
-Do %t.ReportToTerminal()</Description>
-<FormalSpec>Mark:%String=""</FormalSpec>
-<Implementation><![CDATA[
+/// Displays results on terminal
+/// Do %t.ReportToTerminal()
+Method ReportToTerminal(Mark As %String = "")
+{
 	If Mark '= "" {
 		Do ..Mark(Mark)
 	} ElseIf '..Marks.Count() {
@@ -94,7 +65,7 @@ Do %t.ReportToTerminal()</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

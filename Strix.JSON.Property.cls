@@ -1,39 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.Property">
-<IncludeCode>Strix</IncludeCode>
-<IncludeGenerator>Strix</IncludeGenerator>
-<Super>%DataType</Super>
-<TimeCreated>64714,55414.338999</TimeCreated>
+Include Strix
 
-<Parameter name="Conversion">
-<Description>
-Specifies what conversion to perform on values, if any.
-. JSON: convert JSON strings to %DynamicObject (on set and open)
-. Str: Convert %DynamicObject to their equivalent string (on set)
-. (empty): Do no conversion.
-Properties with Conversion set to JSON will reconvert stored
-values to a %DynamicObject when opening an existing object.
-%DynamicArray is treated the same as %DynamicObject.</Description>
-<Type>STRING</Type>
-<Constraint>,JSON,Str</Constraint>
-<Flags>ENUMEDIT</Flags>
-</Parameter>
+IncludeGenerator Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.JSON.Property Extends %DataType
+{
+
+/// Specifies what conversion to perform on values, if any.
+/// . JSON: convert JSON strings to %DynamicObject (on set and open)
+/// . Str: Convert %DynamicObject to their equivalent string (on set)
+/// . (empty): Do no conversion.
+/// Properties with Conversion set to JSON will reconvert stored
+/// values to a %DynamicObject when opening an existing object.
+/// %DynamicArray is treated the same as %DynamicObject.
+Parameter Conversion As STRING [ Constraint = ",JSON,Str", Flags = ENUMEDIT ];
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="IsValid">
-<Description>
-Value must either be a %Dynamic[Object|Array], or a valid JSON string.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>%val</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Value must either be a %Dynamic[Object|Array], or a valid JSON string.
+ClassMethod IsValid(%val) As %Status
+{
 	If %val = "" Quit $$$OK
 	If $IsObject(%val) {
 		If %val.%IsA("%DynamicAbstractObject") Quit $$$OK
@@ -45,17 +30,11 @@ Value must either be a %Dynamic[Object|Array], or a valid JSON string.</Descript
 		Return $$$BuildStatus("String not valid JSON.")
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Set">
-<Description>
-Setter implements type conversion, if needed.</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>%val</FormalSpec>
-<NoContext>1</NoContext>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Setter implements type conversion, if needed.
+Method Set(%val) As %Status [ CodeMode = objectgenerator, NoContext ]
+{
 	Set Name = %property
 	
 	; If name is empty we're compiling this class
@@ -88,68 +67,40 @@ Setter implements type conversion, if needed.</Description>
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="AsString">
-<Description>
-Returns the property value as a string, even if it is a %DynamicObject
-(or -Array).</Description>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the property value as a string, even if it is a %DynamicObject
+/// (or -Array).
+Method AsString() As %String
+{
 	If '$IsObject(%val) Quit %val
 	Quit %val.%ToJSON()
-]]></Implementation>
-</Method>
+}
 
-<Method name="AsObject">
-<Description>
-Returns the property value as a %DynamicObject (or -Array),
-if possible, even if it is a string.</Description>
-<ReturnType>%DynamicAbstractObject</ReturnType>
-<Implementation><![CDATA[
+/// Returns the property value as a %DynamicObject (or -Array),
+/// if possible, even if it is a string.
+Method AsObject() As %DynamicAbstractObject
+{
 	If $IsObject(%val) Quit %val
 	If %val = "" Quit ""
 	Quit ##class(%DynamicAbstractObject).%FromJSON(%val)
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="LogicalToStorage">
-<Description>
-Converts %DynamicObject to the equivalent JSON when storing.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>%val</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Converts %DynamicObject to the equivalent JSON when storing.
+ClassMethod LogicalToStorage(%val) As %String
+{
 	If '$IsObject(%val) Quit %val
 	Quit %val.%ToJSON()
-]]></Implementation>
-</Method>
+}
 
-<Method name="StorageToLogical">
-<Description>
-Reload value from disk: convert value back to %DynamicObject
-(or -Array), if it was one.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>%val</FormalSpec>
-<NoContext>1</NoContext>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Reload value from disk: convert value back to %DynamicObject
+/// (or -Array), if it was one.
+ClassMethod StorageToLogical(%val) As %String [ CodeMode = objectgenerator, NoContext ]
+{
 	Set Name = %property
 	
 	; If name is empty we're compiling this class
@@ -168,7 +119,7 @@ Reload value from disk: convert value back to %DynamicObject
 	Do %code.WriteLine($Char(9)_"Quit "_Value)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

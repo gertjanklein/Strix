@@ -1,19 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.System">
-<Description>
-Various utility methods</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64380,39933.025974</TimeCreated>
+Include Strix
 
-<Method name="GetDatabaseDirectory">
-<Description>
-Returns the directory for the database with the given name.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>DatabaseName:%String,*Status:%Status,*Properties:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Various utility methods
+Class Strix.Lib.System Extends %RegisteredObject
+{
+
+/// Returns the directory for the database with the given name.
+ClassMethod GetDatabaseDirectory(DatabaseName As %String, Output Status As %Status, Output Properties As %String) As %String
+{
 	New $Namespace
 	
 	;The system class we use is only accessible from %SYS
@@ -25,19 +18,14 @@ Returns the directory for the database with the given name.</Description>
 	Set Result = Properties("Directory")
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="CacheLibReadOnly">
-<Description>
-Gets/sets the readonly flag for the CACHELIB database. If the
-parameter ReadOnly is not specified, no changes will be made.
-If specified, the requested setting will be applied and the
-previous value will be returned.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ReadOnly:%Boolean="",*Status:%Status</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Gets/sets the readonly flag for the CACHELIB database. If the
+/// parameter ReadOnly is not specified, no changes will be made.
+/// If specified, the requested setting will be applied and the
+/// previous value will be returned.
+ClassMethod CacheLibReadOnly(ReadOnly As %Boolean = "", Output Status As %Status) As %Boolean
+{
 	New $Namespace, %objlasterror
 	
 	Set Directory = ..GetDatabaseDirectory("CACHELIB", .Status)
@@ -67,19 +55,15 @@ previous value will be returned.</Description>
 	Kill Database
 	
 	Return PrevState
-]]></Implementation>
-</Method>
+}
 
-<Method name="MemoryUsed">
-<Description>
-Returns the amount of memory used (in bytes) in the current process.
-$ZStorage returns the maximum available memory (in kB)
-$Storage returns the currently available memor (in bytes)</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>expression</CodeMode>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[($ZStorage*1024) - $Storage
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+/// Returns the amount of memory used (in bytes) in the current process.
+/// $ZStorage returns the maximum available memory (in kB)
+/// $Storage returns the currently available memor (in bytes)
+ClassMethod MemoryUsed() As %Integer [ CodeMode = expression ]
+{
+($ZStorage*1024) - $Storage
+}
+
+}
+

@@ -1,77 +1,40 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.CSV.Adaptor">
-<Abstract>1</Abstract>
-<IncludeCode>Strix</IncludeCode>
-<IncludeGenerator>Strix</IncludeGenerator>
-<PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
-<TimeCreated>64771,47169.904165</TimeCreated>
-<DependsOn>Strix.Generator.Utilities</DependsOn>
+Include Strix
 
-<Parameter name="PreferredLoader">
-<Description>
-Which load method the parser should use: the one which expects
-data indexed by column header ("header"), or by column index ("index").</Description>
-<Constraint>header,index</Constraint>
-<Default>index</Default>
-<Flags>ENUM</Flags>
-</Parameter>
+IncludeGenerator Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.CSV.Adaptor [ Abstract, DependsOn = Strix.Generator.Utilities, PropertyClass = Strix.CSV.PropertyParm ]
+{
+
+/// Which load method the parser should use: the one which expects
+/// data indexed by column header ("header"), or by column index ("index").
+Parameter PreferredLoader [ Constraint = "header,index", Flags = ENUM ] = "index";
+
 // -----
 
-]]></Content>
-</UDLText>
+/// For boolean properties: "true" values
+Parameter True = "1,yes,true";
 
-<Parameter name="True">
-<Description>
-For boolean properties: "true" values</Description>
-<Default>1,yes,true</Default>
-</Parameter>
+/// For boolean properties: "false" values
+Parameter False = "0,no,false";
 
-<Parameter name="False">
-<Description>
-For boolean properties: "false" values</Description>
-<Default>0,no,false</Default>
-</Parameter>
+/// Expression to use to convert dates to logical format.
+/// The value from the CSV file is present in variable "v".
+Parameter DateExpression = "$ZDateH(v,3)";
 
-<Parameter name="DateExpression">
-<Description>
-Expression to use to convert dates to logical format.
-The value from the CSV file is present in variable "v".</Description>
-<Default>$ZDateH(v,3)</Default>
-</Parameter>
+/// Expression to use to convert times to logical format.
+/// The value from the CSV file is present in variable "v".
+Parameter TimeExpression = "$ZTimeH(v,1)";
 
-<Parameter name="TimeExpression">
-<Description>
-Expression to use to convert times to logical format.
-The value from the CSV file is present in variable "v".</Description>
-<Default>$ZTimeH(v,1)</Default>
-</Parameter>
+/// Expression to use to convert numeric (floating point) values
+/// to logical format. The value from the CSV file is present in
+/// variable "v".
+Parameter NumericExpression = "+v";
 
-<Parameter name="NumericExpression">
-<Description>
-Expression to use to convert numeric (floating point) values
-to logical format. The value from the CSV file is present in
-variable "v".</Description>
-<Default>+v</Default>
-</Parameter>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="LoadByHeader">
-<Description>
-Loads the object from the data in Data (indexed by column header).</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads the object from the data in Data (indexed by column header).
+Method LoadByHeader(ByRef Data As %String) As %Status [ CodeMode = objectgenerator ]
+{
 	Set key = ""
 	For  {
 		#dim pd As %Dictionary.CompiledProperty
@@ -116,16 +79,11 @@ Loads the object from the data in Data (indexed by column header).</Description>
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LoadByIndex">
-<Description>
-Loads the object from the data in Data (indexed by column number).</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads the object from the data in Data (indexed by column number).
+Method LoadByIndex(ByRef Data As %String) As %Status [ CodeMode = objectgenerator ]
+{
 	Set key = ""
 	For  {
 		#dim pd As %Dictionary.CompiledProperty
@@ -170,36 +128,25 @@ Loads the object from the data in Data (indexed by column number).</Description>
 	Do %code.WriteLine($Char(9)_"Quit $$$OK")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="PostProcessCsv">
-<Description>
-This method is called after the object receives the data.
-Datatype conversions have been run. The original data is
-present in the Data array.</Description>
-<Abstract>1</Abstract>
-<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// This method is called after the object receives the data.
+/// Datatype conversions have been run. The original data is
+/// present in the Data array.
+Method PostProcessCsv(ByRef Data As %String) As %Status [ Abstract ]
+{
 	Set Skip = 0
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckCSVColumns">
-<Description>
-Compares the column headers present in Columns with the specifications
-in the properties of this class. Returns comma-separated lists of:
-- Missing: headers defined in a property but not in the Columns array
-- Unused: headers in the Columns array for which no property is defined
-The return value is true if all property-defined headers are present,
-false otherwise.</Description>
-<ClassMethod>1</ClassMethod>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec><![CDATA[&Columns:%String,*Missing:%String,*Unused:%String]]></FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Compares the column headers present in Columns with the specifications
+/// in the properties of this class. Returns comma-separated lists of:
+/// - Missing: headers defined in a property but not in the Columns array
+/// - Unused: headers in the Columns array for which no property is defined
+/// The return value is true if all property-defined headers are present,
+/// false otherwise.
+ClassMethod CheckCSVColumns(ByRef Columns As %String, Output Missing As %String, Output Unused As %String) As %Boolean [ CodeMode = objectgenerator ]
+{
 	If %class.Name = "Strix.CSV.Adaptor" Quit $$$OK
 	
 	Do %code.WriteLine($Char(9)_"Set (Missing, Unused) = """"")
@@ -226,7 +173,7 @@ false otherwise.</Description>
 	Do %code.WriteLine($Char(9)_"Quit Missing = """"")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

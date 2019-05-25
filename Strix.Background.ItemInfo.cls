@@ -1,60 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Background.ItemInfo">
-<Description>
-This class describes the results of a single item handled in a job
-(i.e., by a subclass of the Job class).</Description>
-<Super>%SerialObject,%XML.Adaptor</Super>
-<TimeCreated>63419,42228.066507</TimeCreated>
+/// This class describes the results of a single item handled in a job
+/// (i.e., by a subclass of the Job class).
+Class Strix.Background.ItemInfo Extends (%SerialObject, %XML.Adaptor)
+{
 
-<Property name="IsError">
-<Description>
-Whether this item describes an error</Description>
-<Type>%Boolean</Type>
-</Property>
+/// Whether this item describes an error
+Property IsError As %Boolean;
 
-<Property name="Message">
-<Description>
-Textual description</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
+/// Textual description
+Property Message As %String(MAXLEN = "");
 
-<Property name="Status">
-<Description>
-If available, a %Status with error information</Description>
-<Type>%Status</Type>
-</Property>
+/// If available, a %Status with error information
+Property Status As %Status;
 
-<Property name="RelatedId">
-<Description>
-If this item describes a specific object, it's id</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
+/// If this item describes a specific object, it's id
+Property RelatedId As %String(MAXLEN = "");
 
-<Method name="GetError">
-<Description>
-Creates and returns an object with the IsError flag set.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String="",Status:%Status="",RelatedId:%String=""</FormalSpec>
-<ReturnType>Strix.Background.ItemInfo</ReturnType>
-<Implementation><![CDATA[
+/// Creates and returns an object with the IsError flag set.
+ClassMethod GetError(Message As %String = "", Status As %Status = "", RelatedId As %String = "") As Strix.Background.ItemInfo
+{
 	Set Me = ..%New()
 	Set Me.IsError = 1
 	Set Me.Message = Message
 	Set Me.Status = Status
 	Set Me.RelatedId = RelatedId
 	Quit Me
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetErrorText">
-<Description>
-Returns message and/or status, depending on which have a value</Description>
-<FormalSpec>Language:%String="nl"</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns message and/or status, depending on which have a value
+Method GetErrorText(Language As %String = "nl") As %String
+{
 	Set Text = ..Message
 	If ..Status = "" Quit Text
 	
@@ -64,13 +38,10 @@ Returns message and/or status, depending on which have a value</Description>
 	Set Text = Text_": "_$System.Status.GetErrorText(..Status, Language)
 	
 	Quit Text
-]]></Implementation>
-</Method>
+}
 
-<Storage name="Default">
-<Type>%Library.CacheSerialState</Type>
-<State>ItemInfoState</State>
-<StreamLocation>^Strix.Background.ItemInfoS</StreamLocation>
+Storage Default
+{
 <Data name="ItemInfoState">
 <Value name="1">
 <Value>IsError</Value>
@@ -85,6 +56,10 @@ Returns message and/or status, depending on which have a value</Description>
 <Value>RelatedId</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<State>ItemInfoState</State>
+<StreamLocation>^Strix.Background.ItemInfoS</StreamLocation>
+<Type>%Library.CacheSerialState</Type>
+}
+
+}
+

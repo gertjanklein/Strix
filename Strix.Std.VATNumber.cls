@@ -1,20 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Std.VATNumber">
-<Description>
-VAT number validation</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63600,42477.243996</TimeCreated>
+/// VAT number validation
+Class Strix.Std.VATNumber Extends %RegisteredObject
+{
 
-<Method name="Check">
-<Description>
-Checks for VAT number validity. Returns 0 (not valid), 1 (valid), or
-an empty string if unknown. The normalized parameter receives the
-possibly corrected VAT number; this should be used for external systems.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>VATNumber:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks for VAT number validity. Returns 0 (not valid), 1 (valid), or
+/// an empty string if unknown. The normalized parameter receives the
+/// possibly corrected VAT number; this should be used for external systems.
+ClassMethod Check(VATNumber As %String, Output Normalized As %String) As %Boolean
+{
 	Set CountryCode = $ZConvert($Extract(VATNumber, 1, 2), "U")
 	
 	;If no country code, check if this is a partial Dutch VAT number.
@@ -29,17 +21,12 @@ possibly corrected VAT number; this should be used for external systems.</Descri
 	
 	;Return "unknown":
 	Quit ""
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckNL">
-<Description>
-Checks a Dutch VAT number
-Examples: NL820321588B01, NL851332444B01, NL052690210B02</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>VATNumber:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks a Dutch VAT number
+/// Examples: NL820321588B01, NL851332444B01, NL052690210B02
+ClassMethod CheckNL(VATNumber As %String, Output Normalized As %String) As %Boolean
+{
 	Set Normalized = $Translate($ZConvert(VATNumber, "U"), " .")
 	
 	;Check normal form first
@@ -70,17 +57,12 @@ Examples: NL820321588B01, NL851332444B01, NL052690210B02</Description>
 	}
 	
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckBE">
-<Description>
-Checks a Belgian VAT number
-Examples: BE0863.982.562, BE0887.052.231, BE0560.869.935</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>VATNumber:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks a Belgian VAT number
+/// Examples: BE0863.982.562, BE0887.052.231, BE0560.869.935
+ClassMethod CheckBE(VATNumber As %String, Output Normalized As %String) As %Boolean
+{
 	Set Normalized = $Translate($ZConvert(VATNumber, "U"), " .")
 	
 	If Normalized '? 1"BE"1(1"0",1"1")9N Quit 0
@@ -88,17 +70,12 @@ Examples: BE0863.982.562, BE0887.052.231, BE0560.869.935</Description>
 	Set Check = 97 - ($Extract(Normalized, 4, 10) # 97)
 	
 	Quit Check = $Extract(Normalized, 11, 12)
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckDE">
-<Description>
-Checks a German VAT number
-Examples: DE142293940, DE117407655, DE263429934</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>VATNumber:%String,*Normalized:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks a German VAT number
+/// Examples: DE142293940, DE117407655, DE263429934
+ClassMethod CheckDE(VATNumber As %String, Output Normalized As %String) As %Boolean
+{
 	Set Normalized = $Translate($ZConvert(VATNumber, "U"), " .")
 	
 	If Normalized '? 1"DE"9N Quit 0
@@ -114,17 +91,12 @@ Examples: DE142293940, DE117407655, DE263429934</Description>
 	If P = 10 Set P = 0
 	
 	Quit $Extract(Normalized, *) = P
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckBSN">
-<Description>
-Checks a Dutch BSN for validity.
-http://nl.wikipedia.org/wiki/Burgerservicenummer#11-proef</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>BSN:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks a Dutch BSN for validity.
+/// http://nl.wikipedia.org/wiki/Burgerservicenummer#11-proef
+ClassMethod CheckBSN(BSN As %String) As %Boolean
+{
 	If $Length(BSN) '= 9 Quit 0
 	
 	Set Sum = 0
@@ -137,7 +109,7 @@ http://nl.wikipedia.org/wiki/Burgerservicenummer#11-proef</Description>
 	}
 	
 	Quit Sum # 11 = 0
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

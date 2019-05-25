@@ -1,47 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.XML.SchemaReader">
-<Description>
-Schema reader that adds a callback after parsing is done,
-but before the classes are created.</Description>
-<IncludeCode>Strix</IncludeCode>
-<IncludeGenerator>Strix</IncludeGenerator>
-<Super>%XML.Utils.SchemaReader</Super>
-<TimeCreated>65045,39000.901232</TimeCreated>
+Include Strix
 
-<Property name="Callback">
-<Description>
-Object to receive a callback when the schema is processed, but
-before the classes are created. Allows altering</Description>
-<Type>Strix.XML.SchemaReaderCallback</Type>
-</Property>
+IncludeGenerator Strix
 
-<Method name="CallbackSet">
-<Description>
-Setter that provides a back reference to the schema reader
-(this object) to the callback object.</Description>
-<FormalSpec>Callback:Strix.XML.SchemaReaderCallback</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Schema reader that adds a callback after parsing is done,
+/// but before the classes are created.
+Class Strix.XML.SchemaReader Extends %XML.Utils.SchemaReader
+{
+
+/// Object to receive a callback when the schema is processed, but
+/// before the classes are created. Allows altering
+Property Callback As Strix.XML.SchemaReaderCallback;
+
+/// Setter that provides a back reference to the schema reader
+/// (this object) to the callback object.
+Method CallbackSet(Callback As Strix.XML.SchemaReaderCallback) As %Status
+{
 	Set i%Callback = Callback
 	If $IsObject(Callback) Set Callback.Reader = $this
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ProcessStream">
-<Description>
-Processes XSD present in a stream, by creating a temporary file for it.</Description>
-<FormalSpec><![CDATA[Stream:%Stream.Object,Package:%String,&Features:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Processes XSD present in a stream, by creating a temporary file for it.
+Method ProcessStream(Stream As %Stream.Object, Package As %String, ByRef Features As %String) As %Status
+{
 	Set FileName = ##class(%File).TempFilename("xsd")
 	Set File = ##class(%FileCharacterStream).%New()
 	Set File.TranslateTable = "UTF8"
@@ -52,24 +35,14 @@ Processes XSD present in a stream, by creating a temporary file for it.</Descrip
 	Set sc = ..Process(FileName, .Package, .Features)
 	Do ##class(%File).Delete(FileName)
 	Quit sc
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ParseSchema">
-<Description>
-Overridden method, used to call callback directly after the
-schema is parsed.</Description>
-<Internal>1</Internal>
-<FormalSpec>filename:%String,url:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Overridden method, used to call callback directly after the
+/// schema is parsed.
+Method ParseSchema(filename As %String, url As %String = "") As %Status [ Internal ]
+{
 	Set sc = ##super(.filename, .url)
 	If 'sc Quit sc
 	
@@ -80,7 +53,7 @@ schema is parsed.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

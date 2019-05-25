@@ -1,26 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Config">
-<Description>
-Basic source control management configuration.</Description>
-<Super>Strix.Lib.Singleton</Super>
-<TimeCreated>63865,41242.319843</TimeCreated>
+/// Basic source control management configuration.
+Class Strix.SCM.Config Extends Strix.Lib.Singleton
+{
 
-<Property name="BasePath">
-<Description>
-The base path of the working copy. All project paths are specified
-relative to this one.</Description>
-<Type>%String</Type>
-<Parameter name="TRUNCATE"/>
-</Property>
+/// The base path of the working copy. All project paths are specified
+/// relative to this one.
+Property BasePath As %String(TRUNCATE = "");
 
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^Strix.SCM.ConfigD</DataLocation>
-<DefaultData>ConfigDefaultData</DefaultData>
-<IdLocation>^Strix.SCM.ConfigD</IdLocation>
-<IndexLocation>^Strix.SCM.ConfigI</IndexLocation>
-<StreamLocation>^Strix.SCM.ConfigS</StreamLocation>
+Storage Default
+{
 <Data name="ConfigDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
@@ -29,6 +16,13 @@ relative to this one.</Description>
 <Value>BasePath</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<DataLocation>^Strix.SCM.ConfigD</DataLocation>
+<DefaultData>ConfigDefaultData</DefaultData>
+<IdLocation>^Strix.SCM.ConfigD</IdLocation>
+<IndexLocation>^Strix.SCM.ConfigI</IndexLocation>
+<StreamLocation>^Strix.SCM.ConfigS</StreamLocation>
+<Type>%Library.CacheStorage</Type>
+}
+
+}
+

@@ -1,41 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.SchemaReader">
-<Description>
-Tests Strix.XML.ToClass.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
+/// Tests Strix.XML.ToClass.
+Class Strix.Tests.SchemaReader Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestPackage">
-<Default>Strix.Tests.SchemaReader</Default>
-</Parameter>
+Parameter TestPackage = "Strix.Tests.SchemaReader";
 
-<Property name="Reader">
-<Type>Strix.XML.SchemaReader</Type>
-</Property>
+Property Reader As Strix.XML.SchemaReader;
 
-<Property name="CallbackObject">
-<Type>Strix.XML.SchemaReaderCallback</Type>
-</Property>
+Property CallbackObject As Strix.XML.SchemaReaderCallback;
 
-<Property name="ScratchData">
-<Description>
-Temporary data</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+/// Temporary data
+Property ScratchData As %String [ MultiDimensional ];
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Tests
 
-]]></Content>
-</UDLText>
-
-<Method name="TestProcessStream">
-<Description>
-Test processing an XSD passes in a stream (ProcessStream method).</Description>
-<Implementation><![CDATA[
+/// Test processing an XSD passes in a stream (ProcessStream method).
+Method TestProcessStream()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -51,21 +31,14 @@ Test processing an XSD passes in a stream (ProcessStream method).</Description>
 	Do ..AssertHasProperty("Element1", "String2", "Element1 has String2 property.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestProcessParseTree">
-<Description>
-Tests that the basic callback method, ProcessParseTree, is
-called during schema processing.</Description>
-<Implementation><![CDATA[
+/// Tests that the basic callback method, ProcessParseTree, is
+/// called during schema processing.
+Method TestProcessParseTree()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -76,31 +49,21 @@ called during schema processing.</Description>
 	If '..AssertStatusOk(sc, "Processing schema works.") Quit
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback1">
-<FormalSpec>ClassTree:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback1(ClassTree As %String) As %Status
+{
 	If '..AssertNotEmpty(ClassTree, "We receive a class node as parameter.") Quit $$$OK
 	Do ..AssertNotEmpty($Order(@ClassTree@("")), "The node contains data.")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestCallbackStatus">
-<Description>
-Tests that the basic callback method, ProcessParseTree, can
-abort schema processing by returning an error.</Description>
-<Implementation><![CDATA[
+/// Tests that the basic callback method, ProcessParseTree, can
+/// abort schema processing by returning an error.
+Method TestCallbackStatus()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -112,27 +75,18 @@ abort schema processing by returning an error.</Description>
 	Do ..AssertStatusParameter(sc, 1, "Stop here.", "Proper error is returned.") Quit
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback2">
-<FormalSpec>ClassTree:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit $$$BuildStatus("Stop here.")
-]]></Implementation>
-</Method>
+Method Callback2(ClassTree As %String) As %Status
+{
+	Quit $$$BuildStatus("Stop here.")
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestProcessClassNode">
-<Description>
-Tests that callback method HandleClass is called for each class.</Description>
-<Implementation><![CDATA[
+/// Tests that callback method HandleClass is called for each class.
+Method TestProcessClassNode()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -146,31 +100,21 @@ Tests that callback method HandleClass is called for each class.</Description>
 	Do ..Assert($Data(..ScratchData("Element1")), "Callback called for Element1 class.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback3">
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback3(Name As %String) As %Status
+{
 	Set ShortName = $Piece(Name, ".", *)
 	If '..Assert("Base,Element1" [ ShortName, "Name '{}' is expected.", ShortName) Quit
 	Set ..ScratchData(ShortName) = ""
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestHandleProperty">
-<Description>
-Tests that callback method HandleClass is called for each class.</Description>
-<Implementation><![CDATA[
+/// Tests that callback method HandleClass is called for each class.
+Method TestHandleProperty()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -185,13 +129,10 @@ Tests that callback method HandleClass is called for each class.</Description>
 	Do ..Assert($Data(..ScratchData("String2")), "Callback called for String2 property.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback4">
-<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback4(Name As %String, XmlName As %String, Type As %String, IsDataType As %Boolean) As %Status
+{
 	If '..Assert("Element1,String1,String2" [ Name, "Name '{}' is expected.", Name) Quit
 	If Name = "Element1" {
 		Do ..AssertEqual(Type, ..#TestPackage_".Element1", "Property Element1 has proper class.")
@@ -202,20 +143,13 @@ Tests that callback method HandleClass is called for each class.</Description>
 	}
 	Set ..ScratchData(Name) = ""
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestRenameClass">
-<Description>
-Tests renaming a class.</Description>
-<Implementation><![CDATA[
+/// Tests renaming a class.
+Method TestRenameClass()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -234,31 +168,21 @@ Tests renaming a class.</Description>
 	Do ..AssertHasProperty("Element1", "String2", "Element1 has String2 property.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback5">
-<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback5(Name As %String, XmlName As %String) As %Status
+{
 	If $$$ClassShortName(Name) '= "Base" Quit $$$OK
 	Set sc = ..CallbackObject.RenameClass("BaseRenamed")
 	Do ..AssertStatusOk(sc, "Changing class name does not return an error.")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestRenameProperty">
-<Description>
-Tests renaming a property.</Description>
-<Implementation><![CDATA[
+/// Tests renaming a property.
+Method TestRenameProperty()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -276,13 +200,10 @@ Tests renaming a property.</Description>
 	Do ..AssertHasProperty("Element1", "SecondString", "Element1 has SecondString property.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback6">
-<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback6(Name As %String, XmlName As %String, Type As %String, IsDataType As %Boolean) As %Status
+{
 	If Name = "Element1" {
 		Set sc = ..CallbackObject.RenameProperty("Element")
 		Do ..AssertStatusOk(sc, "Changing property name does not return an error.")
@@ -291,20 +212,13 @@ Tests renaming a property.</Description>
 		Do ..AssertStatusOk(sc, "Changing property name does not return an error.")
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestChangeRequired">
-<Description>
-Tests setting a property's required attribute.</Description>
-<Implementation><![CDATA[
+/// Tests setting a property's required attribute.
+Method TestChangeRequired()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -319,13 +233,10 @@ Tests setting a property's required attribute.</Description>
 	Do ..AssertPropertyRequired("Element1", "String2", 0, "String2 is no longer required.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback7">
-<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback7(Name As %String, XmlName As %String, Type As %String, IsDataType As %Boolean) As %Status
+{
 	If Name = "String1" {
 		Set sc = ..CallbackObject.SetPropertyRequired(1)
 		Do ..AssertStatusOk(sc, "Changing property required flag does not return an error.")
@@ -334,20 +245,13 @@ Tests setting a property's required attribute.</Description>
 		Do ..AssertStatusOk(sc, "Changing property required flag does not return an error.")
 	}
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestSetClassParameter">
-<Description>
-Tests setting a class parameter.</Description>
-<Implementation><![CDATA[
+/// Tests setting a class parameter.
+Method TestSetClassParameter()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -363,31 +267,21 @@ Tests setting a class parameter.</Description>
 	Do ..AssertEqual(Value, "inputonly", "Class parameter set.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback8">
-<FormalSpec>Name:%String,XmlName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback8(Name As %String, XmlName As %String) As %Status
+{
 	If $$$ClassShortName(Name) '= "Base" Quit $$$OK
 	Set sc = ..CallbackObject.SetClassParameter("XMLIGNORENULL", "inputonly")
 	Do ..AssertStatusOk(sc, "Setting class parameter does not return an error.")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="TestSetPropertyParameter">
-<Description>
-Tests setting a property parameter.</Description>
-<Implementation><![CDATA[
+/// Tests setting a property parameter.
+Method TestSetPropertyParameter()
+{
 	#dim Reader As Strix.XML.SchemaReader
 	Set Reader = ..GetReader()
 	Set XSDStream = ..GetXSD("Schema1")
@@ -403,88 +297,60 @@ Tests setting a property parameter.</Description>
 	Do ..AssertEqual(Value, 5, "Property parameter set.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Callback9">
-<FormalSpec>Name:%String,XmlName:%String,Type:%String,IsDataType:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method Callback9(Name As %String, XmlName As %String, Type As %String, IsDataType As %Boolean) As %Status
+{
 	If Name '= "String1" Quit $$$OK
 	Set sc = ..CallbackObject.SetPropertyParameter("MAXLEN", 5)
 	Do ..AssertStatusOk(sc, "Setting class parameter does not return an error.")
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="GetReader">
-<ReturnType>Strix.XML.SchemaReader</ReturnType>
-<Implementation><![CDATA[
+Method GetReader() As Strix.XML.SchemaReader
+{
 	Set Reader = ##class(Strix.XML.SchemaReader).%New()
 	Set Reader.CompileClasses = 0
 	Set Reader.MakePersistent = 0
 	Set Reader.MakeSerial = 0
 	Quit Reader
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetXSD">
-<FormalSpec>Name:%String,*Status:%Status</FormalSpec>
-<ReturnType>%Stream.Object</ReturnType>
-<Implementation><![CDATA[
+Method GetXSD(Name As %String, Output Status As %Status) As %Stream.Object
+{
 	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(..%ClassName(1)_"||"_Name, , .Status)
 	Quit XData.Data
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertClassExists">
-<FormalSpec>Name:%String,Description:%String,Parameters...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertClassExists(Name As %String, Description As %String, Parameters... As %String) As %Boolean
+{
 	If Name '[ "." Set Name = ..#TestPackage_"."_Name
 	Quit ..Assert(##class(%Dictionary.ClassDefinition).%ExistsId(Name), .Description, .Parameters)
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertClassNotExists">
-<FormalSpec>Name:%String,Description:%String,Parameters...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertClassNotExists(Name As %String, Description As %String, Parameters... As %String) As %Boolean
+{
 	If Name '[ "." Set Name = ..#TestPackage_"."_Name
 	Quit ..Assert('##class(%Dictionary.ClassDefinition).%ExistsId(Name), .Description, .Parameters)
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertHasProperty">
-<FormalSpec>ClassName:%String,PropertyName:%String,Description:%String,Parameters...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertHasProperty(ClassName As %String, PropertyName As %String, Description As %String, Parameters... As %String) As %Boolean
+{
 	If ClassName '[ "." Set ClassName = ..#TestPackage_"."_ClassName
 	Quit ..Assert(##class(%Dictionary.PropertyDefinition).%ExistsId(ClassName_"||"_PropertyName), .Description, .Parameters)
-]]></Implementation>
-</Method>
+}
 
-<Method name="AssertPropertyRequired">
-<FormalSpec>ClassName:%String,PropertyName:%String,Value:%Boolean,Description:%String,Parameters...:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+Method AssertPropertyRequired(ClassName As %String, PropertyName As %String, Value As %Boolean, Description As %String, Parameters... As %String) As %Boolean
+{
 	If ClassName '[ "." Set ClassName = ..#TestPackage_"."_ClassName
 	Set Required = ##class(Strix.Testing.Support).GetPropertyAttribute(ClassName, PropertyName, "Required")
 	Quit ..AssertEqual(Required, Value, .Description, .Parameters)
-]]></Implementation>
-</Method>
+}
 
-<Method name="BuildCallBack">
-<FormalSpec>Reader:Strix.XML.SchemaReader,Override:%String,With:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method BuildCallBack(Reader As Strix.XML.SchemaReader, Override As %String, With As %String) As %Status
+{
 	Set ClassName = ..#TestPackage_".CallbackHandler"
 	Set sc = ##class(Strix.Testing.Support).CreateClass(ClassName, "Strix.XML.SchemaReaderCallback", .Dic)
 	If 'sc Quit $$$BuildStatus("Error creating callback handler:", sc)
@@ -524,61 +390,39 @@ Tests setting a property parameter.</Description>
 	Set ..CallbackObject = Callback
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Setup/teardown
 
-]]></Content>
-</UDLText>
-
-<Method name="Setup">
-<Description>
-Code to run before any test in this class is executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run before any test in this class is executed.
+Method Setup() As %Status
+{
 	Set %zCurrentTestCase = $this
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnAfterTest">
-<Description>
-Delete generated classes after each test</Description>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Delete generated classes after each test
+Method OnAfterTest(Name As %String) As %Status
+{
 	Set sc = $System.OBJ.DeletePackage(..#TestPackage, "-d")
 	If 'sc Quit $$$BuildStatus("Error deleting test package {}:", sc, ..#TestPackage)
 	Kill ..ScratchData
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="TearDown">
-<Description>
-Final cleanup, if necessary</Description>
-<FormalSpec>FailedTests:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Final cleanup, if necessary
+Method TearDown(FailedTests As %String) As %Status
+{
 	Kill %zCurrentTestCase
 	Set sc = $System.OBJ.DeletePackage(..#TestPackage, "-d")
 	If 'sc Quit $$$BuildStatus("Error deleting test package {}:", sc, ..#TestPackage)
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Data
 
-]]></Content>
-</UDLText>
-
-<XData name="Schema1">
-<Data><![CDATA[
+XData Schema1
+{
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
 <xs:element name='Base'>
@@ -596,7 +440,7 @@ Final cleanup, if necessary</Description>
 </xs:complexType>
 </xs:element>
 </xs:schema>
-]]></Data>
-</XData>
-</Class>
-</Export>
+}
+
+}
+

@@ -1,24 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Patches.Language">
-<Description>
-Enables/disables a (locale) language. Caché displays messages translated
-in the language of the server it runs on. It does not offer an option to
-permanently disable this. By removing the translation strings for the
-language involved, Caché falls back to English. The removed translation
-strings are backed up and can be restored later.</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63898,40796.659517</TimeCreated>
+/// Enables/disables a (locale) language. Caché displays messages translated
+/// in the language of the server it runs on. It does not offer an option to
+/// permanently disable this. By removing the translation strings for the
+/// language involved, Caché falls back to English. The removed translation
+/// strings are backed up and can be restored later.
+Class Strix.Patches.Language Extends %RegisteredObject
+{
 
-<Method name="Disable">
-<Description>
-Disables the translation for a given language identifier (e.g. "nl" or "zh-cn").
-The translations are backed up before removing.
-
-Do ##class(Strix.Patches.Language).Disable("nl")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Language:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Disables the translation for a given language identifier (e.g. "nl" or "zh-cn").
+/// The translations are backed up before removing.
+/// 
+/// Do ##class(Strix.Patches.Language).Disable("nl")
+ClassMethod Disable(Language As %String)
+{
 	;Check that the language to disable is present:
 	If '$Data(^%qCacheMsg("%Compiler", Language)) {
 		If $Data(^%qCacheMsgOrg("%Compiler", Language)) {
@@ -50,17 +43,13 @@ Do ##class(Strix.Patches.Language).Disable("nl")</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Enable">
-<Description>
-Re-enables the translation for a given language identifier.
-
-Do ##class(Strix.Patches.Language).Enable("nl")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Language:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Re-enables the translation for a given language identifier.
+/// 
+/// Do ##class(Strix.Patches.Language).Enable("nl")
+ClassMethod Enable(Language As %String)
+{
 	;Check that the language to enable is present:
 	If '$Data(^%qCacheMsgOrg("%Compiler", Language)) {
 		If $Data(^%qCacheMsg("%Compiler", Language)) {
@@ -92,17 +81,13 @@ Do ##class(Strix.Patches.Language).Enable("nl")</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="DisableEnsemble">
-<Description>
-Disable translation for Ensemble messages
-
-Do ##class(Strix.Patches.Language).DisableEnsemble("nl")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Language:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Disable translation for Ensemble messages
+/// 
+/// Do ##class(Strix.Patches.Language).DisableEnsemble("nl")
+ClassMethod DisableEnsemble(Language As %String)
+{
 	;If this is not an Ensemble installation, there's nothing to do here
 	If $System.Version.GetISCProduct() '= 2 {
 		Write "This is not an Ensemble installation, nothing to do.",!
@@ -140,17 +125,13 @@ Do ##class(Strix.Patches.Language).DisableEnsemble("nl")</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="EnableEnsemble">
-<Description>
-Re-enables the translation for a given language identifier.
-
-Do ##class(Strix.Patches.Language).EnableEnsemble("nl")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Language:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Re-enables the translation for a given language identifier.
+/// 
+/// Do ##class(Strix.Patches.Language).EnableEnsemble("nl")
+ClassMethod EnableEnsemble(Language As %String)
+{
 	;If this is not an Ensemble installation, there's nothing to do here
 	If $System.Version.GetISCProduct() '= 2 {
 		Write "This is not an Ensemble installation, nothing to do.",!
@@ -189,16 +170,13 @@ Do ##class(Strix.Patches.Language).EnableEnsemble("nl")</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="ShowLanguages">
-<Description>
-Displays all languages for which Caché has translations in CACHELIB.
-
-Do ##class(Strix.Patches.Language).ShowLanguages()</Description>
-<ClassMethod>1</ClassMethod>
-<Implementation><![CDATA[
+/// Displays all languages for which Caché has translations in CACHELIB.
+/// 
+/// Do ##class(Strix.Patches.Language).ShowLanguages()
+ClassMethod ShowLanguages()
+{
 	Set Section = ""
 	For  {
 		Set Section = $Order(^%qCacheMsg(Section))
@@ -251,7 +229,7 @@ Do ##class(Strix.Patches.Language).ShowLanguages()</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

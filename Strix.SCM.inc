@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Routine name="Strix.SCM" type="INC"><![CDATA[
+ROUTINE Strix.SCM [Type=INC]
 #include Strix
 
 #; ===== Dot-separated string macro's
@@ -19,5 +17,3 @@
 
 
 
-]]></Routine>
-</Export>

@@ -1,22 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Testing.System">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>65053,54905.671825</TimeCreated>
+Include Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.Testing.System Extends %RegisteredObject
+{
+
 // ----- Databases
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateDatabase">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,BaseDir:%String="",*DatabaseDir:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod CreateDatabase(Name As %String, BaseDir As %String = "", Output DatabaseDir As %String) As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -41,14 +31,10 @@
 	If 'sc Quit ..BuildStatus("Error creating database definition for {}:", sc, DatabaseDir)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="DeleteDatabase">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Directory:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod DeleteDatabase(Directory As %String) As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -87,21 +73,12 @@
 	
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ----- Namespaces
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateNamespace">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String,DatabaseName:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod CreateNamespace(Name As %String, DatabaseName As %String = "") As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -112,14 +89,10 @@
 	If 'sc Quit ..BuildStatus("Error creating namespace {} for database {}:", sc, Name, DatabaseName)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="DeleteNamespace">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod DeleteNamespace(Name As %String) As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -127,21 +100,12 @@
 	If 'sc Quit ..BuildStatus("Error deleting namespace {}:", sc, Name)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ----- Ensemble
 
-]]></Content>
-</UDLText>
-
-<Method name="EnableEnsemble">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Namespace:%String,NoExtraDbs:%Boolean=1</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod EnableEnsemble(Namespace As %String, NoExtraDbs As %Boolean = 1) As %Status
+{
 	If NoExtraDbs {
 		; If a mapping for these globals exists, the secondary and temp databases
 		; will not be created.
@@ -155,14 +119,10 @@
 	If 'sc Quit ..BuildStatus("Error enabling Ensemble:", sc)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="DisableEnsemble">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Namespace:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod DisableEnsemble(Namespace As %String) As %Status
+{
 	Set sc = ##class(%EnsembleMgr).DisableNamespace(Namespace, 0)
 	If 'sc Quit ..BuildStatus("Error disabling Ensemble:", sc)
 	
@@ -174,23 +134,13 @@
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="DeleteResource">
-<Description>
-Helper to delete a resource</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Helper to delete a resource
+ClassMethod DeleteResource(Name As %String) As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -198,23 +148,13 @@ Helper to delete a resource</Description>
 	If 'sc Quit ..BuildStatus("Error deleting resource {}:", sc, Name)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="DeleteCSPApplication">
-<Description>
-Deletes a CSP application.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>App:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Deletes a CSP application.
+ClassMethod DeleteCSPApplication(App As %String) As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -230,16 +170,11 @@ Deletes a CSP application.</Description>
 	Set ok = ##class(%File).RemoveDirectory(Directory, .rc)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="MapGlobal">
-<Description>
-Adds a global mapping in Namespace to the specified database.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Namespace:%String,Global:%String,Database:%String="CACHETEMP"</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Adds a global mapping in Namespace to the specified database.
+ClassMethod MapGlobal(Namespace As %String, Global As %String, Database As %String = "CACHETEMP") As %Status
+{
 	New $Namespace
 	Do $ZUtil(5, "%SYS")
 	
@@ -250,16 +185,11 @@ Adds a global mapping in Namespace to the specified database.</Description>
 	If 'sc Quit ..BuildStatus("Error creating mapping in {} for global {} to database {}:", sc, Namespace, Global, Database)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="BuildStatus">
-<Description>
-Helper for creating updated status</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String,Status:%Status="",Args...:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Helper for creating updated status
+ClassMethod BuildStatus(Message As %String, Status As %Status = "", Args... As %String) As %Status
+{
 	For i = 1:1:$Get(Args) {
 		Set Message = $Replace(Message, "{}", $Get(Args(i)), 1, 1)
 	}
@@ -271,7 +201,7 @@ Helper for creating updated status</Description>
 	If Status '= "" Set MsgStatus = $System.Status.AppendStatus(MsgStatus, Status)
 	
 	Quit MsgStatus
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

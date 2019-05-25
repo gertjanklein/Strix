@@ -1,26 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.Collections">
-<Description>
-Tests Strix.Lib.Collections.</Description>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>64594,31293.265299</TimeCreated>
+/// Tests Strix.Lib.Collections.
+Class Strix.Tests.Collections Extends Strix.Testing.TestCase
+{
 
-<Parameter name="TestClassName">
-<Default>Strix.Tests.Temp.Collections</Default>
-</Parameter>
+Parameter TestClassName = "Strix.Tests.Temp.Collections";
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestCommonElementsBasic">
-<Description>
-Basic tests</Description>
-<Implementation><![CDATA[
+/// Basic tests
+Method TestCommonElementsBasic()
+{
 	Set a = ..GetListOfDT("a", "b", "c")
 	Set b = ..GetListOfDT("b", "c", "d")
 	
@@ -62,13 +50,11 @@ Basic tests</Description>
 	Do ..AssertEqual(Result.Count(), 0, "Method should return no common elements.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestCommonElementsLoL">
-<Description>
-Test input as list of lists</Description>
-<Implementation><![CDATA[
+/// Test input as list of lists
+Method TestCommonElementsLoL()
+{
 	Set a = ..GetListOfDT("a", "b", "c")
 	Set b = ..GetListOfDT("b", "c", "d")
 	Set Lists = ..GetListOfObjects(a, b)
@@ -80,13 +66,11 @@ Test input as list of lists</Description>
 	Do ..AssertEqual(Result.GetAt(2), "c", "Second result should match.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestCommonElementsInClass">
-<Description>
-Test %Collection.ListOfDT input</Description>
-<Implementation><![CDATA[
+/// Test %Collection.ListOfDT input
+Method TestCommonElementsInClass()
+{
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
 	Do ..Insert(Obj.a, "a", "b", "c")
 	Do ..Insert(Obj.b, "b", "c", "d")
@@ -98,14 +82,12 @@ Test %Collection.ListOfDT input</Description>
 	Do ..AssertEqual(Result.GetAt(2), "c", "Second result should match.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestCommonElementsObjects">
-<Description>
-Test list of objects input. Comparisons should be done
-on Oref.</Description>
-<Implementation><![CDATA[
+/// Test list of objects input. Comparisons should be done
+/// on Oref.
+Method TestCommonElementsObjects()
+{
 	Set Obj = $ZObjClassMethod(..#TestClassName, "%New")
 	Set a = Obj.%New(), b = Obj.%New(), c = Obj.%New(), d = Obj.%New()
 	Do ..Insert(Obj.c, a, b, c)
@@ -118,18 +100,12 @@ on Oref.</Description>
 	Do ..AssertEqual(Result.GetAt(2), c, "Second result should match.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestGetCopy">
-<Implementation><![CDATA[
+Method TestGetCopy()
+{
 	Set ClassName = ..#TestClassName_"2"
 	Set Type = ..#TestClassName
 	Set Status = ..CreateClass(ClassName, "a:%String:list,b:%String:array,c:"_Type_":list,d:"_Type_":array")
@@ -168,13 +144,11 @@ on Oref.</Description>
 	Do ..AssertEqual(Copy.%ClassName(), "%ArrayOfObjects", "Get proper collection type for property d.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestGetCopyWithContents">
-<Description>
-Simple test to make sure contents is copied without error.</Description>
-<Implementation><![CDATA[
+/// Simple test to make sure contents is copied without error.
+Method TestGetCopyWithContents()
+{
 	Set Inst = $ZObjClassMethod(..#TestClassName, "%New")
 	Do Inst.a.Insert("value")
 	Do Inst.e.SetAt("value", "key")
@@ -201,49 +175,32 @@ Simple test to make sure contents is copied without error.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="GetListOfDT">
-<FormalSpec>Contents...</FormalSpec>
-<ReturnType>%ListOfDataTypes</ReturnType>
-<Implementation><![CDATA[
+Method GetListOfDT(Contents...) As %ListOfDataTypes
+{
 	Set Result = ##class(%ListOfDataTypes).%New()
 	For i = 1:1:$Get(Contents) Do Result.Insert($Get(Contents(i)))
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetListOfObjects">
-<FormalSpec>Lists...</FormalSpec>
-<ReturnType>%ListOfObjects</ReturnType>
-<Implementation><![CDATA[
+Method GetListOfObjects(Lists...) As %ListOfObjects
+{
 	Set Result = ##class(%ListOfObjects).%New()
 	For i = 1:1:$Get(Lists) Do Result.Insert($Get(Lists(i)))
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="Insert">
-<FormalSpec>List:%Collection.AbstractList,Items...</FormalSpec>
-<Implementation><![CDATA[	For i = 1:1:$Get(Items) Do List.Insert(Items(i))
-]]></Implementation>
-</Method>
+Method Insert(List As %Collection.AbstractList, Items...)
+{
+	For i = 1:1:$Get(Items) Do List.Insert(Items(i))
+}
 
-<Method name="CreateClass">
-<Description>
-Create a class with the specified properties</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Properties:%String=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Create a class with the specified properties
+ClassMethod CreateClass(ClassName As %String, Properties As %String = "") As %Status
+{
 	Set Status = ##class(Strix.Testing.Support).CreateClass(ClassName, "%RegisteredObject", .ClassDef)
 	If 'Status Quit Status
 	
@@ -261,36 +218,25 @@ Create a class with the specified properties</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Setup">
-<Description>
-Code to run before any test in this class is executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run before any test in this class is executed.
+Method Setup() As %Status
+{
 	Set Type = ..#TestClassName
 	Set Status = ..CreateClass(Type, "a:%String:list,b:%String:list,c:"_Type_":list,d:"_Type_":list,e:%String:array")
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="TearDown">
-<Description>
-Code to run after all tests in this class have been executed.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Code to run after all tests in this class have been executed.
+Method TearDown() As %Status
+{
 	Do ##class(Strix.Testing.Support).RemoveClass(..#TestClassName)
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

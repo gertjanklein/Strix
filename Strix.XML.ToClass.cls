@@ -1,12 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.XML.ToClass">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64578,54724.518495</TimeCreated>
+Include Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+Class Strix.XML.ToClass Extends %RegisteredObject
+{
+
 /* ToDo
 
 Support overrides at various levels. E.g., guessing the property type
@@ -30,70 +26,33 @@ them, for roundtrip testing.
 
 
 */
-]]></Content>
-</UDLText>
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Configuration
 
-]]></Content>
-</UDLText>
+/// The package to create the classes in
+Property Package As %String;
 
-<Property name="Package">
-<Description>
-The package to create the classes in</Description>
-<Type>%String</Type>
-</Property>
+/// Always add the XMLNAME parameter (1) or only if different from
+/// Caché property name (0)
+Property XmlName As %Boolean [ InitialExpression = 1 ];
 
-<Property name="XmlName">
-<Description>
-Always add the XMLNAME parameter (1) or only if different from
-Caché property name (0)</Description>
-<Type>%Boolean</Type>
-<InitialExpression>1</InitialExpression>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Scratch data
 
-]]></Content>
-</UDLText>
+/// Index in process private global to store parse tree
+Property NodeIdx As %Integer [ Internal ];
 
-<Property name="NodeIdx">
-<Description>
-Index in process private global to store parse tree</Description>
-<Type>%Integer</Type>
-<Internal>1</Internal>
-</Property>
+/// Names of created classes
+Property ClassNames As %String [ MultiDimensional ];
 
-<Property name="ClassNames">
-<Description>
-Names of created classes</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+ClassMethod Create(XMLFile As %String, Package As %String, Output RootClassName As %String) As %Status
+{
+	Quit ..%New().CreateInt(XMLFile, Package, .RootClassName)
+}
 
-<Method name="Create">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>XMLFile:%String,Package:%String,*RootClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Quit ..%New().CreateInt(XMLFile, Package, .RootClassName)
-]]></Implementation>
-</Method>
-
-<Method name="CreateInt">
-<FormalSpec>XMLFile:%String,Package:%String,*RootClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method CreateInt(XMLFile As %String, Package As %String, Output RootClassName As %String) As %Status
+{
 	Set ..NodeIdx = $Increment(^||Parser)
 	Kill ^||Parser(..NodeIdx)
 	
@@ -107,20 +66,12 @@ Names of created classes</Description>
 	Kill ^||Parser(..NodeIdx)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Class generation related code
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateClasses">
-<FormalSpec>*RootClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method CreateClasses(Output RootClassName As %String) As %Status
+{
 	Set RootName = $Order(^||Parser(..NodeIdx, "s", ""))
 	Set RootNode = $Name(^||Parser(..NodeIdx, "s", RootName))
 	
@@ -128,13 +79,10 @@ Names of created classes</Description>
 	If 'sc Quit sc
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CreateClass">
-<FormalSpec>Node:%String,*ClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method CreateClass(Node As %String, Output ClassName As %String) As %Status
+{
 	Set Path = ..NodeRefToPath(Node)
 	Set Data = @Node
 	Set Properties = $lg(Data, 1)
@@ -236,25 +184,19 @@ Names of created classes</Description>
 	
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="AddParameter">
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Value:%String,*Status:%Status</FormalSpec>
-<ReturnType>%Dictionary.ParameterDefinition</ReturnType>
-<Implementation><![CDATA[
+Method AddParameter(ClassDef As %Dictionary.ClassDefinition, Name As %String, Value As %String, Output Status As %Status) As %Dictionary.ParameterDefinition
+{
 	#dim Def As %Dictionary.ParameterDefinition
 	Set Def = ##class(Strix.Generator.Utilities).GetInCollection(ClassDef.Parameters, Name, 1, .Status)
 	If 'Status Quit ""
 	Set Def.Default = Value
 	Quit Def
-]]></Implementation>
-</Method>
+}
 
-<Method name="AddProperty">
-<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String,*Status:%Status</FormalSpec>
-<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
-<Implementation><![CDATA[
+Method AddProperty(ClassDef As %Dictionary.ClassDefinition, Name As %String, Type As %String, Output Status As %Status) As %Dictionary.PropertyDefinition
+{
 	#dim Def As %Dictionary.PropertyDefinition
 	Set Def = ##class(Strix.Generator.Utilities).GetInCollection(ClassDef.Properties, Name, 1, .Status)
 	If 'Status Quit ""
@@ -275,16 +217,12 @@ Names of created classes</Description>
 	Set Def.Type = Type
 	
 	Quit Def
-]]></Implementation>
-</Method>
+}
 
-<Method name="DetermineType">
-<Description>
-Determines the type of a property. By defaults examines the collected
-data. </Description>
-<FormalSpec>Path:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Determines the type of a property. By defaults examines the collected
+/// data. 
+Method DetermineType(Path As %String) As %String
+{
 	Do ..GetNodeRef(Path, , .NodeRef)
 	Set Data = @NodeRef
 	
@@ -296,25 +234,16 @@ data. </Description>
 	}
 	
 	Quit Type
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Configuration: can be overridden in subclass
 
-]]></Content>
-</UDLText>
-
-<Method name="GetCacheName">
-<Description>
-Convert an XML name to a property name.
-- Type: 0=Property, 1=Attribute, 2=ClassName
-- Path: parent path for property and attribute, own path for classname
-- PropertyName: the XML name to convert</Description>
-<FormalSpec>Type:%Integer,Path:%String,PropertyName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Convert an XML name to a property name.
+/// - Type: 0=Property, 1=Attribute, 2=ClassName
+/// - Path: parent path for property and attribute, own path for classname
+/// - PropertyName: the XML name to convert
+Method GetCacheName(Type As %Integer, Path As %String, PropertyName As %String) As %String
+{
 	;Compatibility with ISC implementation: leading _ maps to %
 	If $Extract(PropertyName) = "_" Set $Extract(PropertyName) = "%"
 	
@@ -346,16 +275,12 @@ Convert an XML name to a property name.
 	Set PropertyName = $Translate(PropertyName, "_-.", "")
 	
 	Quit PropertyName
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetClassName">
-<Description>
-Determine the name of the class to create for a given path.
-The XML name (last node of the path) is returned as well.</Description>
-<FormalSpec>Path:%String,*XMLName:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Determine the name of the class to create for a given path.
+/// The XML name (last node of the path) is returned as well.
+Method GetClassName(Path As %String, Output XMLName As %String) As %String
+{
 	Set XMLName = $Piece(Path, "/", *)
 	Set Name = ..GetCacheName(2, Path, XMLName)
 	Set Name = ..Package_"."_Name
@@ -373,16 +298,12 @@ The XML name (last node of the path) is returned as well.</Description>
 	Set Name = Name_i, ..ClassNames(NameUC_i) = ""
 	
 	Quit Name
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetPropertyType">
-<Description>
-Determines the type of a (datatype) property, by examining the collected
-data.</Description>
-<FormalSpec>Path:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Determines the type of a (datatype) property, by examining the collected
+/// data.
+Method GetPropertyType(Path As %String) As %String
+{
 	Set Node = $Name(^||Parser(..NodeIdx, "v", Path))
 	
 	;Start assuming anything is possible
@@ -420,23 +341,14 @@ data.</Description>
 	;If multiple or no options left here, default to string.
 	
 	Quit "%String"
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Parse tree related code
 
-]]></Content>
-</UDLText>
-
-<Method name="CreateParseTree">
-<Description>
-Creates a parse tree for the XML document to be used to create the
-proxy classes with.</Description>
-<FormalSpec>XMLFile:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Creates a parse tree for the XML document to be used to create the
+/// proxy classes with.
+Method CreateParseTree(XMLFile As %String) As %Status
+{
 	#dim Reader As %XML.TextReader
 	Set sc = ##class(%XML.TextReader).ParseFile(XMLFile, .Reader)
 	If 'sc Quit ..HandleError("Error parsing XML file '{}'.", sc, XMLFile)
@@ -568,16 +480,13 @@ proxy classes with.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="HandleAttributes">
-<Description>
-Handles attributes for the current element in Reader. Updates the
-list of attribute names in the structure node, and stores values
-under @AttributeName in the value node.</Description>
-<FormalSpec>Reader:%XML.TextReader,Node:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Handles attributes for the current element in Reader. Updates the
+/// list of attribute names in the structure node, and stores values
+/// under @AttributeName in the value node.
+Method HandleAttributes(Reader As %XML.TextReader, Node As %String)
+{
 	Set Data = $Get(@Node), AttributeList = $ListGet(Data, 2)
 	
 	Set List = $ListFromString(AttributeList)
@@ -605,17 +514,13 @@ under @AttributeName in the value node.</Description>
 	Set @Node = Data
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetNodeRef">
-<Description>
-Returns a reference to the current and parent nodes in the structure
-tree for the given path, in output parameters. Return value is the
-last sequence number for this element, or "" if this is a new one.</Description>
-<FormalSpec>Path:%String,*ParentNodeRef:%String,*NodeRef:%String</FormalSpec>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[
+/// Returns a reference to the current and parent nodes in the structure
+/// tree for the given path, in output parameters. Return value is the
+/// last sequence number for this element, or "" if this is a new one.
+Method GetNodeRef(Path As %String, Output ParentNodeRef As %String, Output NodeRef As %String) As %Integer
+{
 	;Get reference to parent node
 	Set ParentNodeRef = $Name(^||Parser(..NodeIdx, "s"))
 	For i = 2:1:$Length(Path, "/") - 1 {
@@ -631,29 +536,21 @@ last sequence number for this element, or "" if this is a new one.</Description>
 	Set LastSeq = $ListGet($Get(@NodeRef), 5)
 	
 	Quit LastSeq
-]]></Implementation>
-</Method>
+}
 
-<Method name="NodeRefToPath">
-<Description>
-Given a node reference, returns an XML-style path for it.</Description>
-<FormalSpec>Node:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Given a node reference, returns an XML-style path for it.
+Method NodeRefToPath(Node As %String) As %String
+{
 	Set Path = ""
 	;Skip ..NodeIdx and "s"
 	For i = 3:1:$QLength(Node) Set Path = Path_"/"_$QSubscript(Node, i)
 	Quit Path
-]]></Implementation>
-</Method>
+}
 
-<Method name="ShowTree">
-<Description>
-Debugging aid: shows how %XML.TextReader parses an XML document. Based on
-the example in the documentation.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>XMLFile:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Debugging aid: shows how %XML.TextReader parses an XML document. Based on
+/// the example in the documentation.
+ClassMethod ShowTree(XMLFile As %String)
+{
 	#dim Reader As %XML.TextReader
 	Set sc = ##class(%XML.TextReader).ParseFile(XMLFile, .Reader)
 	If 'sc Quit ..HandleError("Error parsing XML file '{}'.", sc, XMLFile)
@@ -676,24 +573,14 @@ the example in the documentation.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Helpers
 
-]]></Content>
-</UDLText>
-
-<Method name="HandleError">
-<Description>
-Builds a status from a message and an existing status. If the principal
-device is a terminal, displays the error. Returns the new status.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String,Status:%Status,Args...:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Builds a status from a message and an existing status. If the principal
+/// device is a terminal, displays the error. Returns the new status.
+ClassMethod HandleError(Message As %String, Status As %Status, Args... As %String) As %Status
+{
 	Set Status = $$$BuildErr(Message, Status, Args...)
 	
 	If $$$IsTerm {
@@ -701,7 +588,7 @@ device is a terminal, displays the error. Returns the new status.</Description>
 	}
 	
 	Quit Status
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

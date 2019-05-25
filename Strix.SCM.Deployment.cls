@@ -1,80 +1,48 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Deployment">
-<Description>
-Helper code for managing Caché export files.</Description>
-<IncludeCode>%occErrors</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64652,48736.339695</TimeCreated>
+Include %occErrors
 
-<Property name="ClassesInRelease">
-<Description>
-Scratch data</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+/// Helper code for managing Caché export files.
+Class Strix.SCM.Deployment Extends %RegisteredObject
+{
 
-<Property name="PackagesInRelease">
-<Description>
-Scratch data</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+/// Scratch data
+Property ClassesInRelease As %String [ MultiDimensional ];
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Scratch data
+Property PackagesInRelease As %String [ MultiDimensional ];
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="FindRedundantClassesInExport">
-<Description>
-Determines the packages in a release file, and searches for
-classes present on this system that are not present in the
-release file. Optionally deletes them.
-Matching of redundant classes is only done in packages for
-which classes exist in the release.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ReleaseFileName:%String,Delete:%Boolean=0</FormalSpec>
-<Implementation><![CDATA[
+/// Determines the packages in a release file, and searches for
+/// classes present on this system that are not present in the
+/// release file. Optionally deletes them.
+/// Matching of redundant classes is only done in packages for
+/// which classes exist in the release.
+ClassMethod FindRedundantClassesInExport(ReleaseFileName As %String, Delete As %Boolean = 0)
+{
 	Set Me = ..%New()
 	Set Status = Me.FindRedundantClassesInExportImp(ReleaseFileName, Delete)
 	If 'Status Do $System.Status.DisplayError(Status)
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="FindRedundantClassesInDir">
-<Description>
-Determines the packages in export files in a directory, and
-searches for classes present on this system that are not present
-in the export files. Optionally deletes them.
-Matching of redundant classes is only done in packages for
-which classes exist in the release.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Directory:%String,Delete:%Boolean=0</FormalSpec>
-<Implementation><![CDATA[
+/// Determines the packages in export files in a directory, and
+/// searches for classes present on this system that are not present
+/// in the export files. Optionally deletes them.
+/// Matching of redundant classes is only done in packages for
+/// which classes exist in the release.
+ClassMethod FindRedundantClassesInDir(Directory As %String, Delete As %Boolean = 0)
+{
 	Set Me = ..%New()
 	Set Status = Me.FindRedundantClassesInDirImp(Directory, Delete)
 	If 'Status Do $System.Status.DisplayError(Status)
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="FindRedundantClassesInExportImp">
-<Description>
-Implementation of FindRedundantClassesInExport.</Description>
-<FormalSpec>ReleaseFileName:%String,Delete:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Implementation of FindRedundantClassesInExport.
+Method FindRedundantClassesInExportImp(ReleaseFileName As %String, Delete As %Boolean = 0) As %Status
+{
 	Set Status = ..GetClassesInExportFile(ReleaseFileName)
 	If 'Status Quit ..BuildStatus("Error determining classes in release file:", Status)
 	
@@ -98,15 +66,11 @@ Implementation of FindRedundantClassesInExport.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="FindRedundantClassesInDirImp">
-<Description>
-Implementation of FindRedundantClassesInDir.</Description>
-<FormalSpec>Directory:%String,Delete:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Implementation of FindRedundantClassesInDir.
+Method FindRedundantClassesInDirImp(Directory As %String, Delete As %Boolean = 0) As %Status
+{
 	Set rs = ##class(%ResultSet).%New("%File:FileSet")
 	Set Status = rs.Execute(Directory, "*.xml")
 	If 'Status Quit ..BuildStatus("Error listing contents of '{}'", Status, Directory)
@@ -137,15 +101,11 @@ Implementation of FindRedundantClassesInDir.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckPackage">
-<Description>
-Find classes in a package not present in ..ClassesInRelease.</Description>
-<FormalSpec>Package:%String,*UnknownClasses:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Find classes in a package not present in ..ClassesInRelease.
+Method CheckPackage(Package As %String, Output UnknownClasses As %String) As %Status
+{
 	Set Status = $System.OBJ.GetPackageList(.Classes, Package, "")
 	If 'Status Quit Status
 	
@@ -165,47 +125,33 @@ Find classes in a package not present in ..ClassesInRelease.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="IsGenerated">
-<Description>
-Checks if a class is generated.</Description>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Checks if a class is generated.
+Method IsGenerated(ClassName As %String) As %Boolean
+{
 	&sql(SELECT GeneratedBy INTO :GeneratedBy
 	       FROM %Dictionary.ClassDefinition
 	      WHERE Name = :ClassName)
 	If SQLCODE Quit 0
 	If GeneratedBy '= "" Quit 1
 	Quit 0
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // -----
 
-]]></Content>
-</UDLText>
-
-<Method name="GetItemsInExport">
-<Description>
-Returns an array of all items in an export; the export may
-be a stream or a filename. Filter can contain a comma-separated
-list of item types to return (e.g. "cls" or "mac,inc").
-Returns items indexed as an array mapping name to type. If
-more than one type has the same name, the value is a comma
-separated list of those types. E.g., normally:
-  Items("The.Class.Name")="cls"
-but perhaps:
-  Items("The.Class.Name")="cls,inc"
-if an include file with the same name is present.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Export,Filter:%String="",*Items:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns an array of all items in an export; the export may
+/// be a stream or a filename. Filter can contain a comma-separated
+/// list of item types to return (e.g. "cls" or "mac,inc").
+/// Returns items indexed as an array mapping name to type. If
+/// more than one type has the same name, the value is a comma
+/// separated list of those types. E.g., normally:
+///   Items("The.Class.Name")="cls"
+/// but perhaps:
+///   Items("The.Class.Name")="cls,inc"
+/// if an include file with the same name is present.
+ClassMethod GetItemsInExport(Export, Filter As %String = "", Output Items As %String) As %Status
+{
 	;Get list of items in export
 	If $IsObject(Export) {
 		;Object: assume a stream
@@ -239,13 +185,10 @@ if an include file with the same name is present.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetClassesInExportFile">
-<FormalSpec>ExportFileName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+Method GetClassesInExportFile(ExportFileName As %String) As %Status
+{
 	Set Status = ..GetItemsInExport(ExportFileName, "cls", .Items)
 	If 'Status Quit ..BuildStatus("Error determining export file contents:", Status)
 	
@@ -263,24 +206,14 @@ if an include file with the same name is present.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetExportContents">
-<Description>
-Extract the (XML) contents from a Caché XML export file, i.e.
-everything inside the Export element.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Export:%Stream,*Content:%Stream</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Extract the (XML) contents from a Caché XML export file, i.e.
+/// everything inside the Export element.
+ClassMethod GetExportContents(Export As %Stream, Output Content As %Stream) As %Status
+{
 	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(..%ClassName(1)_"||ExtractAllFromExport", , .Status)
 	If 'Status Quit ..BuildStatus("Error opening XData definition:", Status)
 	
@@ -288,19 +221,14 @@ everything inside the Export element.</Description>
 	If 'Status Quit ..BuildStatus("Error in transform:", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CombineExportFiles">
-<Description>
-Combines the contents of the XML export files passed in by name,
-by extracting everything within the Export elements, and placing
-it into a combined export element. Uses the Caché version of the
-first export file for the combined one.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>FileNames:%String,*Combined:%Stream</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Combines the contents of the XML export files passed in by name,
+/// by extracting everything within the Export elements, and placing
+/// it into a combined export element. Uses the Caché version of the
+/// first export file for the combined one.
+ClassMethod CombineExportFiles(FileNames As %String, Output Combined As %Stream) As %Status
+{
 	; Get the XSL to extract the contents of an export file
 	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(..%ClassName(1)_"||ExtractAllFromExport", , .Status)
 	If 'Status Quit ..BuildStatus("Error opening XData definition:", Status)
@@ -349,24 +277,14 @@ first export file for the combined one.</Description>
 	Do Combined.WriteLine("</Export>")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="BuildStatus">
-<Description>
-Build a %Status from a message and a %Status, optionally replacing
-placeholders with values passed in.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String,Status:%Status="",Args...:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Build a %Status from a message and a %Status, optionally replacing
+/// placeholders with values passed in.
+ClassMethod BuildStatus(Message As %String, Status As %Status = "", Args... As %String) As %Status
+{
 	;Replace placeholders with content, if present
 	Set Index = 0
 	For Count = 1:1 {
@@ -385,20 +303,13 @@ placeholders with values passed in.</Description>
 	If Status '= "" Set MsgStatus = $System.Status.AppendStatus(MsgStatus, Status)
 	
 	Quit MsgStatus
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<XData name="ExtractAllFromExport">
-<Description>
-XSL to extract the contents of a Caché XML export file.</Description>
-<Data><![CDATA[
+/// XSL to extract the contents of a Caché XML export file.
+XData ExtractAllFromExport
+{
 <?xml version="1.0" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="xml" omit-xml-declaration="yes"/>
@@ -406,7 +317,7 @@ XSL to extract the contents of a Caché XML export file.</Description>
     <xsl:copy-of select="//Export/*"/>
 </xsl:template>
 </xsl:stylesheet>
-]]></Data>
-</XData>
-</Class>
-</Export>
+}
+
+}
+

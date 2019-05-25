@@ -1,18 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.JSON.PropertyParameters">
-<TimeCreated>64394,79506.492902</TimeCreated>
+Class Strix.JSON.PropertyParameters
+{
 
-<Parameter name="JSONNAME">
-<Description>
-The JSON name for this property; defaults to the Caché name
-with the first letter lowercased.</Description>
-</Parameter>
+/// The JSON name for this property; defaults to the Caché name
+/// with the first letter lowercased.
+Parameter JSONNAME;
 
-<Parameter name="JSONIO">
-<Type>STRING</Type>
-<Constraint>,IN,OUT,CALC,NONE</Constraint>
-<Flags>ENUM</Flags>
-</Parameter>
-</Class>
-</Export>
+Parameter JSONIO As STRING [ Constraint = ",IN,OUT,CALC,NONE", Flags = ENUM ];
+
+}
+

@@ -1,47 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Depends">
-<IncludeCode>%occErrors</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>65091,28435.781976</TimeCreated>
+Include %occErrors
 
-<Property name="Checked">
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+Class Strix.Lib.Depends Extends %RegisteredObject
+{
 
-<Property name="Dependencies">
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-</Property>
+Property Checked As %String [ MultiDimensional ];
 
-<UDLText name="T">
-<Content><![CDATA[
+Property Dependencies As %String [ MultiDimensional ];
+
 // -----
 
-]]></Content>
-</UDLText>
+/// Cached regex objects (performance)
+Property Matchers As array Of %Regex.Matcher;
 
-<Property name="Matchers">
-<Description>
-Cached regex objects (performance)</Description>
-<Type>%Regex.Matcher</Type>
-<Collection>array</Collection>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CheckPackage">
-<Description>
-Check all dependencies of one or more packages.</Description>
-<FormalSpec>Packages:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Check all dependencies of one or more packages.
+Method CheckPackage(Packages As %String) As %Status
+{
 	For i = 1:1:$Length(Packages, ",") {
 		Set Package = $Piece(Packages, ",", i)
 		
@@ -61,15 +36,11 @@ Check all dependencies of one or more packages.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckItem">
-<Description>
-Checks dependencies for a single item.</Description>
-<FormalSpec>Item:%String,Recursive:%Boolean=1</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Checks dependencies for a single item.
+Method CheckItem(Item As %String, Recursive As %Boolean = 1) As %Status
+{
 	Set Type = $ZConvert($Piece(Item, ".", *), "l")
 	If Type = "cls" {
 		Set sc = ..CheckClass($Piece(Item, ".", 1, *-1))
@@ -102,15 +73,11 @@ Checks dependencies for a single item.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckClass">
-<Description>
-Checks a single class for its dependencies</Description>
-<FormalSpec>ClassName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Checks a single class for its dependencies
+Method CheckClass(ClassName As %String) As %Status
+{
 	Set ..Checked(ClassName_".cls") = ""
 	
 	; Start with what this returns:
@@ -162,15 +129,11 @@ Checks a single class for its dependencies</Description>
 	;Projections, ...
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CheckCode">
-<Description>
-Checks code, passed as a stream, for references to classes.</Description>
-<FormalSpec>Code:%Stream,Package:%String="User",ClassName=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Checks code, passed as a stream, for references to classes.
+Method CheckCode(Code As %Stream, Package As %String = "User", ClassName = "") As %Status
+{
 	; Check for classmethod calls and #dim statements
 	Set RegExes = $lb("##class\(([^)%]+)\)", "(?i)#dim +\w+ +As +([\w.]+)")
 	
@@ -201,22 +164,14 @@ Checks code, passed as a stream, for references to classes.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="AddItem">
-<Description>
-Adds an item to the dependency array, after checking that
-it is not a system item.</Description>
-<FormalSpec>Name,ClassName</FormalSpec>
-<Implementation><![CDATA[
+/// Adds an item to the dependency array, after checking that
+/// it is not a system item.
+Method AddItem(Name, ClassName)
+{
 	If $Extract(Name) = "%" Quit
 	If Name ? 1"Ens."1.E Quit
 	If Name ? 1"EnsLib."1.E Quit
@@ -224,16 +179,11 @@ it is not a system item.</Description>
 	If Name ? 1"CSPX."1.E Quit
 	Set ..Dependencies(Name) = ClassName
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="BuildStatus">
-<Description>
-Helper for creating updated status</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Message:%String,Status:%Status="",Args...:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Helper for creating updated status
+ClassMethod BuildStatus(Message As %String, Status As %Status = "", Args... As %String) As %Status
+{
 	For i = 1:1:$Get(Args) {
 		Set Message = $Replace(Message, "{}", $Get(Args(i)), 1, 1)
 	}
@@ -245,7 +195,7 @@ Helper for creating updated status</Description>
 	If Status '= "" Set MsgStatus = $System.Status.AppendStatus(MsgStatus, Status)
 	
 	Quit MsgStatus
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

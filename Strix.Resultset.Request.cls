@@ -1,41 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Resultset.Request">
-<Description>
-Information for requesting a page from a resultset</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63664,36770.178622</TimeCreated>
+/// Information for requesting a page from a resultset
+Class Strix.Resultset.Request Extends %RegisteredObject
+{
 
-<Property name="ResultsetId">
-<Description>
-The id of the resultset containing all results.</Description>
-<Type>%String</Type>
-</Property>
+/// The id of the resultset containing all results.
+Property ResultsetId As %String;
 
-<Property name="PageSize">
-<Description>
-The number of items to return for one page of results</Description>
-<Type>%Integer</Type>
-</Property>
+/// The number of items to return for one page of results
+Property PageSize As %Integer;
 
-<Property name="PageNumber">
-<Description>
-The (one-based) number of the page to return</Description>
-<Type>%Integer</Type>
-</Property>
+/// The (one-based) number of the page to return
+Property PageNumber As %Integer;
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+/// The session key (normaly: login id) for this request. Only used server-side.
+Property SessionKey As %String(XMLPROJECTION = "NONE");
 
-<Property name="SessionKey">
-<Description>
-The session key (normaly: login id) for this request. Only used server-side.</Description>
-<Type>%String</Type>
-<Parameter name="XMLPROJECTION" value="NONE"/>
-</Property>
-</Class>
-</Export>
+}
+

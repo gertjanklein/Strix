@@ -1,71 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Counts">
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63857,71004.238777</TimeCreated>
+Include Strix
 
-<Property name="MaxCount">
-<Description>
-The maximum number of itmes to keep</Description>
-<Type>%Integer</Type>
-</Property>
+Class Strix.Lib.Counts Extends %RegisteredObject
+{
 
-<Property name="Values">
-<Description>
-The values to record</Description>
-<Type>%String</Type>
-<MultiDimensional>1</MultiDimensional>
-<Private>1</Private>
-</Property>
+/// The maximum number of itmes to keep
+Property MaxCount As %Integer;
 
-<Property name="ValueCount">
-<Description>
-The number of values recorded</Description>
-<Type>%Integer</Type>
-<Private>1</Private>
-</Property>
+/// The values to record
+Property Values As %String [ MultiDimensional, Private ];
 
-<Property name="Strategy">
-<Description>
-Which way to count</Description>
-<Type>%String</Type>
-<Private>1</Private>
-<Parameter name="VALUELIST" value=",nlargest,nsmallest"/>
-</Property>
+/// The number of values recorded
+Property ValueCount As %Integer [ Private ];
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Which way to count
+Property Strategy As %String(VALUELIST = ",nlargest,nsmallest") [ Private ];
+
 // =====
 
-]]></Content>
-</UDLText>
+/// Constructor: returns an nlargest counter
+ClassMethod NLargest(MaxCount As %Integer = "") As Strix.Lib.Counts
+{
+	Quit ..%New("nlargest", MaxCount)
+}
 
-<Method name="NLargest">
-<Description>
-Constructor: returns an nlargest counter</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>MaxCount:%Integer=""</FormalSpec>
-<ReturnType>Strix.Lib.Counts</ReturnType>
-<Implementation><![CDATA[	Quit ..%New("nlargest", MaxCount)
-]]></Implementation>
-</Method>
+/// Constructor: returns an nsmallest counter
+ClassMethod NSmallest(MaxCount As %Integer = "") As Strix.Lib.Counts
+{
+	Quit ..%New("nsmallest", MaxCount)
+}
 
-<Method name="NSmallest">
-<Description>
-Constructor: returns an nsmallest counter</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>MaxCount:%Integer=""</FormalSpec>
-<ReturnType>Strix.Lib.Counts</ReturnType>
-<Implementation><![CDATA[	Quit ..%New("nsmallest", MaxCount)
-]]></Implementation>
-</Method>
-
-<Method name="Add">
-<Description>
-Adds a value to the counter.</Description>
-<FormalSpec>Value:%String,Name:%String=""</FormalSpec>
-<Implementation><![CDATA[
+/// Adds a value to the counter.
+Method Add(Value As %String, Name As %String = "")
+{
 	; If this particular value is already known we're done, we keep the first one found
 	If $Data(..Values(Value)) Quit
 	
@@ -85,25 +51,20 @@ Adds a value to the counter.</Description>
 	Set ..ValueCount = ValueCount
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="Reset">
-<Description>
-Clears the recorded values and optionally resets the maximum count</Description>
-<FormalSpec>MaxCount:%Integer=""</FormalSpec>
-<Implementation><![CDATA[
+/// Clears the recorded values and optionally resets the maximum count
+Method Reset(MaxCount As %Integer = "")
+{
 	Kill ..Values
 	Set ..ValueCount = ""
 	If MaxCount '= "" Set ..MaxCount = MaxCount
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="ReportToTerminal">
-<Description>
-Display recorded values and their names.</Description>
-<Implementation><![CDATA[
+/// Display recorded values and their names.
+Method ReportToTerminal()
+{
 	If '..ValueCount Quit
 	Set ValueColumns = $Length($Order(..Values(""), -1))
 	
@@ -117,28 +78,21 @@ Display recorded values and their names.</Description>
 	}
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetNext">
-<Description>
-Method to retrieve next result, based on the provided value;
-Can be used to retrieve results in a loop, like in %ArrayOfDataTypes.</Description>
-<FormalSpec><![CDATA[&Value:%String=""]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Method to retrieve next result, based on the provided value;
+/// Can be used to retrieve results in a loop, like in %ArrayOfDataTypes.
+Method GetNext(ByRef Value As %String = "") As %String
+{
 	Set Order = $Select(..Strategy = "nlargest": -1, 1: 1)
 	Set Value = $Order(..Values(Value), Order, Data)
 	If Value = "" Quit ""
 	Quit Data
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetList">
-<Description>
-Method to retrieve the stored values as a list of count,name lists</Description>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Method to retrieve the stored values as a list of count,name lists
+Method GetList() As %List
+{
 	If '..ValueCount Quit ""
 	
 	Set Result = ""
@@ -153,28 +107,18 @@ Method to retrieve the stored values as a list of count,name lists</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="%OnNew">
-<FormalSpec>Strategy:%String,MaxCount:%Integer=""</FormalSpec>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+Method %OnNew(Strategy As %String, MaxCount As %Integer = "") As %Status [ Private, ServerOnly = 1 ]
+{
 	Set ..Strategy = Strategy
 	Set Status = ..StrategyIsValid(..Strategy)
 	If 'Status $$$QuitErrOnNew("Strategy parameter has an invalid value", Status)
 	If MaxCount Set ..MaxCount = MaxCount
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

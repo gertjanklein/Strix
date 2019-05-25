@@ -1,27 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.Sorting">
-<Description>
-Helper code for sorting objects.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63060,54552.935978</TimeCreated>
+Include Strix
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Helper code for sorting objects.
+Class Strix.Lib.Sorting Extends %RegisteredObject
+{
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="SortListOfObjects">
-<Description>
-Sorts a list of objects on one of it's properties. Sort is stable,
-objects with the same sort key stay in the same order.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>List:%ListOfObjects,SortOn:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Sorts a list of objects on one of it's properties. Sort is stable,
+/// objects with the same sort key stay in the same order.
+ClassMethod SortListOfObjects(List As %ListOfObjects, SortOn As %String) As %Status
+{
 	If List.Count() < 2 Quit $$$OK
 	
 	Set Status = ..ParseSortSpec(SortOn, .SortSpec)
@@ -72,17 +60,12 @@ objects with the same sort key stay in the same order.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SortList">
-<Description>
-Sorts the data in a %List. Sort can be ascending (default) or descending;
-Supported flag is N for numeric.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Data:%List,Direction:%Integer=1,Flags:%String=""</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Sorts the data in a %List. Sort can be ascending (default) or descending;
+/// Supported flag is N for numeric.
+ClassMethod SortList(Data As %List, Direction As %Integer = 1, Flags As %String = "") As %List
+{
 	If $ListLength(Data) < 2 Quit Data
 	
 	; Construct array for sorting
@@ -115,32 +98,22 @@ Supported flag is N for numeric.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="ParseSortSpec">
-<Description>
-Convert a string sort specification into the internal %List version, filling
-in defaults for missing properties.
-
-The full sort specification is a comma-separated list of sort specification
-items. Items contain the following information (separated by colons):
-- Value: the name of a property to sort on
-- Direction: "A" (ascending, default) or "D" (descending)
-- Default: a default value to use if the property value is empty.
-
-If errors are detected in the specification, an error status is returned.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>SortSpec:%String,*SortSpecList:%List</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Convert a string sort specification into the internal %List version, filling
+/// in defaults for missing properties.
+/// 
+/// The full sort specification is a comma-separated list of sort specification
+/// items. Items contain the following information (separated by colons):
+/// - Value: the name of a property to sort on
+/// - Direction: "A" (ascending, default) or "D" (descending)
+/// - Default: a default value to use if the property value is empty.
+/// 
+/// If errors are detected in the specification, an error status is returned.
+ClassMethod ParseSortSpec(SortSpec As %String, Output SortSpecList As %List) As %Status
+{
 	Set SortSpecList = ""
 	
 	Set Status = $$$OK
@@ -164,7 +137,7 @@ If errors are detected in the specification, an error status is returned.</Descr
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

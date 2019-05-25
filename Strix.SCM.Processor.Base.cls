@@ -1,46 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Processor.Base">
-<Description>
-Base class for post-processors.</Description>
-<IncludeCode>Strix</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>64652,58901.37132</TimeCreated>
+Include Strix
 
-<Parameter name="HandlerType">
-<Description>
-Whether the processor is meant to work on an item or on
-a release.</Description>
-<Constraint>,Release,Item</Constraint>
-<Flags>ENUM</Flags>
-</Parameter>
+/// Base class for post-processors.
+Class Strix.SCM.Processor.Base Extends %RegisteredObject
+{
 
-<Property name="Handler">
-<Description>
-The current handler</Description>
-<Type>Strix.SCM.Handler.Base</Type>
-</Property>
+/// Whether the processor is meant to work on an item or on
+/// a release.
+Parameter HandlerType [ Constraint = ",Release,Item", Flags = ENUM ];
 
-<Property name="Project">
-<Description>
-The current project</Description>
-<Type>Strix.SCM.Project</Type>
-</Property>
+/// The current handler
+Property Handler As Strix.SCM.Handler.Base;
 
-<UDLText name="T">
-<Content><![CDATA[
+/// The current project
+Property Project As Strix.SCM.Project;
+
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="Get">
-<Description>
-Returns a processor instance, initialized with handler and project.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ClassName:%String,Handler:Strix.SCM.Handler.Base,Project:Strix.SCM.Project,*Status:%Status</FormalSpec>
-<ReturnType>Strix.SCM.Processor.Base</ReturnType>
-<Implementation><![CDATA[
+/// Returns a processor instance, initialized with handler and project.
+ClassMethod Get(ClassName As %String, Handler As Strix.SCM.Handler.Base, Project As Strix.SCM.Project, Output Status As %Status) As Strix.SCM.Processor.Base
+{
 	Set Status = $$$OK
 	
 	#dim Processor As Strix.SCM.Processor.Base
@@ -59,36 +37,28 @@ Returns a processor instance, initialized with handler and project.</Description
 	Set Processor.Project = Project
 	
 	Quit Processor
-]]></Implementation>
-</Method>
+}
 
-<Method name="Run">
-<Description>
-Release processors should override the Run method.</Description>
-<Abstract>1</Abstract>
-<ReturnType>%Status</ReturnType>
-</Method>
+/// Release processors should override the Run method.
+Method Run() As %Status [ Abstract ]
+{
+}
 
-<Method name="ProcessExport">
-<Description>
-Item processors should provide an Export method.</Description>
-<Abstract>1</Abstract>
-<FormalSpec>Item:%String,Export:%Stream,*Status:%Status</FormalSpec>
-<ReturnType>%Stream</ReturnType>
-</Method>
+/// Item processors should provide an Export method.
+Method ProcessExport(Item As %String, Export As %Stream, Output Status As %Status) As %Stream [ Abstract ]
+{
+}
 
-<Method name="Write">
-<Description>
-Call back to handler for messages; allows the handler to filter them
-based on e.g. verbosity.</Description>
-<FormalSpec>Text:%String</FormalSpec>
-<Implementation><![CDATA[
+/// Call back to handler for messages; allows the handler to filter them
+/// based on e.g. verbosity.
+Method Write(Text As %String)
+{
 	If $IsObject(..Handler) {
 		Do ..Handler.HandlePostProcessorOutput(Text)
 	} Else {
 		Write !,Text
 	}
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

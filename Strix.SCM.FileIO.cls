@@ -1,19 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.FileIO">
-<Description>
-Export/import code</Description>
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63865,70871.973876</TimeCreated>
+Include Strix.SCM
 
-<Method name="ExportItem">
-<Description>
-Exports a single item to disk</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Export/import code
+Class Strix.SCM.FileIO Extends %RegisteredObject
+{
+
+/// Exports a single item to disk
+ClassMethod ExportItem(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+{
 	Set Filename = Project.GetExportFilename(Item, , , .Status)
 	If 'Status Quit Status
 	
@@ -24,16 +17,11 @@ Exports a single item to disk</Description>
 	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, Item)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ExportClassData">
-<Description>
-Exports data for a class to disk</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Exports data for a class to disk
+ClassMethod ExportClassData(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+{
 	;Item is a class; we must change type to stg for filename.
 	Set ClassName = Item
 	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
@@ -51,16 +39,11 @@ Exports data for a class to disk</Description>
 	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, Item)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LoadItem">
-<Description>
-Loads a single item from disk</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads a single item from disk
+ClassMethod LoadItem(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+{
 	Set Filename = Project.GetExportFilename(Item, , , .Status)
 	If 'Status Quit Status
 	
@@ -68,16 +51,11 @@ Loads a single item from disk</Description>
 	If 'Status Quit $$$BuildErr("Error loading '"_Item_"' from '"_Filename_"'", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LoadClassData">
-<Description>
-Loads data for a class from disk</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads data for a class from disk
+ClassMethod LoadClassData(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+{
 	;Item is a class; we must change type to stg for filename.
 	Set ClassName = Item
 	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
@@ -92,16 +70,11 @@ Loads data for a class from disk</Description>
 	If 'Status Quit $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ExportProject">
-<Description>
-Exports an entire project to disk</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Exports an entire project to disk
+ClassMethod ExportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) As %Status
+{
 	If 'Quiet Write "Determining project members: "
 	Set Status = Project.GetAllItems(.Items)
 	If 'Status Quit $$$BuildErr("Error determining project members", Status)
@@ -129,16 +102,11 @@ Exports an entire project to disk</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ImportProject">
-<Description>
-Loads all project members form the configured directory</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads all project members form the configured directory
+ClassMethod ImportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) As %Status
+{
 	;Get list of XML files in the project directory
 	If 'Quiet Write !,"== Reading directory: "
 	Set stm = ##class(%SQL.Statement).%New()
@@ -175,16 +143,11 @@ Loads all project members form the configured directory</Description>
 	If 'Quiet Write "ok",!
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Export">
-<Description>
-Exports an item, running post-processors if configured.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Item:%String,AsUDL:%Boolean,Processors:%ListOfObjects,Filename:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Exports an item, running post-processors if configured.
+ClassMethod Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, Filename As %String) As %Status
+{
 	Set Stream = ##class(%Stream.FileBinary).%New()
 	
 	; Make sure stream has a filename
@@ -216,7 +179,7 @@ Exports an item, running post-processors if configured.</Description>
 	If 'sc Return $$$BuildStatus("Error saving export data to '{}':", sc, Filename)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

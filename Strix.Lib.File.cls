@@ -1,19 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Lib.File">
-<Description>
-Fil(name) related functions</Description>
-<Super>%RegisteredObject</Super>
-<TimeCreated>63850,49428.501291</TimeCreated>
+/// Fil(name) related functions
+Class Strix.Lib.File Extends %RegisteredObject
+{
 
-<Method name="UniqueFilename">
-<Description>
-Returns a unique filename based on the name passed in, by appending a sequence
-number if the file already exists.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Filename:%String,*Changed:%Boolean</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns a unique filename based on the name passed in, by appending a sequence
+/// number if the file already exists.
+ClassMethod UniqueFilename(Filename As %String, Output Changed As %Boolean) As %String
+{
 	Set Changed = 0
 	Set NewName = Filename
 	Set Index = 0
@@ -40,18 +32,13 @@ number if the file already exists.</Description>
 	}
 	
 	Quit NewName
-]]></Implementation>
-</Method>
+}
 
-<Method name="AppendPath">
-<Description>
-Appends one or more path components to an existing path. Uses the implementation
-in class %File for platform independence, but allows more then one path component
-to be appended at once.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Path:%String,SubPaths...:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Appends one or more path components to an existing path. Uses the implementation
+/// in class %File for platform independence, but allows more then one path component
+/// to be appended at once.
+ClassMethod AppendPath(Path As %String, SubPaths... As %String) As %String
+{
 	Set Result = Path
 	For i = 1:1:$Get(SubPaths) {
 		Set SubPath = $Get(SubPaths(i))
@@ -59,18 +46,13 @@ to be appended at once.</Description>
 		Set Result = ##class(%File).SubDirectoryName(Result, SubPath)
 	}
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<Method name="SplitPath">
-<Description>
-Split Path into ParentDir and LastPiece, where LastPiece is the last pathname
-component and ParentDir is everything leading up to that. If Path is already
-at the root, returns false.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Path:%String,*ParentDir:%String,*LastPiece:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Split Path into ParentDir and LastPiece, where LastPiece is the last pathname
+/// component and ParentDir is everything leading up to that. If Path is already
+/// at the root, returns false.
+ClassMethod SplitPath(Path As %String, Output ParentDir As %String, Output LastPiece As %String) As %Boolean
+{
 	Set ParentDir = ##class(%File).ParentDirectoryName(Path)
 	If ParentDir = Path Quit 0
 	
@@ -78,18 +60,13 @@ at the root, returns false.</Description>
 	Set LastPiece = ##class(%File).GetDirectoryPiece(Path, Len)
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="IsPathAbsolute">
-<Description>
-Returns a boolean indicating whether a path is absolute (true) or
-relative (false). If AllowFromRoot is true, a path like "\dir\sub"
-(i.e., without a drive) is considered absolute; by default it is not.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Path:%String,AllowFromRoot:%Boolean=0</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether a path is absolute (true) or
+/// relative (false). If AllowFromRoot is true, a path like "\dir\sub"
+/// (i.e., without a drive) is considered absolute; by default it is not.
+ClassMethod IsPathAbsolute(Path As %String, AllowFromRoot As %Boolean = 0) As %Boolean
+{
 #if $$$isWINDOWS
 	;Windows allows forwards slashes as paths separators in system calls
 	Set Path = $Replace(Path, "/", "\")
@@ -109,7 +86,7 @@ relative (false). If AllowFromRoot is true, a path like "\dir\sub"
 #endif
 	
 	Quit 0
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

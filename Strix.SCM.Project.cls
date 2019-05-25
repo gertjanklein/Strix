@@ -1,169 +1,73 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.SCM.Project">
-<Description>
-Configuration of the source control interface. Defines a single project;
-multiple projects may be present in a single namespace. This information
-itself is (partly) versioned as well.</Description>
-<IncludeCode>Strix.SCM</IncludeCode>
-<Super>%Persistent,%XML.Adaptor</Super>
-<TimeCreated>61366,38789.907608</TimeCreated>
+Include Strix.SCM
 
-<UDLText name="T">
-<Content><![CDATA[
+/// Configuration of the source control interface. Defines a single project;
+/// multiple projects may be present in a single namespace. This information
+/// itself is (partly) versioned as well.
+Class Strix.SCM.Project Extends (%Persistent, %XML.Adaptor)
+{
+
 // ===== ID
 
-]]></Content>
-</UDLText>
+/// The GUID of this project; assigned on first creation of the project. Used to
+/// make sure the proper file is loaded / saved to.
+Property GUID As %String [ InitialExpression = {$System.Util.CreateGUID()} ];
 
-<Property name="GUID">
-<Description>
-The GUID of this project; assigned on first creation of the project. Used to
-make sure the proper file is loaded / saved to.</Description>
-<Type>%String</Type>
-<InitialExpression>$System.Util.CreateGUID()</InitialExpression>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Local information not present in configuration file
 
-]]></Content>
-</UDLText>
+/// The location of the external configuration file.
+Property ConfigFilePath As %String(MAXLEN = 512, XMLPROJECTION = "NONE") [ Required ];
 
-<Property name="ConfigFilePath">
-<Description>
-The location of the external configuration file.</Description>
-<Type>%String</Type>
-<Required>1</Required>
-<Parameter name="MAXLEN" value="512"/>
-<Parameter name="XMLPROJECTION" value="NONE"/>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // ===== Global information from configuration file
 
-]]></Content>
-</UDLText>
+/// The project name.
+Property Name As %String [ Required ];
 
-<Property name="Name">
-<Description>
-The project name.</Description>
-<Type>%String</Type>
-<Required>1</Required>
-</Property>
+/// The path, relative to the configuration file directory, where to store the
+/// exported classes etc.; can be empty for same directory as that of config file.
+Property ProjectPath As %String;
 
-<Property name="ProjectPath">
-<Description>
-The path, relative to the configuration file directory, where to store the
-exported classes etc.; can be empty for same directory as that of config file.</Description>
-<Type>%String</Type>
-</Property>
+/// The members of this project, defined as a list of 'patterns' supporting
+/// wildcards. Examples:
+/// Strix.*.cls (all classes in the Strix package)
+/// Strix.SCM.*.gbl (all globals starting with the specified string)
+/// Patterns can be turned into "exclude" patterns by prefixing them with a "-".
+Property Members As list Of %String(MAXLEN = 256, STORAGEDEFAULT = "array", XMLITEMNAME = "Spec");
 
-<Property name="Members">
-<Description>
-The members of this project, defined as a list of 'patterns' supporting
-wildcards. Examples:
-Strix.*.cls (all classes in the Strix package)
-Strix.SCM.*.gbl (all globals starting with the specified string)
-Patterns can be turned into "exclude" patterns by prefixing them with a "-".</Description>
-<Type>%String</Type>
-<Collection>list</Collection>
-<Parameter name="MAXLEN" value="256"/>
-<Parameter name="STORAGEDEFAULT" value="array"/>
-<Parameter name="XMLITEMNAME" value="Spec"/>
-</Property>
+/// Whether to convert packages to subdirectories on export; e.g., if this
+/// is set, class Strix.SCM.Project would be exported to .../Strix/SCM/Project.cls.xml,
+/// instead of .../Strix.SCM.Project.cls.xml
+Property PackageSubdirs As %Boolean [ InitialExpression = 0 ];
 
-<Property name="PackageSubdirs">
-<Description>
-Whether to convert packages to subdirectories on export; e.g., if this
-is set, class Strix.SCM.Project would be exported to .../Strix/SCM/Project.cls.xml,
-instead of .../Strix.SCM.Project.cls.xml</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Classname of handler for this project
+Property Handler As %String;
 
-<Property name="Handler">
-<Description>
-Classname of handler for this project</Description>
-<Type>%String</Type>
-</Property>
+/// Whether to export items as XML (0) or CDL (1)
+Property ExportUDL As %Boolean [ InitialExpression = 0 ];
 
-<Property name="ExportUDL">
-<Description>
-Whether to export items as XML (0) or CDL (1)</Description>
-<Type>%Boolean</Type>
-<InitialExpression>0</InitialExpression>
-</Property>
+/// Comma-separated list of export item post-processors to run.
+Property PostProcessors As %String(MAXLEN = 80);
 
-<Property name="PostProcessors">
-<Description>
-Comma-separated list of export item post-processors to run.</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="80"/>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+/// Handler-specific settings for this project
+Property Settings As array Of %String(MAXLEN = "", XMLITEMNAME = "Setting", XMLKEYNAME = "Name");
 
-<Property name="Settings">
-<Description>
-Handler-specific settings for this project</Description>
-<Type>%String</Type>
-<Collection>array</Collection>
-<Parameter name="MAXLEN"/>
-<Parameter name="XMLITEMNAME" value="Setting"/>
-<Parameter name="XMLKEYNAME" value="Name"/>
-</Property>
+/// Local handler settings (not stored in the configuration file)
+Property LocalSettings As array Of %String(MAXLEN = "", XMLPROJECTION = "NONE");
 
-<Property name="LocalSettings">
-<Description>
-Local handler settings (not stored in the configuration file)</Description>
-<Type>%String</Type>
-<Collection>array</Collection>
-<Parameter name="MAXLEN"/>
-<Parameter name="XMLPROJECTION" value="NONE"/>
-</Property>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
+Index IdKey On GUID [ IdKey, Unique ];
 
-<Index name="IdKey">
-<IdKey>1</IdKey>
-<Properties>GUID</Properties>
-<Unique>1</Unique>
-</Index>
+Index OnName On Name [ Unique ];
 
-<Index name="OnName">
-<Properties>Name</Properties>
-<Unique>1</Unique>
-</Index>
-
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="LoadProjectFile">
-<Description>
-Loads a configuration file. If the corresponding Project object
-already exists, it is updated; otherwise, a new one is created.
-Saves the created/updated project.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,*Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads a configuration file. If the corresponding Project object
+/// already exists, it is updated; otherwise, a new one is created.
+/// Saves the created/updated project.
+ClassMethod LoadProjectFile(FileName As %String, Output Project As Strix.SCM.Project) As %Status
+{
 	Set sc = ..LoadProjectFileData(FileName, .ProjectFromFile)
 	If 'sc Quit sc
 	
@@ -184,16 +88,11 @@ Saves the created/updated project.</Description>
 	If 'Status Quit $$$BuildErr("Error "_$Select(Existing: "updating", 1: "creating")_" project object", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="LoadProjectFileData">
-<Description>
-Loads data from a project file, without altering anything.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>FileName:%String,*Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Loads data from a project file, without altering anything.
+ClassMethod LoadProjectFileData(FileName As %String, Output Project As Strix.SCM.Project) As %Status
+{
 	Set Reader = ##class(%XML.Reader).%New()
 	Set Status = Reader.OpenFile(FileName)
 	If 'Status Quit $$$BuildErr("Error opening project configuration file '{}':", Status, FileName)
@@ -205,15 +104,12 @@ Loads data from a project file, without altering anything.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SaveProjectFile">
-<Description>
-Saves the configuration, in XML format, to the file specified in
-property ConfigFilePath.</Description>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Saves the configuration, in XML format, to the file specified in
+/// property ConfigFilePath.
+Method SaveProjectFile() As %Status
+{
 	Set File = ##class(%FileCharacterStream).%New()
 	Set File.Filename = ..ConfigFilePath
 	
@@ -224,15 +120,11 @@ property ConfigFilePath.</Description>
 	If 'Status Quit $$$BuildErr("Error saving configuration to '"_..ConfigFilePath_"':", Status)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="CopyFrom">
-<Description>
-Copies properties from another Project instance into the current one.</Description>
-<CodeMode>objectgenerator</CodeMode>
-<FormalSpec>Other:Strix.SCM.Project</FormalSpec>
-<Implementation><![CDATA[
+/// Copies properties from another Project instance into the current one.
+Method CopyFrom(Other As Strix.SCM.Project) [ CodeMode = objectgenerator ]
+{
 	#define Write(%s) Do %code.WriteLine($Char(9)_%s)
 	
 	For i = 1:1:%class.Properties.Count() {
@@ -255,18 +147,12 @@ Copies properties from another Project instance into the current one.</Descripti
 	$$$Write("Quit")
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="%OnAfterSave">
-<Description>
-Called by the system after the project object has been saved; used to update
-the configuration file in the working copy.</Description>
-<FormalSpec>Insert:%Boolean</FormalSpec>
-<Private>1</Private>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
-<Implementation><![CDATA[
+/// Called by the system after the project object has been saved; used to update
+/// the configuration file in the working copy.
+Method %OnAfterSave(Insert As %Boolean) As %Status [ Private, ServerOnly = 1 ]
+{
 	;If this is an insert and a config file already exists, we're loading that file.
 	;In this case, don't overwrite the file.
 	If Insert, ##class(%File).Exists(..ConfigFilePath) Quit $$$OK
@@ -276,24 +162,14 @@ the configuration file in the working copy.</Description>
 	If 'Status Quit Status
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetHandler">
-<Description>
-Returns the appropriate handler for the document specified in
-parameter InternalName, initialized with the project's settings.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>InternalName:%String="",*Handler:Strix.SCM.Handler.Base</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns the appropriate handler for the document specified in
+/// parameter InternalName, initialized with the project's settings.
+ClassMethod GetHandler(InternalName As %String = "", Output Handler As Strix.SCM.Handler.Base) As %Status
+{
 	;Initialise the handler to the do-nothing base, in case not specified
 	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
 	
@@ -335,13 +211,10 @@ parameter InternalName, initialized with the project's settings.</Description>
 	}
 	
 	Quit Handler
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetProcessors">
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%ListOfObjects</ReturnType>
-<Implementation><![CDATA[
+Method GetProcessors(Output Status As %Status) As %ListOfObjects
+{
 	Set Status = $$$OK
 	
 	Set Processors = ##class(%ListOfObjects).%New()
@@ -363,34 +236,22 @@ parameter InternalName, initialized with the project's settings.</Description>
 	}
 	
 	Quit Processors
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetHandlerSettings">
-<Description>
-Retrieves a list of valid settings for the currently configured handler.</Description>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Retrieves a list of valid settings for the currently configured handler.
+Method GetHandlerSettings() As %List
+{
 	Set Handler = ..Handler
 	If Handler = "" Quit ""
 	Set Settings = $ZObjClassMethod(Handler, "GetSettings")
 	Quit Settings
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetProjectPath">
-<Description>
-Returns the basic storage path for files managed by this project</Description>
-<FormalSpec>*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the basic storage path for files managed by this project
+Method GetProjectPath(Output Status As %Status) As %String
+{
 	Set Status = $$$OK
 	
 	;Get configured path (may be empty)
@@ -408,15 +269,11 @@ Returns the basic storage path for files managed by this project</Description>
 	Set ProjectPath = ##class(%File).SubDirectoryName(Config.BasePath, ProjectPath)
 	
 	Quit ProjectPath
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetExportFilename">
-<Description>
-Returns the file name for an item, based on project settings.</Description>
-<FormalSpec>ItemName:%String,*Directory:%String,*Filename:%String,*Status:%Status</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
+/// Returns the file name for an item, based on project settings.
+Method GetExportFilename(ItemName As %String, Output Directory As %String, Output Filename As %String, Output Status As %Status) As %String
+{
 	Set (Directory, FileName) = ""
 	
 	Set Path = ..GetProjectPath(.Status)
@@ -446,23 +303,13 @@ Returns the file name for an item, based on project settings.</Description>
 	If 'ok Set Status = $$$BuildErr("Can't create directory chain '"_Directory_"'", 1)
 	
 	Quit FullPath
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="CheckItem">
-<Description>
-Returns a boolean indicating whether this item is handled by a project.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&Item:%String,*Project:Project,*AsItem:%Boolean,*AsStorage:%Boolean,*Msg:%String]]></FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether this item is handled by a project.
+ClassMethod CheckItem(ByRef Item As %String, Output Project As Project, Output AsItem As %Boolean, Output AsStorage As %Boolean, Output Msg As %String) As %Boolean
+{
 	Set (Project, Msg) = "", (AsItem, AsStorage) = 0
 	
 	;Normalize name:
@@ -495,51 +342,33 @@ Returns a boolean indicating whether this item is handled by a project.</Descrip
 	Do Project.OwnsItem(Item, .AsItem, .AsStorage)
 	
 	Quit 1
-]]></Implementation>
-</Method>
+}
 
-<Method name="OwnsItem">
-<Description>
-Returns a boolean indicating whether this project handles the specified
-item. Also returns two booleans indicating whether the item itself is
-handled, and whether the item's storage is handled. (The method returns
-true if either one of these booleans is true.)</Description>
-<FormalSpec>Item:%String,*AsItem:%Boolean,*AsStorage:%Boolean</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
+/// Returns a boolean indicating whether this project handles the specified
+/// item. Also returns two booleans indicating whether the item itself is
+/// handled, and whether the item's storage is handled. (The method returns
+/// true if either one of these booleans is true.)
+Method OwnsItem(Item As %String, Output AsItem As %Boolean, Output AsStorage As %Boolean) As %Boolean
+{
 	Set Matcher = ##class(Matcher).%New(..Members)
 	Quit Matcher.Matches(Item, .AsItem, .AsStorage)
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetAllItems">
-<Description>
-Returns an array of all items in the current namespace that match
-the project's member specifications.</Description>
-<FormalSpec>*Items</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns an array of all items in the current namespace that match
+/// the project's member specifications.
+Method GetAllItems(Output Items) As %Status
+{
 	Set Matcher = ##class(Matcher).%New(..Members)
 	Set Status = Matcher.GetAllMembers(.Items)
 	If 'Status Quit Status
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="FindByName">
-<Description>
-Open and return the project with the specified name, if present.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ProjectName:%String,*Project:Strix.SCM.Project</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Open and return the project with the specified name, if present.
+ClassMethod FindByName(ProjectName As %String, Output Project As Strix.SCM.Project) As %Status
+{
 	&sql(SELECT %ID, COUNT(*) INTO :ProjectId, :Count FROM Project WHERE Name = :ProjectName)
 	If SQLCODE Quit $$$BuildErr("No project with name '"_ProjectName_"' found.", $$$ERROR($$$SQLError, SQLCODE, $Get(%msg)))
 	
@@ -549,16 +378,11 @@ Open and return the project with the specified name, if present.</Description>
 	If 'sc Quit $$$BuildErr("Error opening project with id '"_ProjectId_"':", sc)
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="GetProjectsOwningItem">
-<Description>
-Returns a list of ids of projects owning this item.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Item:%String,*Status:%Status</FormalSpec>
-<ReturnType>%List</ReturnType>
-<Implementation><![CDATA[
+/// Returns a list of ids of projects owning this item.
+ClassMethod GetProjectsOwningItem(Item As %String, Output Status As %Status) As %List
+{
 	Set rs = ##class(%ResultSet).%New(..%ClassName(1)_":ProjectsOwningItem")
 	If 'rs Set Status = $$$BuildErr("Error creating project query", $Get(%objlasterror)) Quit ""
 	
@@ -572,23 +396,13 @@ Returns a list of ids of projects owning this item.</Description>
 	}
 	
 	Quit Result
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="GetAllProjects">
-<Description>
-Returns all projects in this namespace.</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>*Projects:%ListOfObjects=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Returns all projects in this namespace.
+ClassMethod GetAllProjects(Output Projects As %ListOfObjects = "") As %Status
+{
 	If Projects = "" {
 		Set Projects = ##class(%ListOfObjects).%New()
 	} Else {
@@ -606,40 +420,25 @@ Returns all projects in this namespace.</Description>
 	}
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Query name="Projects">
-<Description>
-Returns all known projects</Description>
-<Type>%SQLQuery</Type>
-<SqlQuery>SELECT ID, Name
+/// Returns all known projects
+Query Projects() As %SQLQuery
+{
+SELECT ID, Name
   FROM Project
- ORDER BY Name</SqlQuery>
-</Query>
+ ORDER BY Name
+}
 
-<Query name="ProjectsOwningItem">
-<Description>
-Returns the id and name of all project owning an item.</Description>
-<Type>%Query</Type>
-<FormalSpec>Item:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<Parameter name="CONTAINID" value="1"/>
-<Parameter name="ROWSPEC" value="ID:%String,Name:%String"/>
-</Query>
+/// Returns the id and name of all project owning an item.
+Query ProjectsOwningItem(Item As %String) As %Query(CONTAINID = 1, ROWSPEC = "ID:%String,Name:%String") [ SqlProc ]
+{
+}
 
-<Method name="ProjectsOwningItemExecute">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,Item:%String]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod ProjectsOwningItemExecute(ByRef qHandle As %Binary, Item As %String) As %Status
+{
 	Set Node = $Name(^||Projects($Increment(^||Projects)))
 	Set qHandle = $lb(Item, Node, "")
 	
@@ -665,15 +464,10 @@ Returns the id and name of all project owning an item.</Description>
 	Do rs.Close()
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ProjectsOwningItemFetch">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
-<PlaceAfter>OwnsItemExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod ProjectsOwningItemFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = OwnsItemExecute ]
+{
 	Set Item = $li(qHandle, 1), Node = $li(qHandle, 2), Key = $li(qHandle, 3)
 	
 	Set Key = $Order(@Node@(Key), 1, Data)
@@ -688,35 +482,19 @@ Returns the id and name of all project owning an item.</Description>
 	Set AtEnd = 0
 	
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="ProjectsOwningItemClose">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
-<PlaceAfter>OwnsItemExecute</PlaceAfter>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod ProjectsOwningItemClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = OwnsItemExecute ]
+{
 	Set Node = $li(qHandle, 2)
 	Kill @Node
 	Quit $$$OK
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^Strix.SCM.ProjectD</DataLocation>
-<DefaultData>ProjectDefaultData</DefaultData>
-<IdLocation>^Strix.SCM.ProjectD</IdLocation>
-<IndexLocation>^Strix.SCM.ProjectI</IndexLocation>
-<StreamLocation>^Strix.SCM.ProjectS</StreamLocation>
+Storage Default
+{
 <Data name="LocalSettings">
 <Attribute>LocalSettings</Attribute>
 <Structure>subnode</Structure>
@@ -756,6 +534,13 @@ Returns the id and name of all project owning an item.</Description>
 <Value>PostProcessors</Value>
 </Value>
 </Data>
-</Storage>
-</Class>
-</Export>
+<DataLocation>^Strix.SCM.ProjectD</DataLocation>
+<DefaultData>ProjectDefaultData</DefaultData>
+<IdLocation>^Strix.SCM.ProjectD</IdLocation>
+<IndexLocation>^Strix.SCM.ProjectI</IndexLocation>
+<StreamLocation>^Strix.SCM.ProjectS</StreamLocation>
+<Type>%Library.CacheStorage</Type>
+}
+
+}
+

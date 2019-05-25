@@ -1,14 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Class name="Strix.Tests.Counts">
-<IncludeCode>Strix</IncludeCode>
-<Super>Strix.Testing.TestCase</Super>
-<TimeCreated>63858,42156.198023</TimeCreated>
+Include Strix
 
-<Method name="TestNLargest">
-<Description>
-Various basic NLargest tests</Description>
-<Implementation><![CDATA[
+Class Strix.Tests.Counts Extends Strix.Testing.TestCase
+{
+
+/// Various basic NLargest tests
+Method TestNLargest()
+{
 	Set Values = $lb(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	
 	#dim Counter As Strix.Lib.Counts
@@ -26,13 +23,11 @@ Various basic NLargest tests</Description>
 	Do ..AssertEqual($List($List(Result,2)), 9, "Second returned result should be second highest value.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestNLargestKeepFirst">
-<Description>
-Test that NLargest keeps the first name for a given value</Description>
-<Implementation><![CDATA[
+/// Test that NLargest keeps the first name for a given value
+Method TestNLargestKeepFirst()
+{
 	#dim Counter As Strix.Lib.Counts
 	Set Counter = ##class(Strix.Lib.Counts).NLargest(5)
 	For i = 1:1:5 Do Counter.Add(1, "Value "_i)
@@ -41,20 +36,13 @@ Test that NLargest keeps the first name for a given value</Description>
 	Do ..AssertEqual($List($List(Result), 2), "Value 1", "Result should keep first encountered name.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestNSmallest">
-<Description>
-Various basic NSmallest tests</Description>
-<Implementation><![CDATA[
+/// Various basic NSmallest tests
+Method TestNSmallest()
+{
 	Set Values = $lb(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	
 	#dim Counter As Strix.Lib.Counts
@@ -72,13 +60,11 @@ Various basic NSmallest tests</Description>
 	Do ..AssertEqual($List($List(Result,2)), 2, "Second returned result should be second smallest value.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<Method name="TestNSmallestKeepFirst">
-<Description>
-Test that NSmallest keeps the first name for a given value</Description>
-<Implementation><![CDATA[
+/// Test that NSmallest keeps the first name for a given value
+Method TestNSmallestKeepFirst()
+{
 	#dim Counter As Strix.Lib.Counts
 	Set Counter = ##class(Strix.Lib.Counts).NSmallest(5)
 	For i = 1:1:5 Do Counter.Add(1, "Value "_i)
@@ -87,20 +73,13 @@ Test that NSmallest keeps the first name for a given value</Description>
 	Do ..AssertEqual($List($List(Result), 2), "Value 1", "Result should keep first encountered name.")
 	
 	Quit
-]]></Implementation>
-</Method>
+}
 
-<UDLText name="T">
-<Content><![CDATA[
 // =====
 
-]]></Content>
-</UDLText>
-
-<Method name="TestGetNext">
-<Description>
-Test method GetNext.</Description>
-<Implementation><![CDATA[
+/// Test method GetNext.
+Method TestGetNext()
+{
 	Set Values = $lb(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	
 	#dim Counter As Strix.Lib.Counts
@@ -118,7 +97,7 @@ Test method GetNext.</Description>
 	Do ..AssertEqual(i, MaxCount + 1, "GetNext should be successfull "_MaxCount_" times.")
 	
 	Quit
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+
