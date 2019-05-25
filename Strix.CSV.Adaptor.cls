@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.CSV.Adaptor">
+<Abstract>1</Abstract>
+<IncludeCode>Strix</IncludeCode>
+<IncludeGenerator>Strix</IncludeGenerator>
+<PropertyClass>Strix.CSV.PropertyParm</PropertyClass>
+<TimeCreated>64771,47169.904165</TimeCreated>
+<DependsOn>Strix.Generator.Utilities</DependsOn>
+
+<Parameter name="PreferredLoader">
+<Description>
+Which load method the parser should use: the one which expects
+data indexed by column header ("header"), or by column index ("index").</Description>
+<Constraint>header,index</Constraint>
+<Default>index</Default>
+<Flags>ENUM</Flags>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Parameter name="True">
+<Description>
+For boolean properties: "true" values</Description>
+<Default>1,yes,true</Default>
+</Parameter>
+
+<Parameter name="False">
+<Description>
+For boolean properties: "false" values</Description>
+<Default>0,no,false</Default>
+</Parameter>
+
+<Parameter name="DateExpression">
+<Description>
+Expression to use to convert dates to logical format.
+The value from the CSV file is present in variable "v".</Description>
+<Default>$ZDateH(v,3)</Default>
+</Parameter>
+
+<Parameter name="TimeExpression">
+<Description>
+Expression to use to convert times to logical format.
+The value from the CSV file is present in variable "v".</Description>
+<Default>$ZTimeH(v,1)</Default>
+</Parameter>
+
+<Parameter name="NumericExpression">
+<Description>
+Expression to use to convert numeric (floating point) values
+to logical format. The value from the CSV file is present in
+variable "v".</Description>
+<Default>+v</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="LoadByHeader">
+<Description>
+Loads the object from the data in Data (indexed by column header).</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Header = pd.Parameters.GetAt("CsvColumnHeader")
+		If Header = "" Continue
+		
+		Set Name = pd.Name, Type = $$$DenormalizeClassname(pd.Type)
+		
+		Set Code = "v"
+		If Type = "%Boolean" {
+			Set Trues = $ListFromString(%parameter("True"))
+			Set Falses = $ListFromString(%parameter("False"))
+			Set Code = "$Case(v"
+			For i = 1:1:$ListLength(Trues) Set Code = Code_","""_$List(Trues, i)_""":1"
+			For i = 1:1:$ListLength(Falses) Set Code = Code_","""_$List(Falses, i)_""":0"
+			Set Code = Code_",:v)"
+			
+		} ElseIf Type = "%Date" {
+			Set Code = %parameter("DateExpression")
+			
+		} ElseIf Type = "%Time" {
+			Set Code = %parameter("TimeExpression")
+			
+		} ElseIf $lf($lfs("%Numeric,%Float,%Double"), Type) {
+			Set Code = %parameter("NumericExpression")
+			
+		}
+		
+		Set Code = "Set v = Data("""_Header_""") If v '= """" Set .."_Name_" = "_Code
+		Do %code.WriteLine($Char(9)_Code)
+	}
+	
+	; If a non-abstract fixup method is present, call it.
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "PostProcessCsv") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..PostProcessCsv(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
+	Do %code.WriteLine($Char(9)_"Quit $$$OK")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadByIndex">
+<Description>
+Loads the object from the data in Data (indexed by column number).</Description>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Index = pd.Parameters.GetAt("CsvColumnNr")
+		If Index = "" Continue
+		
+		Set Name = pd.Name, Type = $$$DenormalizeClassname(pd.Type)
+		
+		Set Code = "v"
+		If Type = "%Boolean" {
+			Set Trues = $ListFromString(%parameter("True"))
+			Set Falses = $ListFromString(%parameter("False"))
+			Set Code = "$Case(v"
+			For i = 1:1:$ListLength(Trues) Set Code = Code_","""_$List(Trues, i)_""":1"
+			For i = 1:1:$ListLength(Falses) Set Code = Code_","""_$List(Falses, i)_""":0"
+			Set Code = Code_",:v)"
+			
+		} ElseIf Type = "%Date" {
+			Set Code = %parameter("DateExpression")
+			
+		} ElseIf Type = "%Time" {
+			Set Code = %parameter("TimeExpression")
+			
+		} ElseIf $lf($lfs("%Numeric,%Float,%Double"), Type) {
+			Set Code = %parameter("NumericExpression")
+			
+		}
+		
+		Set Code = "Set v = Data("_Index_") If v '= """" Set .."_Name_" = "_Code
+		Do %code.WriteLine($Char(9)_Code)
+	}
+	
+	; If a non-abstract fixup method is present, call it.
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(%compiledclass, "PostProcessCsv") {
+		Do %code.WriteLine($Char(9)_"Set sc = ..PostProcessCsv(.Data)")
+		Do %code.WriteLine($Char(9)_"If 'sc Quit sc")
+	}
+	
+	Do %code.WriteLine($Char(9)_"Quit $$$OK")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="PostProcessCsv">
+<Description>
+This method is called after the object receives the data.
+Datatype conversions have been run. The original data is
+present in the Data array.</Description>
+<Abstract>1</Abstract>
+<FormalSpec><![CDATA[&Data:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Skip = 0
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CheckCSVColumns">
+<Description>
+Compares the column headers present in Columns with the specifications
+in the properties of this class. Returns comma-separated lists of:
+- Missing: headers defined in a property but not in the Columns array
+- Unused: headers in the Columns array for which no property is defined
+The return value is true if all property-defined headers are present,
+false otherwise.</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&Columns:%String,*Missing:%String,*Unused:%String]]></FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If %class.Name = "Strix.CSV.Adaptor" Quit $$$OK
+	
+	Do %code.WriteLine($Char(9)_"Set (Missing, Unused) = """"")
+	Do %code.WriteLine($Char(9)_"Merge Test = Columns")
+	Set key = ""
+	For  {
+		#dim pd As %Dictionary.CompiledProperty
+		Set pd = %compiledclass.Properties.GetNext(.key)
+		If key = "" Quit
+		
+		Set Header = pd.Parameters.GetAt("CsvColumnHeader")
+		If Header = "" Continue
+		If $Data(Headers(Header)) Continue
+		Set Headers(Header) = ""
+		
+		Do %code.WriteLine($Char(9)_"Set v = """_Header_""" If $Data(Columns(v)) { Kill Test(v) } Else { Set Missing = Missing_$lb(v) }")
+	}
+	
+	Do %code.WriteLine($Char(9)_"If Missing '= """" Set Missing = $ListToString(Missing)")
+	
+	Do %code.WriteLine($Char(9)_"Set v = """" For  { Set v=$Order(Test(v)) Quit:v=""""  Set Unused=Unused_$lb(v) }")
+	Do %code.WriteLine($Char(9)_"If Unused '= """" Set Unused = $ListToString(Unused)")
+	
+	Do %code.WriteLine($Char(9)_"Quit Missing = """"")
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

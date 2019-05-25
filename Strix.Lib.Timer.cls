@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.Lib.Timer">
+<Description>
+Helper class for timing things.</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63480,54365.861044</TimeCreated>
+
+<Property name="StartTime">
+<Description>
+The start time of the timer, set to $ZH-format when starting</Description>
+<Type>%String</Type>
+<InitialExpression>$ZHorolog</InitialExpression>
+<Private>1</Private>
+</Property>
+
+<Property name="Marks">
+<Description>
+Marks, if any</Description>
+<Type>%List</Type>
+<Collection>list</Collection>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="Get">
+<Description>
+Constructor (%New can be used too)
+Set %t = ##class(Strix.Lib.Timer).Get()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>Strix.Lib.Timer</ReturnType>
+<Implementation><![CDATA[
+	Set Me = ..%New()
+	Set Me.StartTime = $ZHorolog
+	Quit Me
+]]></Implementation>
+</Method>
+
+<Method name="Mark">
+<Description>
+Records time passed so far; as many marks as needed can be set
+Do %t.Mark("Here")</Description>
+<FormalSpec>Message:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	If Message = "" Set Message = "Mark "_(..Marks.Count() + 1)
+	Set List = $ListBuild($ZHorolog, Message)
+	Do ..Marks.Insert(List)
+]]></Implementation>
+</Method>
+
+<Method name="Reset">
+<Description>
+Clears marks and restart
+Do %t.Reset()</Description>
+<Implementation><![CDATA[
+	Set ..StartTime = $ZHorolog
+	Do ..Marks.Clear()
+]]></Implementation>
+</Method>
+
+<Method name="ReportToTerminal">
+<Description>
+Displays results on terminal
+Do %t.ReportToTerminal()</Description>
+<FormalSpec>Mark:%String=""</FormalSpec>
+<Implementation><![CDATA[
+	If Mark '= "" {
+		Do ..Mark(Mark)
+	} ElseIf '..Marks.Count() {
+		; Make sure an endtime is present
+		Do ..Mark("Total time")
+	} 
+	
+	Set Points = ..Marks.Count()
+	Set Len = $Length(Points)
+	
+	Set Prev = ..StartTime
+	For i = 1:1:..Marks.Count() {
+		Set List = ..Marks.GetAt(i)
+		Set Time = $List(List, 1), Message = $ListGet(List, 2)
+		
+		Set DiffFromPrev = Time - Prev
+		Set DiffFromFirst = Time - ..StartTime
+		
+		Set Nr = $Justify(i, Len)
+		Write Nr_$Justify(DiffFromFirst, 8, 3)_$Justify(DiffFromPrev, 8, 3)_" "_Message,!
+		
+		Set Prev = Time
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+</Class>
+</Export>

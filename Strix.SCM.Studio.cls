@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Studio">
+<IncludeCode>Strix.SCM</IncludeCode>
+<Super>%Studio.Extension.Base</Super>
+<TimeCreated>60984,44961.499937</TimeCreated>
+
+<Property name="Handler">
+<Description>
+The menu item handler; delegates to an appropriate subclass of Strix.SCM.Handler.Base.</Description>
+<Type>Strix.SCM.HandlerProxy</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Source control menu handling methods
+
+]]></Content>
+</UDLText>
+
+<Method name="OnMenuItem">
+<Description>
+Called when a menu item is to be displayed; determines what to display,
+and whether the item should be enabled or not.</Description>
+<FormalSpec><![CDATA[MenuName:%String,InternalName:%String,SelectedText:%String,&Enabled:%Boolean,&DisplayName:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnMenuItem(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
+]]></Implementation>
+</Method>
+
+<Method name="UserAction">
+<Description>
+Called when a menu item is selected; depends what to do based on the
+(internal) menu name, and performs that action. This usually entails
+displaying some kind of dialog.</Description>
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,SelectedText:%String,&Action:%String,&Target:%String,&Msg:%String,&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.UserAction(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<Method name="AfterUserAction">
+<Description>
+Called after a menu item is selected and the appropriate dialog (if any)
+has been displayed.</Description>
+<FormalSpec><![CDATA[Type:%Integer,Name:%String,InternalName:%String,Answer:%Integer,Msg:%String="",&Reload:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.AfterUserAction(Type, .Name, InternalName, Answer, Msg, .Reload)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Studio callbacks
+
+]]></Content>
+</UDLText>
+
+<Method name="Login">
+<Description>
+Login method; use to instantiate delegator</Description>
+<FormalSpec>Name:%String,Password:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ..Handler = ##class(Strix.SCM.HandlerProxy).%New()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeLoad">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeLoad(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterLoad">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterLoad(InternalName, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeSave">
+<FormalSpec>InternalName:%String,Location:%String="",Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeSave(InternalName, Location, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterSave">
+<FormalSpec>InternalName:%String,Object:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterSave(InternalName, Object)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterStorage">
+<FormalSpec>InternalName:%String,Location:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterStorage(InternalName, Location)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeCompile">
+<FormalSpec><![CDATA[InternalName:%String,&qstruct:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeCompile(InternalName, .qstruct)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterCompile">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterCompile(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnBeforeDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnBeforeDelete(InternalName)
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterDelete">
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..Handler.OnAfterDelete(InternalName)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ===== Menu query implementations
+
+]]></Content>
+</UDLText>
+
+<Query name="MainMenus">
+<Description>
+Provide a list of the top level menu items that Studio will add when connecting to this namespace.</Description>
+<Type>%Query</Type>
+<FormalSpec>Classname:%String</FormalSpec>
+<Parameter name="ROWSPEC" value="Name:%String,Type:%String"/>
+</Query>
+
+<Method name="MainMenusExecute">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,Classname:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Handler = ##class(Strix.SCM.Handler.Base).%New()
+	Set qHandle = $lb(0, Handler.GetMainMenus(.Status))
+	If 'Status Quit Status
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MainMenusFetch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
+<PlaceAfter>MainMenusExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Index = $List(qHandle, 1) + 1, Items = $List(qHandle, 2)
+	If $ListData(Items, Index) {
+		Set Row = $List(Items, Index)
+		Set $List(qHandle, 1) = Index
+		
+	} Else {
+		Set Row = ""
+		Set AtEnd = 1
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MainMenusClose">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
+<PlaceAfter>MainMenusExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Query name="MenuItems">
+<Description>
+Query for the items in menu MenuName</Description>
+<Type>%Query</Type>
+<FormalSpec>ClassName:%String,MenuName:%String,InternalName:%String,SelectedText:%String</FormalSpec>
+<Parameter name="ROWSPEC" value="MenuItem_Name:%String,MenuItem_Enabled:%String,MenuItem_Save:%String,MenuItem_Separator:%String"/>
+</Query>
+
+<Method name="MenuItemsExecute">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,ClassName:%String,MenuName:%String,InternalName:%String,SelectedText:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim Handler As Strix.SCM.Handler.Base
+	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
+	If 'Status Quit Status
+	Set qHandle = $lb(0, Handler.GetMenuItems(MenuName, InternalName, SelectedText, .Status))
+	If 'Status Quit Status
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MenuItemsFetch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
+<PlaceAfter>MenuItemsExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Index = $List(qHandle, 1) + 1, Items = $List(qHandle, 2)
+	If $ListData(Items, Index) {
+		Set Row = $List(Items, Index)
+		Set $List(qHandle, 1) = Index
+		
+	} Else {
+		Set Row = ""
+		Set AtEnd = 1
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MenuItemsClose">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
+<PlaceAfter>MenuItemsExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

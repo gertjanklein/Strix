@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.FileIO">
+<Description>
+Export/import code</Description>
+<IncludeCode>Strix.SCM</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63865,70871.973876</TimeCreated>
+
+<Method name="ExportItem">
+<Description>
+Exports a single item to disk</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	If 'Status Quit Status
+	
+	Set Processors = Project.GetProcessors(.Status)
+	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
+	
+	Set Status = ..Export(Item, Project.ExportUDL, Processors, Filename)
+	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, Item)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExportClassData">
+<Description>
+Exports data for a class to disk</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Item is a class; we must change type to stg for filename.
+	Set ClassName = Item
+	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
+	
+	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	If 'Status Quit Status
+	
+	Set Globals = ##class(Strix.SCM.Matcher).GetStorageGlobals(ClassName, .Status)
+	If 'Status Quit Status
+	
+	Set Processors = Project.GetProcessors(.Status)
+	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
+	
+	Set Status = ..Export(Globals, 0, Processors, Filename)
+	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, Item)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadItem">
+<Description>
+Loads a single item from disk</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	If 'Status Quit Status
+	
+	Set Status = $System.OBJ.Load(Filename, "ck-d", , , , Item)
+	If 'Status Quit $$$BuildErr("Error loading '"_Item_"' from '"_Filename_"'", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadClassData">
+<Description>
+Loads data for a class from disk</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Item:%String,*Filename:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Item is a class; we must change type to stg for filename.
+	Set ClassName = Item
+	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
+	
+	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	If 'Status Quit Status
+	
+	Set Globals = ##class(Strix.SCM.Matcher).GetStorageGlobals(ClassName, .Status)
+	If 'Status Quit Status
+	
+	Set Status = $System.OBJ.Load(Filename, "-d", , , , Globals)
+	If 'Status Quit $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExportProject">
+<Description>
+Exports an entire project to disk</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If 'Quiet Write "Determining project members: "
+	Set Status = Project.GetAllItems(.Items)
+	If 'Status Quit $$$BuildErr("Error determining project members", Status)
+	If 'Quiet Write "ok",!
+	
+	Set Processors = Project.GetProcessors(.Status)
+	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
+	
+	Set Item = ""
+	For  {
+		Set Item = $Order(Items(Item), 1, Members)
+		If Item = "" Quit
+		
+		Set Filename = Project.GetExportFilename(Item, , , .Status)
+		If 'Status Quit
+		
+		If Members = "" Set Members = Item
+		If 'Quiet Write "Exporting "_Members_" to "_Filename_": "
+		
+		Set Status = ..Export(Members, Project.ExportUDL, Processors, Filename)
+		If 'Status Return $$$BuildStatus("Error exporting '{}':", Status, Item)
+		
+		If 'Quiet Write "ok",!
+	}
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ImportProject">
+<Description>
+Loads all project members form the configured directory</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Project:Strix.SCM.Project,Quiet:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;Get list of XML files in the project directory
+	If 'Quiet Write !,"== Reading directory: "
+	Set stm = ##class(%SQL.Statement).%New()
+	Set sc = stm.%PrepareClassQuery("%File","FileSet")
+	If 'sc Quit $$$BuildErr("Error preparing FileSet query:", sc)
+	
+	#dim rs As %SQL.StatementResult
+	Set rs = stm.%Execute(Project.GetProjectPath(), "*.xml")
+	
+	While rs.%Next() {
+		Set Name = rs.%Get("Name")
+		Set ItemName = rs.%Get("ItemName")
+		Set Files(ItemName) = Name
+	}
+	Kill rs
+	If 'Quiet Write "ok",!
+	
+	Set ItemName = ""
+	For  {
+		Set ItemName = $Order(Files(ItemName), 1, FullPath)
+		If ItemName = "" Quit
+		
+		Write "Importing "_ItemName_": "
+		
+		Set sc = $System.OBJ.Load(FullPath, "-d", , .FileItems)
+		Merge Loaded = FileItems
+		
+		Write "ok.",!
+	}
+	
+	If 'Quiet Write !,"Compiling: "
+	Set sc = $System.OBJ.CompileList(.Loaded, "cku-d")
+	If 'sc Quit $$$BuildErr("Error compiling loaded items:", sc)
+	If 'Quiet Write "ok",!
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Export">
+<Description>
+Exports an item, running post-processors if configured.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Item:%String,AsUDL:%Boolean,Processors:%ListOfObjects,Filename:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Stream = ##class(%Stream.FileBinary).%New()
+	
+	; Make sure stream has a filename
+	Set sc = Stream.Write("")
+	If 'sc Quit $$$BuildStatus("Error creating temporary stream for output:", Status)
+	
+	; Export to it
+	If AsUDL {
+		Set sc = $System.OBJ.ExportUDL(Item, Stream.Filename, "-d/diffexport")
+	} Else {
+		Set sc = $System.OBJ.Export(Item, Stream.Filename, "-d/diffexport")
+	}
+	If 'sc Quit $$$BuildStatus("Error exporting:", sc)
+	
+	; Call processors in order
+	For i = 1:1:Processors.Count() {
+		#dim Processor As Strix.SCM.Processor.Base
+		Set Processor = Processors.GetAt(i)
+		
+		Set Stream = Processor.ProcessExport(Item, Stream, .sc)
+		If 'sc Return $$$BuildStatus("Error processing '{}':", sc, Item)
+	}
+	
+	; Save resulting data to 
+	Set Output = ##class(%Stream.FileBinary).%New()
+	Set sc = Output.LinkToFile(Filename)
+	If 'sc Return $$$BuildStatus("Error opening export file '{}':", sc, Filename)
+	Set sc = Output.CopyFromAndSave(Stream)
+	If 'sc Return $$$BuildStatus("Error saving export data to '{}':", sc, Filename)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

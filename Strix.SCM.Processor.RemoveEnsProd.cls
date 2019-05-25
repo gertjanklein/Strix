@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.SCM.Processor.RemoveEnsProd">
+<Description>
+Removes Ensemble Production classes from the export.</Description>
+<Super>Strix.SCM.Processor.Base</Super>
+<TimeCreated>64374,67492.869936</TimeCreated>
+
+<Parameter name="HandlerType">
+<Description>
+This processor works on a release.</Description>
+<Default>Release</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="Run">
+<FormalSpec>Revision:%String,Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set Status = ..RemoveProductions(Directory)
+	If 'Status Quit Status
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RemoveProductions">
+<Description>
+Checks all export files in a directory, and removes any file containing
+an Ensemble production.</Description>
+<FormalSpec>Directory:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set rs = ##class(%ResultSet).%New("%File:FileSet")
+	Set Status = rs.Execute(Directory, "*.xml")
+	If 'Status Quit $$$BuildErr("Error executing fileset query:", Status)
+	
+	While rs.Next() {
+		Set FileName = rs.Get("Name"), ItemName = rs.Get("ItemName")
+		
+		Kill Loaded
+		Set Status = $System.OBJ.Load(FileName, "-d", , .Loaded, 1)
+		If 'Status Return $$$BuildErr("Error loading export file {}:", Status, FileName)
+		
+		Set Name =""
+		For  {
+			Set Name = $Order(Loaded(Name))
+			If Name = "" Quit
+			
+			If $Piece(Name, ".", *) '= "cls" Continue
+			Set ClassName = $Piece(Name, ".", 1, *-1)
+			
+			If ##class(%Dictionary.CompiledClass).%ExistsId(ClassName) {
+				If '$ZObjClassMethod(ClassName, "%IsA", "Ens.Production") Continue
+				
+			} Else {
+				 Do ..Write("Warning: class "_ClassName_" not compiled.")
+				 Set MROList = ##class(Strix.Generator.Utilities).MRO(ClassName, 0)
+				 If '$ListFind(MROList, "Ens.Production") Continue
+				 
+			}
+			
+			;A production. Remove this file:
+			Do ..Write("Removing "_ItemName_" from release because it contains an Ensemble production.")
+			Set rc = ##class(%File).Delete(FileName, .ec)
+			If 'rc Return $$$BuildErr("Error {} removing file {}.", , ec, FileName)
+		}
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Strix.JSON.ToClass">
+<IncludeCode>Strix</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64708,40018.157013</TimeCreated>
+
+<Property name="NodeIdx">
+<Description>
+Index in process private global to store parse tree</Description>
+<Type>%Integer</Type>
+<Internal>1</Internal>
+</Property>
+
+<Property name="Package">
+<Description>
+Package to create classes in</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ClassNames">
+<Description>
+Stores class names for duplicate detection</Description>
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="Create">
+<Description>
+Create classes that can be used to parse the passed-in JSON object.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>JSON:%DynamicAbstractObject,ClassName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ..%New().CreateInt(JSON, ClassName)
+]]></Implementation>
+</Method>
+
+<Method name="CreateFromFile">
+<Description>
+Create classes that can be used to parse the JSON in the specified file.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,ClassName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set JSON = ##class(%DynamicAbstractObject).%FromJSON(FileName)
+	Quit ..%New().CreateInt(JSON, ClassName)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// -----
+
+]]></Content>
+</UDLText>
+
+<Method name="GetPropertyName">
+<Description>
+Converts a JSON property name to the Caché version.</Description>
+<FormalSpec>Name:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	; Convert dash- or underscore-separated names to CamelCase
+	While $Locate(Name, "[-_]", , End) {
+		Set $Extract(Name, End) = $ZConvert($Extract(Name, End), "U")
+		Set $Extract(Name, End-1) = ""
+	}
+	
+	; Start with a capital letter
+	Set $Extract(Name) = $ZConvert($Extract(Name), "U")
+	
+	; Cater for all-numeric name
+	If Name ? 1.N Set Name = "n"_Name
+	
+	Quit Name
+]]></Implementation>
+</Method>
+
+<Method name="GetClassName">
+<Description>
+Converts a JSON object name to the Caché class name.</Description>
+<FormalSpec>ClassShortName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	; Use same basic rules as for properties:
+	Set ClassShortName = ..GetPropertyName(ClassShortName)
+	
+	; Find unique classname in case of duplicates
+	For Suffix = 0:1 {
+		If Suffix = 0 Set Suffix = ""
+		Set ClassName = ClassShortName_Suffix
+		Set $Extract(ClassName) = $ZConvert($Extract(ClassName), "U")
+		If '$Data(..ClassNames(ClassName)) Quit
+	}
+	
+	Set ..ClassNames(ClassName) = ""
+	
+	Quit ClassName
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateInt">
+<Description>
+Implementation of the JSON to class code.</Description>
+<FormalSpec>JSON:%DynamicAbstractObject,ClassName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ..NodeIdx = $Increment(^||Parser)
+	Set TopNode = $Name(^||Parser(..NodeIdx))
+	Kill @TopNode
+	
+	Set ..Package = $$$ClassPackageName(ClassName)
+	Set ShortName = $$$ClassShortName(ClassName)
+	
+	Set sc = ..CreateParseTree(JSON, TopNode)
+	If 'sc Quit sc
+	
+	Set sc = ..CreateClass(ShortName, TopNode)
+	If 'sc Quit sc
+	
+	Set sc = $System.OBJ.Compile(ClassName, "ck-drb")
+	If 'sc Quit $$$BuildStatus("Error compiling class '{}:", Status, ClassName)
+	
+	Kill @TopNode
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateClass">
+<Description>
+Creates the top-level class, and any related classes, based on
+the parse tree created before.</Description>
+<FormalSpec><![CDATA[&ClassName:%String,Node:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ClassName = ..Package_"."_..GetClassName(ClassName)
+	
+	#dim ClassDef As %Dictionary.ClassDefinition
+	Set sc = ..CreateClassDef(ClassName, , .ClassDef)
+	If 'sc Quit sc
+	
+	Set PropertyNames = ..GetPropList($Name(@Node@(2)))
+	For i = 1:1:$ListLength(PropertyNames) {
+		Set PropertyName = $List(PropertyNames, i)
+		
+		Set Name = ..GetPropertyName(PropertyName)
+		
+		Set Type = $Piece(@Node@(3, PropertyName, 1), ":")
+		Set IsList = $Piece(@Node@(3, PropertyName, 1), ":", 2) = "array"
+		Set Collection = $Select(IsList: "list", 1: "")
+		
+		; Type: null, boolean, number, oref, object, array, string, unassigned
+		
+		If Type = "string" {
+			Set pd = ..AddProperty(ClassDef, Name, "%String", Collection)
+			
+		} ElseIf Type = "boolean" {
+			Set pd = ..AddProperty(ClassDef, Name, "%Boolean", Collection)
+			
+		} ElseIf Type = "number" {
+			Set pd = ..AddProperty(ClassDef, Name, "%Numeric", Collection)
+			
+		} Else {
+			; Object
+			
+			Set PropClassName = PropertyName
+			Set PropNodeName = $Name(@Node@(3, PropertyName))
+			
+			Set sc = ..CreateClass(.PropClassName, PropNodeName)
+			If 'sc Return sc
+			
+			Set pd = ..AddProperty(ClassDef, Name, PropClassName, Collection)
+		}
+		
+		Do pd.Parameters.SetAt(PropertyName, "JSONNAME")
+	}
+	
+	Set sc = ClassDef.%Save()
+	If 'sc Quit sc
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateParseTree">
+<Description>
+Parses the JSON and creates a parse tree to use to create the
+classes with.</Description>
+<FormalSpec>JSON:%DynamicAbstractObject,Node:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set IsList = JSON.%ClassName() = "%DynamicArray"
+	If IsList {
+		Set @Node = "array"
+		Quit ..ParseArray(Node, JSON)
+	}
+	
+	Set @Node@(1) = "object"
+	
+	Quit ..ParseObject(Node, JSON)
+]]></Implementation>
+</Method>
+
+<Method name="ParseObject">
+<Description>
+Creates the parse tree subnode for the given JSON object.</Description>
+<FormalSpec>Node:%String,Object:%DynamicObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim it As Strix.JSON.Iterator
+	Set it = ##class(Strix.JSON.Iterator).GetIterator(Object)
+	
+	Set PropList = ""
+	While it.GetNext(.Name, .Value, .Type) {
+		; Type: null, boolean, number, oref, object, array, string, unassigned
+		If Type = "oref" Continue
+		If Type = "unassigned" Continue
+		
+		Set PropList = PropList_$lb(Name)
+		
+		Set @Node@(3, Name, 1) = Type
+		If Type = "object" {
+			Set sc = ..ParseObject($Name(@Node@(3, Name)), Value)
+			If 'sc Return sc
+			
+		} ElseIf Type = "array" {
+			Set sc = ..ParseArray($Name(@Node@(3, Name)), Value)
+			If 'sc Return sc
+			
+		}
+	}
+	
+	; Save collected list of properties
+	Do ..AddPropList($Name(@Node@(2)), PropList)
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ParseArray">
+<Description>
+Creates the parse tree subnode for the given JSON array.</Description>
+<FormalSpec>Node:%String,Array:%DynamicArray</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim it As Strix.JSON.Iterator
+	Set it = ##class(Strix.JSON.Iterator).GetIterator(Array)
+	
+	Set PrevType = ""
+	While it.GetNext(.Name, .Value, .Type) {
+		If PrevType = "" {
+			Set PrevType = Type
+			Set @Node@(1) = Type_":"_@Node@(1)
+		} Else {
+			If PrevType '= Type {
+				; Allow "downcasting" number to string
+				If PrevType = "number", Type = "string" {
+					Set PrevType = "string"
+					Set $Piece(@Node@(1), ":") = Type
+				} ElseIf (PrevType '= "string") || (Type '= "number") {
+					Set Msg = "Processing failed at {}: inconsistent data in array ({}/{}) not supported."
+					Return $$$BuildStatus(Msg, , Node, PrevType, Type)
+				}
+			}
+		}
+		
+		If Type = "object" {
+			Set sc = ..ParseObject(Node, Value)
+			If 'sc Return sc
+			
+		} ElseIf Type = "array" {
+			Set sc = ..ParseArray(Node, Value)
+			If 'sc Return sc
+			
+		}
+	}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="AddPropList">
+<Description>
+Saves a list of object properties. Prevents duplicates
+from being stored.</Description>
+<FormalSpec>Node:%String,PropList:%List</FormalSpec>
+<Implementation><![CDATA[
+	; Prevent duplicates
+	For i = 1:1:$Get(@Node) {
+		If $ListSame(@Node@(i), PropList) Return
+	}
+	Set @Node@($Increment(@Node)) = PropList
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="GetPropList">
+<Description>
+Returns a list of all properties for an object. Current
+implementation just returns the longest list found.</Description>
+<FormalSpec>Node:%String</FormalSpec>
+<ReturnType>%List</ReturnType>
+<Implementation><![CDATA[
+	Set Longest = ""
+	For i = 1:1:$Get(@Node) {
+		Set Test = @Node@(i)
+		If $ll(Test) > $ll(Longest) Set Longest = Test
+	}
+	Quit Longest
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// =====
+
+]]></Content>
+</UDLText>
+
+<Method name="CreateClassDef">
+<Description>
+Helper: creates and returns a class definition object.</Description>
+<FormalSpec>ClassName:%String,Super:%String="%SerialObject,Strix.JSON.Adaptor",*ClassDef:%Dictionary.ClassDefinition</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If ##class(%Dictionary.ClassDefinition).%ExistsId(ClassName) {
+		Set sc = ##class(%Dictionary.ClassDefinition).%DeleteId(ClassName)
+		If 'sc Quit $$$BuildStatus("Error deleting existing class '{}'", sc, ClassName)
+	}
+	
+	; Prevent unwanted "[ Inheritance = right ]" by specifying
+	; class version 25.
+	Set ClassDef = ##class(%Dictionary.ClassDefinition).%New(ClassName, 25)
+	Set ClassDef.Super = Super
+	Set ..ClassNames(ClassName) = ClassDef
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="AddProperty">
+<Description>
+Helper: creates and returns a property definition object for the
+given class definition.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassDef:%Dictionary.ClassDefinition,Name:%String,Type:%String,Collection:%String="",SeqNr:%Integer=""</FormalSpec>
+<ReturnType>%Dictionary.PropertyDefinition</ReturnType>
+<Implementation><![CDATA[
+	Set Property = ##class(%Dictionary.PropertyDefinition).%New()
+	Set Property.Name = Name
+	Set Property.Type = Type
+	Set Property.Collection = Collection
+	If SeqNr '= "" {
+		Set Property.SequenceNumber = SeqNr
+	} Else {
+		Set Property.SequenceNumber = ClassDef.Properties.Count() + 1
+	}
+	Do ClassDef.Properties.Insert(Property)
+	Quit Property
+]]></Implementation>
+</Method>
+</Class>
+</Export>
