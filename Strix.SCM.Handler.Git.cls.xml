@@ -91,6 +91,50 @@ processors are:
 	}
 	
 	
+	;== Show log
+	
+	If Name = "Source control,ShowLog" {
+		Set Target = ..GetGUICommand("/command:log /path:"_Project.GetProjectPath(), .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
+	;== Show item log
+	
+	If Name = "Source control,ShowItemLog", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		Set Target = ..GetGUICommand("/command:log /path:"""_Filename_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
+	;== Show diff
+	
+	If Name = "Source control,ShowDiff", AsItem {
+		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+		If 'Status Quit Status
+		Set Target = ..GetGUICommand("/command:diff /path:"""_Filename_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
+	;== Create tag
+	
+	If Name = "Source control,CreateTag" {
+		Set Target = ..GetGUICommand("/command:tag /path:"""_Project.GetProjectPath()_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
@@ -156,13 +200,13 @@ and whether the item should be enabled or not.</Description>
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
 	  ;"ShowRevisions": "Revisions for "_InternalName_"",
-	  "Delete": "Delete",
-	  ;"Status": "Working copy status",
+	  "Delete": "Delete item",
 	  "Checkin": "Open checkin dialog",
-	  ;"ShowLog": "View repository log",
-	  ;"ShowItemLog": "View log ",
-	  ;"ShowDiff": "View diff",
+	  "ShowLog": "View repository log",
+	  "ShowItemLog": "View log ",
+	  "ShowDiff": "View diff",
 	  ;"MakeRelease": "Make release",
+	  "CreateTag": "Create tag",
 	  : ""
 	)
 	
@@ -206,14 +250,14 @@ Appends this handlers menus to those of the superclass.</Description>
 	;Append subversion-specific items
 	Set Items = Items_$lb(
 	  $lb("", 1, 0, 1),
-	  ;$lb("ShowDiff", 1, 0, 0),
-	  ;$lb("ShowItemLog", 1, 1, 0),
+	  $lb("ShowDiff", 1, 0, 0),
+	  $lb("ShowItemLog", 1, 1, 0),
 	  $lb("Delete", 1, 1, 0),
-	  ;$lb("", 1, 0, 1),
-	  ;$lb("Status", 1, 1, 0),
-	  ;$lb("ShowLog", 1, 0, 0),
+	  $lb("", 1, 0, 1),
+	  $lb("ShowLog", 1, 0, 0),
 	  $lb("Checkin", 1, 1, 0),
 	  ;$lb("MakeRelease", 1, 1, 0),
+	  $lb("CreateTag", 1, 1, 0),
 	)
 	
 	Quit Items
