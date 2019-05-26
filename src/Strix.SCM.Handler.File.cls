@@ -24,7 +24,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	
 	#dim Project As Strix.SCM.Project
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
-		If Msg '= "" Set Action = 6 ; MesssageBox
+		If Msg '= "" Set Action = 6 ; MessageBox
 		Quit $$$OK
 	}
 	
@@ -45,6 +45,19 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 		Set Status = ##class(Strix.SCM.FileIO).ExportClassData(Project, InternalName, .Filename)
 		If 'Status Quit Status
 		Write !,"== "_InternalName_" data exported to "_Filename_"."
+		Quit $$$OK
+	}
+	
+	
+	;== Edit project
+	
+	If Name = "Source control,EditProject" {
+		Set Action = 3
+		Try { Set Host = $SYSTEM.TCPDevice.LocalAddr() } Catch (e) { Set Host = ##class(%Function).HostName() }
+		Set Port = $Get(^%SYS("WebServer","Port"), "57772")
+		Set App = $System.CSP.GetDefaultApp($ZUtil(5))
+		Set Target = "http://"_Host_":"_Port_App_"/Strix.SCM.UI.cls"
+		Set Target = Target_"?Page=Project&Project="_Project.GUID
 		Quit $$$OK
 	}
 	
@@ -180,6 +193,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	  "ExportData":          "Save data for item to disk",
 	  "LoadItem":            "Reload item from disk",
 	  "LoadData":            "Reload data for item from disk",
+	  "EditProject":         "Edit project settings",
 	  "ExportProject":       "Save project to disk",
 	  "ImportProject":       "Load project from disk",
 	  "OpenFolder":          "Open working copy folder",
@@ -297,8 +311,9 @@ ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedT
 	
 	Set Items = Items_$lb(
 	  ;Name, Enabled, Save before execute, is separator
-  	$lb("OpenFolder", 1, 0, 0),
   	$lb("", 1, 0, 1),
+	  $lb("EditProject", 1, 0, 0),
+  	$lb("OpenFolder", 1, 0, 0),
 	  $lb("ExportProject", 1, 1, 0),
 	  $lb("ImportProject", 1, 0, 0),
   	$lb("", 1, 0, 1),
