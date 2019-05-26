@@ -395,12 +395,13 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	If 'Handlers.Find(Project.Handler) Quit $$$BuildErr("No such handler: "_Project.Handler)
 	
 	;Check config file
-	If '##class(Strix.Lib.File).IsPathAbsolute(Project.ConfigFilePath) {
-		Set Project.ConfigFilePath = ##class(%File).SubDirectoryName(Config.BasePath, Project.ConfigFilePath)
+	Set ConfigFilePath = Project.ConfigFilePath
+	If '##class(Strix.Lib.File).IsPathAbsolute(ConfigFilePath) {
+		Set ConfigFilePath = ##class(%File).SubDirectoryName(Config.BasePath, ConfigFilePath)
 	}
 	
 	;New project: do not overwrite an existing one.
-	If Project.%Id() = "", ##class(%File).Exists(Project.ConfigFilePath) {
+	If Project.%Id() = "", ##class(%File).Exists(ConfigFilePath) {
 		Quit $$$BuildErr("A project configuration file already exists at '{}'.",, Project.ConfigFilePath)
 	}
 	
