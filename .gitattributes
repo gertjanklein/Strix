@@ -1,4 +1,5 @@
 
 *.cls linguist-language=cacheobjectscript-udl
+*.inc linguist-language=cacheobjectscript-udl
 
 
