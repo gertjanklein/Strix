@@ -110,6 +110,21 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	}
 	
 	
+	;== Make release
+	
+	If Name = "Source control,MakeRelease" {
+		If ..ReleasePath '= "" {
+			Set Target = "Please specify the tag to create a release from:"
+			Set Msg = ""
+			Set Action = 7 ; Ask user for input
+		} Else {
+			Set Action = 6 ;Alert
+			Set Target = "No release path configured."
+		}
+		Quit $$$OK
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
@@ -156,6 +171,15 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	}
 	
 	
+	;== Make release
+	
+	If Name = "Source control,MakeRelease", Msg '= "" {
+		Set Status = ..MakeRelease(Project, Msg, .ErrorMsg)
+		If ErrorMsg '= "" Write !,ErrorMsg,!
+		Quit Status
+	}
+	
+	
 	;===== Fallback to File handler
 	
 	Quit ##super(Type, Name, InternalName, Answer, .Msg, .Reload)
@@ -173,7 +197,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	  "ShowLog": "View repository log",
 	  "ShowItemLog": "View log ",
 	  "ShowDiff": "View diff",
-	  ;"MakeRelease": "Make release",
+	  "MakeRelease": "Make release",
 	  "CreateTag": "Create tag",
 	  : ""
 	)
@@ -214,8 +238,9 @@ ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedT
 	  $lb("", 1, 0, 1),
 	  $lb("ShowLog", 1, 0, 0),
 	  $lb("Checkin", 1, 1, 0),
-	  ;$lb("MakeRelease", 1, 1, 0),
+	  $lb("", 1, 0, 1),
 	  $lb("CreateTag", 1, 1, 0),
+	  $lb("MakeRelease", 1, 1, 0),
 	)
 	
 	Quit Items
@@ -223,8 +248,50 @@ ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedT
 
 // =====
 
+/// Implements the MakeRelease menu item
+Method MakeRelease(Project As Strix.SCM.Project, Tag As %String, Output ErrorMsg As %String) As %Status
+{
+	Set ErrorMsg = ""
+	
+	;Get project directory
+	Set Dir = Project.GetProjectPath(.Status)
+	If 'Status Quit $$$BuildErr("Error determining project path", Status)
+	Set Dir = ..DetermineGitRoot(Dir, .Found)
+	If 'Found Quit $$$BuildStatus("Error determine base working directory.")
+	
+	;Determine release directory name:
+	Set Name = ..ReleaseName
+	If Name = "" Set Name = "{rev}"
+	;Convert name to position 
+	Set Name = $Replace(Name, "{rev}", "{1}",,,1)
+	Set Name = $Replace(Name, "{date}", "{2}",,,1)
+	Set Name = $$$BuildStr(Name, Tag, $ZDate($Horolog, 3))
+	
+	;Determine directory for release
+	Set ReleasePath = ##class(%File).SubDirectoryName(..ReleasePath, Name)
+	
+	Set Cmd = "clone --single-branch -b "_Tag_" "_Dir_" "_ReleasePath
+	
+	Write !,$$$BuildMsg("== Exporting version tagged '{}' to {}: ", Tag, ReleasePath)
+	Set Output = ..GetCommandOutput(Dir, Cmd, , .ErrorMsg)
+	If ErrorMsg '= "" Quit $$$OK
+	Write "ok.",!,"== Removing git metadata from release: "
+	
+	Set ok = ##class(%File).RemoveDirectoryTree(##class(%File).SubDirectoryName(ReleasePath, ".git"))
+	If 'ok Write "Error removing .git subdirectory.",! Quit $$$OK
+	Write "ok.",!
+	
+	If ..PostProcessors '= "" {
+		Set Status = ..HandlePostProcessors(Project, Tag, ReleasePath, .ErrorMsg)
+		If 'Status Quit Status
+		If ErrorMsg '= "" Quit $$$OK
+	}
+	
+	Quit $$$OK
+}
+
 /// Helper for MakeRelease: runs post-processors
-Method HandlePostProcessors(Project As Strix.SCM.Project, Revision As %String, ReleasePath As %String, Output ErrorMsg As %String) As %Status
+Method HandlePostProcessors(Project As Strix.SCM.Project, Tag As %String, ReleasePath As %String, Output ErrorMsg As %String) As %Status
 {
 	Set ErrorMsg = ""
 	
@@ -247,7 +314,7 @@ Method HandlePostProcessors(Project As Strix.SCM.Project, Revision As %String, R
 			Set ErrorMsg = "Error getting postprocessor "_ClassName_": "_$System.Status.GetErrorText(Status)
 			Return $$$OK
 		}
-		Set Status = Processor.Run(Revision, ReleasePath)
+		Set Status = Processor.Run(Tag, ReleasePath)
 		If 'Status {
 			Set ErrorMsg = "Error running postprocessor "_ClassName_": "_$System.Status.GetErrorText(Status)
 			Return $$$OK
@@ -261,6 +328,21 @@ Method HandlePostProcessors(Project As Strix.SCM.Project, Revision As %String, R
 
 // =====
 
+ClassMethod DetermineGitRoot(ProjectPath As %String, Output Found As %Boolean) As %String
+{
+	Set Path = ProjectPath, Found = 0, Prev = ""
+	For  {
+		Set Tmp = ##class(%File).SubDirectoryName(Path, ".git")
+		If ##class(%File).DirectoryExists(Tmp) Set Found = 1 Quit
+		Set Path = ##class(%File).GetDirectory(Path)
+		If Path = Prev Quit
+		Set Prev = Path
+	}
+	If 'Found Quit ""
+	
+	Quit Path
+}
+
 /// Returns the output of an svn command (to be passed in without
 /// specifying the executable path). If Split is true, returns it
 /// as a list of lines, already stripped. If an error occurs, the
@@ -273,7 +355,7 @@ Method GetCommandOutput(ProjectPath As %String = "", Command As %String, Split A
 	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(..GitPath)
 	Set Command = Executable_" "_Command
 	
-	; Git commands need the current directory to be in the working directory.
+	; Some git commands need the current directory to be in the working directory.
 	Set CurrentDir = ##class(%SYSTEM.Process).CurrentDirectory(ProjectPath)
 	
 	;Get output
@@ -283,7 +365,7 @@ Method GetCommandOutput(ProjectPath As %String = "", Command As %String, Split A
 	Do ##class(%SYSTEM.Process).CurrentDirectory(CurrentDir)
 	
 	If ErrorMsg '= "" Quit ""
-	If Result ? 1(1"error",1"fatal")1":".E Set ErrorMsg = Result Quit ""
+	If Result ? .(.E1C)1(1"error",1"fatal")1":".E Set ErrorMsg = Result Quit ""
 	
 	If Split Set Result = ##class(Strix.Lib.String).SplitLines(Result)
 	
