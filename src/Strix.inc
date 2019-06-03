@@ -25,8 +25,8 @@ ROUTINE Strix [Type=INC]
 
 #; ===== Status
 
-#; Create a %Status from a message and another %Status. The message is
-#; wrapped in a general error and prefixed to the status.
+/// Create a %Status from a message and another %Status. The message is
+/// wrapped in a general error and prefixed to the status.
 #def1arg BuildStatus(%args) ##class(Strix.Lib.Status).BuildStatus(%args)
 #; Deprecated name for BuildStatus
 #def1arg BuildErr(%args) ##class(Strix.Lib.Status).BuildStatus(%args)
@@ -40,6 +40,7 @@ ROUTINE Strix [Type=INC]
 
 #; ===== Formatting
 
+/// Template replace for string formatting
 #def1arg BuildStr(%args) ##class(Strix.Lib.String).TemplateReplace(%args)
 #def1arg BuildMsg(%args) ##class(Strix.Lib.String).TemplateReplace(%args)
 
