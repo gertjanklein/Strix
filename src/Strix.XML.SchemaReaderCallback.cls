@@ -325,7 +325,8 @@ Method ProcessClassNode(Name As %String) As %Status [ Internal ]
 	Set (..PropertyName, ..PropertyNode) = ""
 	
 	; Call basic callback method
-	Set XmlName = $Get(@..ClassNode@("Parameter", "XMLNAME"), Name)
+	Set ShortName = $Piece(Name, ".", *)
+	Set XmlName = $Get(@..ClassNode@("Parameter", "XMLNAME"), ShortName)
 	
 	; Handle Xml to Caché name conversion here
 	Set Name = ..GetValidName($Piece(Name, ".", *), XmlName, .Changed)
