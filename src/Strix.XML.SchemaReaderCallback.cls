@@ -26,14 +26,16 @@ Property PropertyNode As %String;
 /// configure the schema reader.
 ClassMethod Create(SchemaLocation As %String, Package As %String = "Test")
 {
+	Set Me = ..%New()
+	
 	; Create and configure reader
 	Set Reader = ##class(Strix.XML.SchemaReader).%New()
-	Set Reader.Callback = ..%New()
+	Set Reader.Callback = Me
 	Set Reader.CompileClasses = 0
 	Set Reader.MakePersistent = 0
 	Set Reader.MakeSerial = 0
 	
-	Set sc = ..RunReader(Reader, SchemaLocation, Package)
+	Set sc = Me.RunReader(Reader, SchemaLocation, Package)
 	If 'sc Quit ..ShowError("Error running schema reader:", sc)
 	
 	Quit $$$OK
@@ -55,7 +57,7 @@ Method HandleProperty(Name As %String, XmlName As %String, Type As %String, IsDa
 	Quit $$$OK
 }
 
-ClassMethod PostProcessClass(ClassName As %String) As %Status
+Method PostProcessClass(ClassName As %String) As %Status
 {
 	Quit $$$OK
 }
@@ -203,10 +205,16 @@ Method SetPropertyRequired(Required As %Boolean = 1) As %Status
 	Quit $$$OK
 }
 
+/// Returns the collection ("list", "array", "") for the current property
+Method GetPropertyCollection() As %String
+{
+	Quit @..PropertyNode@("Collection")
+}
+
 // ===== Additional helpers
 
 /// Runs the schema reader for the given schema and package.
-ClassMethod RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Package As %String, ByRef Features As %String) [ Internal ]
+Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Package As %String, ByRef Features As %String) [ Internal ]
 {
 	; Get class creation times of currently existing classes in Package
 	Set sc = ..GetTimes(Package, .Times)
@@ -350,6 +358,7 @@ Method ProcessClassNode(Name As %String) As %Status [ Internal ]
 		Set sc = ..HandleProperty(..PropertyName, XmlName, Type, IsDatatype)
 		If 'sc Return $$$BuildStatus("Error handling property {}:", sc, ..PropertyName)
 	}
+	Set (..PropertyName, ..PropertyNode) = ""
 	
 	Quit $$$OK
 }
