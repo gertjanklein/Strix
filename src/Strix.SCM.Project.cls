@@ -110,8 +110,15 @@ ClassMethod LoadProjectFileData(FileName As %String, Output Project As Strix.SCM
 /// property ConfigFilePath.
 Method SaveProjectFile() As %Status
 {
+	Set ConfigFilePath = ..ConfigFilePath
+	If '##class(Strix.Lib.File).IsPathAbsolute(ConfigFilePath) {
+		Set ProjectPath = ..GetProjectPath(.sc)
+		If 'sc Quit sc
+		Set ConfigFilePath = ##class(%File).SubDirectoryName(ProjectPath, ConfigFilePath)
+	}
+	
 	Set File = ##class(%FileCharacterStream).%New()
-	Set File.Filename = ..ConfigFilePath
+	Set File.Filename = ConfigFilePath
 	
 	Set Status = ..XMLExportToStream(File, , ",indent")
 	If 'Status Quit $$$BuildErr("Error exporting project configuration to XML:", Status)
