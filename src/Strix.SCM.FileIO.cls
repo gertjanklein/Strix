@@ -113,8 +113,14 @@ ClassMethod ImportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) A
 	Set sc = stm.%PrepareClassQuery("%File","FileSet")
 	If 'sc Quit $$$BuildErr("Error preparing FileSet query:", sc)
 	
+	If Project.ExportUDL {
+		Set FileSpec = "*.cls;*.inc"
+	} Else {
+		Set FileSpec = "*.xml"
+	}
+	
 	#dim rs As %SQL.StatementResult
-	Set rs = stm.%Execute(Project.GetProjectPath(), "*.xml")
+	Set rs = stm.%Execute(Project.GetProjectPath(), FileSpec)
 	
 	While rs.%Next() {
 		Set Name = rs.%Get("Name")
