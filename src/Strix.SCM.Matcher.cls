@@ -275,9 +275,9 @@ Method GetAllClasses(Node As %String) As %Status
 	While rs.Next() {
 		If rs.Get("Hidden") Continue
 		If rs.Get("System") Continue
-		If rs.Get("Generated") Continue
 		
 		Set ClassName = rs.Get("Name")
+		If $$$defClassKeyGet(ClassName,$$$cCLASSgeneratedby) '= "" Continue
 		
 		;Skip Ensemble system classes -- these are not marked System in this query. :(
 		Set TopPackage = $Piece(ClassName, ".")
