@@ -374,7 +374,7 @@ Method GetCommandOutput(Command As %String, Split As %Boolean = 0, Output ErrorM
 	Set Command = Executable_" "_Command
 	
 	;Get output
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , , .ErrorMsg)
 	If ErrorMsg '= "" Quit ""
 	
 	If Split Set Result = ##class(Strix.Lib.String).SplitLines(Result)
@@ -399,7 +399,7 @@ Method GetCurrentRevision(ItemPath As %String, Output ErrorMsg As %String) As %S
 	Set Command = Executable_" """_ItemPath_""""
 	
 	;Get output
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , , .ErrorMsg)
 	If ErrorMsg '= "" Quit ""
 	
 	If $Extract(Result) '? 1N Set ErrorMsg = "Error determining current revision: "_Result Quit ""

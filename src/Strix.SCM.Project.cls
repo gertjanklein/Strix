@@ -185,7 +185,10 @@ ClassMethod GetHandler(InternalName As %String = "", Output Handler As Strix.SCM
 	If 'Status Quit $$$BuildErr("Error determining projects owning '"_InternalName_"':", Status)
 	
 	;We need exactly one project
-	If $ListLength(ProjectIds) '= 1 Quit ##class(Strix.SCM.Handler.Base).%New()
+	If $ListLength(ProjectIds) '= 1 {
+		If $ListLength(ProjectIds) > 1 Write !,"=== More than one project owns this item; this is not supported."
+		Quit ##class(Strix.SCM.Handler.Base).%New()
+	}
 	
 	;Open project
 	Set ProjectId = $List(ProjectIds)
@@ -215,6 +218,18 @@ ClassMethod GetHandler(InternalName As %String = "", Output Handler As Strix.SCM
 			If Name = "" Quit
 			Set $ZObjProperty(Handler, Name) = Value
 		}
+	}
+	
+	If Handler.%IsA("Strix.SCM.Handler.File") {
+		; Create an instance of the class handling file IO:
+		If 'Handler.RemoteFileIO {
+			Set Handler.FileIO = ##class(Strix.SCM.FileIO).%New()
+		} Else {
+			Set Handler.FileIO = ##class(Strix.SCM.RemoteFileIO).%New()
+		}
+		Set Handler.FileIO.Handler = Handler
+		Set Handler.FileIO.Project = Project
+		Set Handler.FileIO.Item = InternalName
 	}
 	
 	Quit Handler

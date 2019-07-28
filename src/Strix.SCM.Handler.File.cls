@@ -7,6 +7,19 @@ Class Strix.SCM.Handler.File Extends Strix.SCM.Handler.Base
 /// always kept up to date with the Caché-version.
 Property SyncToDisk As %Boolean [ InitialExpression = 0 ];
 
+/// Whether files must be transported from the server to the
+/// machine Studio is running on (i.e., they are not the same).
+Property RemoteFileIO As %Boolean [ InitialExpression = 0 ];
+
+/// The program that handles transporting files, if handler is
+/// RemoteFileIO.
+Property FileHandler As %String(MAXLEN = 1000);
+
+/// An instance of the class that handles the file IO. Can be
+/// Strix.SCM.FileIO or Strix.SCM.RemoteFileIO. Made transient
+/// so it won't be seen as a setting.
+Property FileIO As Strix.SCM.FileIO [ Transient ];
+
 // ===== Studio menu actions
 
 Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
@@ -32,7 +45,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Export item
 	
 	If Name = "Source control,ExportItem", AsItem {
-		Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
+		Set Status = ..FileIO.ExportItem(.Filename)
 		If 'Status Quit Status
 		Write !,"== "_InternalName_" exported to "_Filename_"."
 		Quit $$$OK
@@ -42,7 +55,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Export class data
 	
 	If Name = "Source control,ExportData", AsStorage {
-		Set Status = ##class(Strix.SCM.FileIO).ExportClassData(Project, InternalName, .Filename)
+		Set Status = ..FileIO.ExportClassData(.Filename)
 		If 'Status Quit Status
 		Write !,"== "_InternalName_" data exported to "_Filename_"."
 		Quit $$$OK
@@ -141,7 +154,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	;== Export project
 	
 	If Name = "Source control,ExportProject" {
-		Set Status = ##class(Strix.SCM.FileIO).ExportProject(Project)
+		Set Status = ..FileIO.ExportProject()
 		If 'Status Quit Status
 		Write "== Export of project finished successfully.",!
 		Quit $$$OK
@@ -151,7 +164,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	;== Import project
 	
 	If Name = "Source control,ImportProject" {
-		Set Status = ##class(Strix.SCM.FileIO).ImportProject(Project)
+		Set Status = ..FileIO.ImportProject()
 		If 'Status Quit Status
 		Write "== Import of project finished successfully.",!
 		Quit $$$OK
@@ -161,7 +174,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	;== Reload item
 	
 	If Name = "Source control,LoadItem" {
-		Set Status = ##class(Strix.SCM.FileIO).LoadItem(Project, InternalName, .Filename)
+		Set Status = ..FileIO.LoadItem(.Filename)
 		If 'Status Quit Status
 		Write !,"== Loaded "_InternalName_" from "_Filename_"."
 		Quit $$$OK
@@ -170,7 +183,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	;== Reload data
 	
 	If Name = "Source control,LoadData" {
-		Set Status = ##class(Strix.SCM.FileIO).LoadClassData(Project, InternalName, .Filename)
+		Set Status = ..FileIO.LoadClassData(.Filename)
 		If 'Status Quit Status
 		Write !,"== Loaded data for "_InternalName_" from "_Filename_"."
 		Quit $$$OK
@@ -251,7 +264,7 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 		Quit $$$OK
 	}
 	
-	Set Status = ##class(Strix.SCM.FileIO).ExportItem(Project, InternalName, .Filename)
+	Set Status = ..FileIO.ExportItem(.Filename)
 	If 'Status Quit Status
 	
 	Write !,"== "_InternalName_" exported to "_Filename_"."

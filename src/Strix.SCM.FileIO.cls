@@ -4,35 +4,46 @@ Include Strix.SCM
 Class Strix.SCM.FileIO Extends %RegisteredObject
 {
 
+/// The file handler that's calling us
+Property Handler As Strix.SCM.Handler.File;
+
+/// The project we're working with
+Property Project As Strix.SCM.Project;
+
+/// The item we're working with
+Property Item As %String;
+
+// =====
+
 /// Exports a single item to disk
-ClassMethod ExportItem(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+Method ExportItem(Output Filename As %String) As %Status
 {
-	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	Set Filename = ..Project.GetExportFilename(..Item, , , .Status)
 	If 'Status Quit Status
 	
-	Set Processors = Project.GetProcessors(.Status)
+	Set Processors = ..Project.GetProcessors(.Status)
 	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
 	
-	Set Status = ..Export(Item, Project.ExportUDL, Processors, Filename)
-	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, Item)
+	Set Status = ..Export(..Item, ..Project.ExportUDL, Processors, Filename)
+	If 'Status Quit $$$BuildStatus("Error exporting '{}':", Status, ..Item)
 	
 	Quit $$$OK
 }
 
 /// Exports data for a class to disk
-ClassMethod ExportClassData(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+Method ExportClassData(Output Filename As %String) As %Status
 {
 	;Item is a class; we must change type to stg for filename.
-	Set ClassName = Item
-	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
+	Set ClassName = ..Item
+	Set $Piece(Item, ".", $Length(..Item, ".")) = "stg"
 	
-	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	Set Filename = ..Project.GetExportFilename(Item, , , .Status)
 	If 'Status Quit Status
 	
 	Set Globals = ##class(Strix.SCM.Matcher).GetStorageGlobals(ClassName, .Status)
 	If 'Status Quit Status
 	
-	Set Processors = Project.GetProcessors(.Status)
+	Set Processors = ..Project.GetProcessors(.Status)
 	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
 	
 	Set Status = ..Export(Globals, 0, Processors, Filename)
@@ -42,45 +53,45 @@ ClassMethod ExportClassData(Project As Strix.SCM.Project, Item As %String, Outpu
 }
 
 /// Loads a single item from disk
-ClassMethod LoadItem(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+Method LoadItem(Output Filename As %String) As %Status
 {
-	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	Set Filename = ..Project.GetExportFilename(..Item, , , .Status)
 	If 'Status Quit Status
 	
-	Set Status = $System.OBJ.Load(Filename, "ck-d", , , , Item)
-	If 'Status Quit $$$BuildErr("Error loading '"_Item_"' from '"_Filename_"'", Status)
+	Set Status = ..Import(Filename, ..Item)
+	If 'Status Quit Status
 	
 	Quit $$$OK
 }
 
 /// Loads data for a class from disk
-ClassMethod LoadClassData(Project As Strix.SCM.Project, Item As %String, Output Filename As %String) As %Status
+Method LoadClassData(Output Filename As %String) As %Status
 {
 	;Item is a class; we must change type to stg for filename.
-	Set ClassName = Item
+	Set ClassName = ..Item, Item = ..Item
 	Set $Piece(Item, ".", $Length(Item, ".")) = "stg"
 	
-	Set Filename = Project.GetExportFilename(Item, , , .Status)
+	Set Filename = ..Project.GetExportFilename(Item, , , .Status)
 	If 'Status Quit Status
 	
 	Set Globals = ##class(Strix.SCM.Matcher).GetStorageGlobals(ClassName, .Status)
 	If 'Status Quit Status
 	
-	Set Status = $System.OBJ.Load(Filename, "-d", , , , Globals)
-	If 'Status Quit $$$BuildErr("Error exporting '"_Item_"' to '"_Filename_"'", Status)
+	Set Status = ..Import(Filename, Globals, "-d")
+	If 'Status Quit Status
 	
 	Quit $$$OK
 }
 
 /// Exports an entire project to disk
-ClassMethod ExportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) As %Status
+Method ExportProject(Quiet As %Boolean = 0) As %Status
 {
 	If 'Quiet Write "Determining project members: "
-	Set Status = Project.GetAllItems(.Items)
+	Set Status = ..Project.GetAllItems(.Items)
 	If 'Status Quit $$$BuildErr("Error determining project members", Status)
 	If 'Quiet Write "ok",!
 	
-	Set Processors = Project.GetProcessors(.Status)
+	Set Processors = ..Project.GetProcessors(.Status)
 	If 'Status Quit $$$BuildStatus("Error determining list of post-processors for project:", Status)
 	
 	Set Item = ""
@@ -88,13 +99,13 @@ ClassMethod ExportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) A
 		Set Item = $Order(Items(Item), 1, Members)
 		If Item = "" Quit
 		
-		Set Filename = Project.GetExportFilename(Item, , , .Status)
+		Set Filename = ..Project.GetExportFilename(Item, , , .Status)
 		If 'Status Quit
 		
 		If Members = "" Set Members = Item
 		If 'Quiet Write "Exporting "_Members_" to "_Filename_": "
 		
-		Set Status = ..Export(Members, Project.ExportUDL, Processors, Filename)
+		Set Status = ..Export(Members, ..Project.ExportUDL, Processors, Filename)
 		If 'Status Return $$$BuildStatus("Error exporting '{}':", Status, Item)
 		
 		If 'Quiet Write "ok",!
@@ -105,7 +116,7 @@ ClassMethod ExportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) A
 }
 
 /// Loads all project members form the configured directory
-ClassMethod ImportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) As %Status
+Method ImportProject(Quiet As %Boolean = 0) As %Status
 {
 	;Get list of XML files in the project directory
 	If 'Quiet Write !,"== Reading directory: "
@@ -113,14 +124,14 @@ ClassMethod ImportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) A
 	Set sc = stm.%PrepareClassQuery("%File","FileSet")
 	If 'sc Quit $$$BuildErr("Error preparing FileSet query:", sc)
 	
-	If Project.ExportUDL {
+	If ..Project.ExportUDL {
 		Set FileSpec = "*.cls;*.inc"
 	} Else {
 		Set FileSpec = "*.xml"
 	}
 	
 	#dim rs As %SQL.StatementResult
-	Set rs = stm.%Execute(Project.GetProjectPath(), FileSpec)
+	Set rs = stm.%Execute(..Project.GetProjectPath(), FileSpec)
 	
 	While rs.%Next() {
 		Set Name = rs.%Get("Name")
@@ -152,7 +163,7 @@ ClassMethod ImportProject(Project As Strix.SCM.Project, Quiet As %Boolean = 0) A
 }
 
 /// Exports an item, running post-processors if configured.
-ClassMethod Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, Filename As %String) As %Status
+Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, Filename As %String) As %Status
 {
 	Set Stream = ##class(%Stream.FileBinary).%New()
 	
@@ -183,6 +194,14 @@ ClassMethod Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObje
 	If 'sc Return $$$BuildStatus("Error opening export file '{}':", sc, Filename)
 	Set sc = Output.CopyFromAndSave(Stream)
 	If 'sc Return $$$BuildStatus("Error saving export data to '{}':", sc, Filename)
+	
+	Quit $$$OK
+}
+
+Method Import(Filename As %String, Item As %String, Flags As %String = "ck-d") As %Status
+{
+	Set Status = $System.OBJ.Load(Filename, Flags, , , , Item)
+	If 'Status Quit $$$BuildErr("Error loading '{}' from '{}'", Status, Item, Filename)
 	
 	Quit $$$OK
 }

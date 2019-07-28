@@ -11,6 +11,9 @@ Class Strix.SCM.Handler.Base Extends %RegisteredObject [ DependsOn = Strix.Gener
 /// must be separated by commas.
 Parameter GlobalSettings As STRING;
 
+/// Studio login credentials
+Property Credentials As %List [ Transient ];
+
 // =====
 
 /// Returns a %List of settings applicable to this class. Each setting
@@ -28,8 +31,13 @@ ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
 		Set Prop = %compiledclass.Properties.GetNext(.Key)
 		If Key = "" Quit
 		
+		; Skip private and system properties
 		If Prop.Private Continue
 		If $Extract(Prop.Name) = "%" Continue
+		
+		; The Transient flag indicates this property should not be
+		; considered a setting.
+		If Prop.Transient Continue
 		
 		If Result '= "" Set Result = Result_","
 		

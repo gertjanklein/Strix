@@ -35,9 +35,14 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 /// Login method; use to instantiate delegator
 Method Login(Name As %String, Password As %String) As %Status
 {
-	Set ..Handler = ##class(Strix.SCM.HandlerProxy).%New()
+	Set Credentials = $lb($g(Name), $g(Password))
+	Set ..Handler = ##class(Strix.SCM.HandlerProxy).%New(Credentials)
 	Quit $$$OK
 }
+
+// -----
+
+// 
 
 Method OnBeforeLoad(InternalName As %String) As %Status
 {

@@ -24,7 +24,7 @@ ClassMethod ZipDir(Directory As %String, Delete As %Boolean = 0) As %Status
 	Set ZipFile = ##class(%File).SubDirectoryName(BaseDir, ReleaseDir_".zip")
 	
 	Set Command = Executable_" "_"a """_ZipFile_""" """_Directory_""""
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , , .ErrorMsg)
 	If ErrorMsg '= "" Quit $$$BuildErr("Error running command '{}': {}",, Command, ErrorMsg)
 	
 	Set Lines = ##class(Strix.Lib.String).SplitLines(Result, , 1)

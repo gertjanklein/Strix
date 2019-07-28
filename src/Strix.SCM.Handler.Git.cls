@@ -359,7 +359,7 @@ Method GetCommandOutput(ProjectPath As %String = "", Command As %String, Split A
 	Set CurrentDir = ##class(%SYSTEM.Process).CurrentDirectory(ProjectPath)
 	
 	;Get output
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , .ErrorMsg)
+	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , , .ErrorMsg)
 	
 	; Restore current directory to what it was
 	Do ##class(%SYSTEM.Process).CurrentDirectory(CurrentDir)
