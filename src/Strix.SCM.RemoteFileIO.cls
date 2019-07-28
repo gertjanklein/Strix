@@ -6,7 +6,7 @@ Class Strix.SCM.RemoteFileIO Extends Strix.SCM.FileIO
 /// This is unimplemented in remote configuration.
 Method ImportProject(Quiet As %Boolean = 0) As %Status
 {
-	Quit $$$BuildStatus(, $$$NotImplemented)
+	Quit $$$ERROR($$$NotImplemented)
 }
 
 /// Exports an item, running post-processors if configured.
@@ -16,60 +16,53 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 		Quit $$$BuildStatus("XML export not implemented for remote site.")
 	}
 	
-	Set Dir = ##class(%File).GetDirectory(..Handler.FileHandler)
-	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(..Handler.FileHandler)
-	
-	Set Url = ..GetServerUrl(Item)
-	
-	; Create basic authentication string from Studio login credentials
-	Set Creds = $ListToString(..Handler.Credentials, ":")
-	If Creds = "" Set Creds = ":"
-	Set Creds = $System.Encryption.Base64Encode(Creds)
-	
-	Set Command = $$$BuildStr("{} GET {} {} {}", Executable, Url, $$$Quote(Filename), Creds)
-	;Write !,Command
-	
-	; Get output and determine if there's an error
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , Dir, .ErrorMsg)
-	If ErrorMsg '= "" Quit $$$BuildStatus("Error exporting item: {}",, ErrorMsg)
-	If $Match(Result, "^(Error|Usage).*") {
-		Quit $$$BuildStatus("Error exporting item; local program returned: {}",, Result)
-	}
-	;Write !,">>> "_Result
+	Set sc = ..ItemIO("GET", Item, Filename)
+	If 'sc Quit sc
 	
 	Quit $$$OK
 }
 
 Method Import(Filename As %String, Item As %String, Flags As %String = "ck-d") As %Status
 {
-	;Normalize name:
-	$$$NormalizeType(Item)
+	; Load external file
+	Set sc = ..ItemIO("PUT", Item, Filename)
+	If 'sc Quit sc
 	
+	; Compile
+	If $Piece(Flags, "/") [ "c", $$$NormalizedType(Item) = "cls" {
+		Set sc = $System.OBJ.Compile($$$ItemName(Item), Flags)
+		If 'sc Quit $$$BuildStatus("Error compiling {}:", sc, Item)
+	}
+	
+	Quit $$$OK
+}
+
+/// Performs item I/O using the remote file transfer helper.
+Method ItemIO(Command As %String, Item As %String, Filename As %String) As %Status
+{
+	; Split executable in directory and file
 	Set Dir = ##class(%File).GetDirectory(..Handler.FileHandler)
-	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(..Handler.FileHandler)
+	Set Executable = ##class(%File).GetFilename(..Handler.FileHandler)
+	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
 	
-	Set Url = ..GetServerUrl(Item)_"?ignoreConflict=1"
+	Set Url = ..GetServerUrl(Item)
+	If Command = "PUT" Set Url = Url_"?ignoreConflict=1"
 	
 	; Create basic authentication string from Studio login credentials
 	Set Creds = $ListToString(..Handler.Credentials, ":")
 	If Creds = "" Set Creds = ":"
 	Set Creds = $System.Encryption.Base64Encode(Creds)
 	
-	Set Command = $$$BuildStr("{} PUT {} {} {}", Executable, Url, $$$Quote(Filename), Creds)
-	;Write !,Command
+	Set Command = $$$BuildStr("{} {} {} {} {}", Executable, Command, Url, $$$Quote(Filename), Creds)
+	;Write !,$Length(Command)_": "_Command
 	
 	; Get output and determine if there's an error
 	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , Dir, .ErrorMsg)
-	If ErrorMsg '= "" Quit $$$BuildStatus("Error loading item: {}",, ErrorMsg)
+	If ErrorMsg '= "" Quit $$$BuildStatus("Error running file transporter: {}",, ErrorMsg)
 	If $Match(Result, "^(Error|Usage).*") {
-		Quit $$$BuildStatus("Error loading item; local program returned: {}",, Result)
+		Quit $$$BuildStatus("Error from file transporter: {}",, Result)
 	}
 	;Write !,">>> "_Result
-	
-	If $Piece(Flags, "/") [ "c", $$$NormalizedType(Item) = "cls" {
-		Set sc = $System.OBJ.Compile($$$ItemName(Item), Flags)
-		If 'sc Quit $$$BuildStatus("Error compiling {}:", sc, Item)
-	}
 	
 	Quit $$$OK
 }
