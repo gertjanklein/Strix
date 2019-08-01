@@ -71,6 +71,7 @@ ROUTINE Strix [Type=INC]
 #define StartsWith(%x,%s) ($e(%x,1,$l(%s))=%s)
 #define EndsWith(%x,%s) ($e(%x,$l(%x)-$l(%s)+1,*)=%s)
 
+#define Quote(%s) (""""_$Replace(%s,"""","""""")_"""")
 
 
 
