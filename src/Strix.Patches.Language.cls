@@ -12,9 +12,12 @@ Class Strix.Patches.Language Extends %RegisteredObject
 /// Do ##class(Strix.Patches.Language).Disable("nl")
 ClassMethod Disable(Language As %String)
 {
+	Set Node = $Select($ZV["IRIS": "^%qMsg", 1:"^%qCacheMsg")
+	Set BackupNode = Node_"Org"
+	
 	;Check that the language to disable is present:
-	If '$Data(^%qCacheMsg("%Compiler", Language)) {
-		If $Data(^%qCacheMsgOrg("%Compiler", Language)) {
+	If '$Data(@Node@("%Compiler", Language)) {
+		If $Data(@BackupNode@("%Compiler", Language)) {
 			Write "Language already disabled.",!
 		} Else {
 			Write "Language not found.",!
@@ -28,13 +31,13 @@ ClassMethod Disable(Language As %String)
 	
 	Set Section = ""
 	For  {
-		Set Section = $Order(^%qCacheMsg(Section))
+		Set Section = $Order(@Node@(Section))
 		If Section = "" Quit
-		If '$Data(^%qCacheMsg(Section, Language)) Continue
+		If '$Data(@Node@(Section, Language)) Continue
 		
 		Write "Disabling section "_Section,!
-		Merge ^%qCacheMsgOrg(Section, Language) = ^%qCacheMsg(Section, Language)
-		Kill ^%qCacheMsg(Section, Language)
+		Merge @BackupNode@(Section, Language) = @Node@(Section, Language)
+		Kill @Node@(Section, Language)
 	}
 	
 	If PrevReadOnly {
@@ -50,9 +53,12 @@ ClassMethod Disable(Language As %String)
 /// Do ##class(Strix.Patches.Language).Enable("nl")
 ClassMethod Enable(Language As %String)
 {
+	Set Node = $Select($ZV["IRIS": "^%qMsg", 1:"^%qCacheMsg")
+	Set BackupNode = Node_"Org"
+	
 	;Check that the language to enable is present:
-	If '$Data(^%qCacheMsgOrg("%Compiler", Language)) {
-		If $Data(^%qCacheMsg("%Compiler", Language)) {
+	If '$Data(@BackupNode@("%Compiler", Language)) {
+		If $Data(@Node@("%Compiler", Language)) {
 			Write "Language already enabled.",!
 		} Else {
 			Write "Language not found.",!
@@ -66,13 +72,13 @@ ClassMethod Enable(Language As %String)
 	
 	Set Section = ""
 	For  {
-		Set Section = $Order(^%qCacheMsgOrg(Section))
+		Set Section = $Order(@BackupNode@(Section))
 		If Section = "" Quit
-		If '$Data(^%qCacheMsgOrg(Section, Language)) Continue
+		If '$Data(@BackupNode@(Section, Language)) Continue
 		
 		Write "Re-enabling section "_Section,!
-		Merge ^%qCacheMsg(Section, Language) = ^%qCacheMsgOrg(Section, Language)
-		Kill ^%qCacheMsgOrg(Section, Language)
+		Merge @Node@(Section, Language) = @BackupNode@(Section, Language)
+		Kill @BackupNode@(Section, Language)
 	}
 	
 	If PrevReadOnly {
@@ -177,14 +183,17 @@ ClassMethod EnableEnsemble(Language As %String)
 /// Do ##class(Strix.Patches.Language).ShowLanguages()
 ClassMethod ShowLanguages()
 {
+	Set Node = $Select($ZV["IRIS": "^%qMsg", 1:"^%qCacheMsg")
+	Set BackupNode = Node_"Org"
+	
 	Set Section = ""
 	For  {
-		Set Section = $Order(^%qCacheMsg(Section))
+		Set Section = $Order(@Node@(Section))
 		If Section = "" Quit
 		
 		Set Language = ""
 		For  {
-			Set Language = $Order(^%qCacheMsg(Section, Language))
+			Set Language = $Order(@Node@(Section, Language))
 			If Language = "" Quit
 			
 			Set Languages(Language) = ""
@@ -205,12 +214,12 @@ ClassMethod ShowLanguages()
 	Kill Languages
 	Set Section = ""
 	For  {
-		Set Section = $Order(^%qCacheMsgOrg(Section))
+		Set Section = $Order(@BackupNode@(Section))
 		If Section = "" Quit
 		
 		Set Language = ""
 		For  {
-			Set Language = $Order(^%qCacheMsgOrg(Section, Language))
+			Set Language = $Order(@BackupNode@(Section, Language))
 			If Language = "" Quit
 			
 			Set Languages(Language) = ""

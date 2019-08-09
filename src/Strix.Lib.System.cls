@@ -28,15 +28,16 @@ ClassMethod CacheLibReadOnly(ReadOnly As %Boolean = "", Output Status As %Status
 {
 	New $Namespace, %objlasterror
 	
-	Set Directory = ..GetDatabaseDirectory("CACHELIB", .Status)
-	If 'Status Set Status = $$$BuildErr("Error determining CACHELIB database directory:", Status) Quit ""
+	Set Name = $Select($ZV["IRIS": "IRISLIB", 1:"CACHELIB")
+	Set Directory = ..GetDatabaseDirectory(Name, .Status)
+	If 'Status Set Status = $$$BuildErr("Error determining {} database directory:", Status, Name) Quit ""
 	
 	;The system class we use is only accessible from %SYS
 	Set $Namespace = "%SYS"
 	
 	Set Database = ##class(SYS.Database).%OpenId(Directory, , .Status)
 	If 'Status {
-		Set Status = $$$BuildErr("Error opening CACHELIB database object:", Status)
+		Set Status = $$$BuildErr("Error opening {} database object:", Status, Name)
 		Quit ""
 	}
 	
@@ -47,7 +48,7 @@ ClassMethod CacheLibReadOnly(ReadOnly As %Boolean = "", Output Status As %Status
 		Set Status = Database.%Save()
 		If 'Status {
 			Kill Database
-			Set Status = $$$BuildErr("Error changing CACHELIB ReadOnly setting to {}:", Status, ReadOnly)
+			Set Status = $$$BuildErr("Error changing {} ReadOnly setting to {}:", Status, Name, ReadOnly)
 			Quit ""
 		}
 	}
