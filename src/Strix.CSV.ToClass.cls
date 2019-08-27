@@ -55,6 +55,10 @@ Method Create() As %Status
 	Set Status = ..GetParser(.Parser)
 	If 'Status Quit Status
 	
+	; Check for duplicate column headers
+	Set sc = ..CheckColumns(Parser)
+	If 'sc Quit sc
+	
 	#dim ClassDef As %Dictionary.ClassDefinition
 	Set ClassDef = ##class(Strix.Generator.Utilities).GetClassDef(..ClassName, .IsNew, .Status)
 	If 'Status Quit $$$BuildStatus("Can't create/open class definition for '{}':", Status, ..ClassName)
@@ -79,7 +83,7 @@ Method Create() As %Status
 		Set PropertyName = ..GetPropertyName(ColumnName)
 		If '$ZName(PropertyName, 6) Return $$$BuildStatus("Can't determine valid property name for column '{}' (tried '{}').",, ColumnName, PropertyName)
 		
-		;Check for multiple column headers with the same name
+		;Check for duplicate property names
 		If $Increment(PropertyNames(PropertyName)) > 1 {
 			Return $$$BuildStatus("Property {} (column {}) occurs more than once.", , PropertyName, ColumnName)
 		}
@@ -108,6 +112,28 @@ Method Create() As %Status
 	
 	Set Status = ClassDef.%Save()
 	If 'Status Quit $$$BuildStatus("Error saving class definition:", Status)
+	
+	Quit $$$OK
+}
+
+/// Checks for duplicate column headers; if found, returns a %Status
+/// error containing their names.
+Method CheckColumns(Parser As Strix.CSV.Parser) As %Status
+{
+	Set Names = ""
+	For ColumnNr = 1:1:Parser.Data {
+		Set ColumnName = Parser.Data(ColumnNr)
+		If ColumnName = "" Continue
+		If $Increment(Names(ColumnName)) '= 2 Continue
+		Set Names = Names_$lb(ColumnName)
+	}
+	
+	Set DupCount = $ll(Names)
+	If DupCount {
+		Set Names = """"_$lts(Names, """, """)_""""
+		Set Msg = $Select(DupCount>1: "Columns {} occur", 1: "Column {} occurs")_" more than once."
+		Quit $$$BuildStatus(Msg, , Names)
+	}
 	
 	Quit $$$OK
 }
