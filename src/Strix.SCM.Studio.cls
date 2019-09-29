@@ -89,6 +89,53 @@ Method OnAfterDelete(InternalName As %String) As %Status
 	Quit ..Handler.OnAfterDelete(InternalName)
 }
 
+// ===== %Studio.SourceControl.Base callbacks
+
+/// Check this routine/class/csp file into source control.
+Method CheckIn(InternalName As %String, Description As %String = "") As %Status
+{
+	Quit $$$OK
+}
+
+/// Check this routine/class/csp file out of source control.
+Method CheckOut(InternalName As %String, Description As %String = "") As %Status
+{
+	Quit $$$OK
+}
+
+/// Undo the checkout of this item.
+Method UndoCheckout(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
+
+/// Called to add this item to source control.
+Method AddToSourceControl(InternalName As %String, Description As %String = "") As %Status
+{
+	Quit $$$OK
+}
+
+/// Called to delete this item from source control.
+Method RemoveFromSourceControl(InternalName As %String, Description As %String = "") As %Status
+{
+	Quit $$$OK
+}
+
+/// Get the latest version of this file from source control.
+Method GetLatest(InternalName As %String) As %Status
+{
+	Quit $$$OK
+}
+
+Method OnPortalCreate(UserData As %ZEN.proxyObject = "") As %Status
+{
+	Quit $$$OK
+}
+
+ClassMethod GetPortalPageOptions(PageURL As %String = "", Output Options As %String)
+{
+}
+
 // ===== Menu query implementations
 
 /// Provide a list of the top level menu items that Studio will add when connecting to this namespace.
