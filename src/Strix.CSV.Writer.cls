@@ -2,7 +2,7 @@ Include Strix
 
 IncludeGenerator Strix
 
-Class Strix.CSV.Writer [ Abstract, CompileAfter = Strix.Generator.Utilities, PropertyClass = Strix.CSV.PropertyParm ]
+Class Strix.CSV.Writer [ Abstract, DependsOn = Strix.Generator.Utilities, PropertyClass = Strix.CSV.PropertyParm ]
 {
 
 /// Separator to use on output
