@@ -18,8 +18,8 @@ Method ProcessExport(Item As %String, Export As %Stream, Output Status As %Statu
 			Set Line = $Replace(Line, "version=""26""", "version=""25""")
 			
 		} ElseIf Line ? 1"<Type>%Storage."1.E {
-			Set Line = $Replace(Line, "<Type>%Library.CacheSerialState", "%Library.CacheSerialState")
-			Set Line = $Replace(Line, "<Type>%Library.CacheStorage", "%Library.CacheStorage")
+			Set Line = $Replace(Line, "<Type>%Storage.Serial", "<Type>%Library.CacheSerialState")
+			Set Line = $Replace(Line, "<Type>%Storage.Persistent", "<Type>%Library.CacheStorage")
 			
 		}
 		Do Stream.WriteLine(Line)
