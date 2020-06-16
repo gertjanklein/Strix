@@ -175,7 +175,9 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 	If AsUDL {
 		Set sc = $System.OBJ.ExportUDL(Item, Stream.Filename, "-d/diffexport")
 	} Else {
-		Set sc = $System.OBJ.Export(Item, Stream.Filename, "-d/diffexport")
+		Set Version = ..Project.ExportVersion
+		If Version '= "" Set Version = "/exportversion="_Version
+		Set sc = $System.OBJ.Export(Item, Stream.Filename, "-d/diffexport"_Version)
 	}
 	If 'sc Quit $$$BuildStatus("Error exporting:", sc)
 	

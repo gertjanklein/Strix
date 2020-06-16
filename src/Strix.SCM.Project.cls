@@ -44,6 +44,10 @@ Property Handler As %String;
 /// Whether to export items as XML (0) or CDL (1)
 Property ExportUDL As %Boolean [ InitialExpression = 0 ];
 
+/// When exporting, what version to export for. Can be used to keep
+/// exports backwards compatible. Only applies to XML exports.
+Property ExportVersion As %String;
+
 /// Comma-separated list of export item post-processors to run.
 Property PostProcessors As %String(MAXLEN = 80);
 
@@ -554,6 +558,9 @@ Storage Default
 </Value>
 <Value name="9">
 <Value>PostProcessors</Value>
+</Value>
+<Value name="10">
+<Value>ExportVersion</Value>
 </Value>
 </Data>
 <DataLocation>^Strix.SCM.ProjectD</DataLocation>

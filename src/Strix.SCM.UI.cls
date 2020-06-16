@@ -246,6 +246,14 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
   </td>
 </tr>
 <tr>
+  <th>Export version:</th>
+  <td>
+    #(..TextInput("ExportVersion", 15))#
+    <p class=Explain>When exporting, what version to export for. Can be used to keep
+      XML exports backwards compatible. Specify major.minor, e.g. 2010.1.</p>
+  </td>
+</tr>
+<tr>
   <th>Postprocessors:</th>
   <td>
     #(..TextInput("PostProcessors", 80))#
@@ -351,6 +359,7 @@ ClassMethod ProjectToRequest(Project As Strix.SCM.Project)
 	Do %request.Set("Handler", Project.Handler)
 	If Project.PackageSubdirs Do %request.Set("PackageSubdirs", 1)
 	If Project.ExportUDL Do %request.Set("ExportUDL", 1)
+	Do %request.Set("ExportVersion", Project.ExportVersion)
 	Do %request.Set("PostProcessors", Project.PostProcessors)
 	
 	Set Members = ""
@@ -377,6 +386,7 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	Set Project.ProjectPath = %request.Get("ProjectPath")
 	Set Project.PackageSubdirs = ''%request.IsDefined("PackageSubdirs")
 	Set Project.ExportUDL = ''%request.IsDefined("ExportUDL")
+	Set Project.ExportVersion = %request.Get("ExportVersion")
 	Set Project.PostProcessors = %request.Get("PostProcessors")
 	
 	;Make sure the project's directory exists
