@@ -200,9 +200,16 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 	Quit $$$OK
 }
 
-Method Import(Filename As %String, Item As %String, Flags As %String = "ck-d") As %Status
+Method Import(Filename As %String, Item As %String, Flags As %String = "ckd") As %Status
 {
-	Set Status = $System.OBJ.Load(Filename, Flags, , , , Item)
+	If ..Project.ExportUDL {
+		; Don't specify the item to load. The file can only contain one
+		; anyway, and if the item type is uppercase (e.g. My.Class.CLS),
+		; as is is by default, the load gives no errors but does nothing.
+		Set Status = $System.OBJ.Load(Filename, Flags)
+	} Else {
+		Set Status = $System.OBJ.Load(Filename, Flags, , , , Item)
+	}
 	If 'Status Quit $$$BuildErr("Error loading '{}' from '{}'", Status, Item, Filename)
 	
 	Quit $$$OK
