@@ -83,9 +83,9 @@ ClassMethod HiddenInput(Name As %String) As %String
 
 ClassMethod CheckBox(Name As %String, ForceChecked As %Boolean = 0) As %String
 {
-	Set Result = "<input type=""checkbox"" name="""_Name_""""
+	Set Result = "<input type=""checkbox"" name="""_Name_""" value=1"
 	
-	If %request.IsDefined(Name) || ForceChecked Set Result = Result_" checked"
+	If %request.Get(Name, 0) || ForceChecked Set Result = Result_" checked"
 	
 	Set Result = Result_">"
 	

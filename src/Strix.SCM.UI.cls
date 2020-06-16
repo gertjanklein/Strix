@@ -268,19 +268,21 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
 	If $ListLength(SettingList) {
 		&html<<tr><th colspan=2>Handler settings</th></tr>>
 	}
+	
 	For i = 1:1:$ListLength(SettingList) {
 		Set Item = $List(SettingList, i)
 		Set Name = $List(Item, 1), Type = $List(Item, 2), Origin = $List(Item, 3)
 		Set Description = ##class(Strix.SCM.Handler.Base).GetSettingDescription(Origin, Name, 1)
-		Set Size = $Select(
-		  Type = "%Boolean": 5,
-		  1: 80
-		)
+		If Type = "%Boolean" {
+			Set InputHtml = ..CheckBox("s:"_Name)
+		} Else {
+			Set InputHtml = ..TextInput("s:"_Name, 80)
+		}
 		
 		&html<<tr>
   <th>#(Name)#:<br><span class=Origin>#(Origin)#</span></th>
   <td>
-    #(..TextInput("s:"_Name, Size))#
+    #(InputHtml)#
     <p class=Explain>#(Description)#</p>
   </td>
 </tr>>
@@ -370,9 +372,13 @@ ClassMethod ProjectToRequest(Project As Strix.SCM.Project)
 	
 	Set SettingList = Project.GetHandlerSettings()
 	For i = 1:1:$ListLength(SettingList) {
-		Set Item = $List(SettingList, i), Name = $List(Item, 1), Global = $List(Item, 4)
+		Set Item = $List(SettingList, i), Name = $List(Item, 1), Type = $List(Item, 2), Global = $List(Item, 4)
 		Set Value = $Select(Global: Project.Settings.GetAt(Name), 1: Project.LocalSettings.GetAt(Name))
-		Do %request.Set("s:"_Name, Value)
+		If Type = "%Boolean" {
+			If Value Do %request.Set("s:"_Name, 1)
+		} Else {
+			Do %request.Set("s:"_Name, Value)
+		}
 	}
 	
 	Quit
@@ -427,7 +433,7 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	Do Project.LocalSettings.Clear()
 	Set SettingList = Project.GetHandlerSettings()
 	For i = 1:1:$ListLength(SettingList) {
-		Set Item = $List(SettingList, i), Name = $List(Item, 1), Global = $List(Item, 4)
+		Set Item = $List(SettingList, i), Name = $List(Item, 1), Type = $List(Item, 2), Global = $List(Item, 4)
 		Set Value = %request.Get("s:"_Name)
 		If Value = "" Continue
 		If Global {
