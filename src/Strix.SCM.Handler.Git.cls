@@ -59,7 +59,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Checkin
 	
 	If Name = "Source control,Checkin" {
-		Set Target = ..GetGUICommand("/command:commit /path:"_Project.GetProjectPath(), .ErrorMsg)
+		Set Target = ..GetGUICommand("/command:commit /path:"""_Project.GetProjectPath()_"""", .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		Set Action = 3 ; Run executable
 		Quit $$$OK
@@ -69,7 +69,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Show log
 	
 	If Name = "Source control,ShowLog" {
-		Set Target = ..GetGUICommand("/command:log /path:"_Project.GetProjectPath(), .ErrorMsg)
+		Set Target = ..GetGUICommand("/command:log /path:"""_Project.GetProjectPath()_"""", .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		Set Action = 3 ; Run executable
 		Quit $$$OK
@@ -376,7 +376,7 @@ Method GetGUICommand(Command As %String, Output ErrorMsg As %String) As %String
 {
 	Set ErrorMsg = ""
 	
-	If '##class(%File).Exists(..GitGuiPath) {
+	If '..RemoteFileIO, '##class(%File).Exists(..GitGuiPath) {
 		Set ErrorMsg = "Option not available: TortoiseGit executable '"_..GitGuiPath_"' not found."
 		Quit ""
 	}
