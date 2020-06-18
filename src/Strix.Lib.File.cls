@@ -1,4 +1,6 @@
-/// Fil(name) related functions
+Include Strix
+
+/// File(name) related functions
 Class Strix.Lib.File Extends %RegisteredObject
 {
 
@@ -34,17 +36,25 @@ ClassMethod UniqueFilename(Filename As %String, Output Changed As %Boolean) As %
 	Quit NewName
 }
 
-/// Appends one or more path components to an existing path. Uses the implementation
-/// in class %File for platform independence, but allows more then one path component
-/// to be appended at once.
+/// Appends one or more path components to an existing path. Allows more
+/// than one path component to be appended at once.
 ClassMethod AppendPath(Path As %String, SubPaths... As %String) As %String
 {
 	Set Result = Path
+	
+	; Directory separator for current OS
+	Set Sep = $$$DirSep
+	
+	; What we accept as directory separator (Windows API accepts both \ and /)
+	Set Accept = $Select($$$isWINDOWS:"\/", 1: "/")
+	
 	For i = 1:1:$Get(SubPaths) {
 		Set SubPath = $Get(SubPaths(i))
 		If SubPath = "" Continue
-		Set Result = ##class(%File).SubDirectoryName(Result, SubPath)
+		If Accept '[ $Extract(Result, *) Set Result = Result_Sep
+		Set Result = Result_SubPath
 	}
+	
 	Quit Result
 }
 
@@ -86,6 +96,18 @@ ClassMethod IsPathAbsolute(Path As %String, AllowFromRoot As %Boolean = 0) As %B
 #endif
 	
 	Quit 0
+}
+
+/// Makes sure the directory for the given filename exists
+ClassMethod EnsureDirectory(Filename As %String) As %Status
+{
+	Set Dir = ##class(%File).GetDirectory(Filename)
+	If ##class(%File).DirectoryExists(Dir) Quit $$$OK
+	
+	Set ok = ##class(%File).CreateDirectoryChain(Dir, .rc)
+	If 'ok Quit $$$BuildStatus("Error {} creating directory '{}'.", rc, Dir)
+	
+	Quit $$$OK
 }
 
 }

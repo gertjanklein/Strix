@@ -74,11 +74,17 @@ ROUTINE Strix [Type=INC]
 #define Quote(%s) (""""_$Replace(%s,"""","""""")_"""")
 
 
-
 #; ===== Fixes
 
 #; Returned by class Config.Databases but only known (in %occErrors) as CPFNameDoesNotExist
 #define DatabaseDefinitionDoesNotExist 420
+
+
+#; =====
+
+#; Directory separator. Returns "\" on Windows, "/" otherwise.
+#; ##expression chokes on backslash and can't use ##quote.
+#define DirSep ##expression($Select($$$isWINDOWS:""""_$c(92)_"""",1:"""/"""))
 
 
 
