@@ -295,7 +295,7 @@ Method GetProjectPath(Output Status As %Status) As %String
 	Set Config = ##class(Strix.SCM.Config).Get()
 	
 	;Create full path
-	Set ProjectPath = ##class(%File).SubDirectoryName(Config.BasePath, ProjectPath)
+	Set ProjectPath = ##class(Strix.Lib.File).AppendPath(Config.BasePath, ProjectPath)
 	
 	Quit ProjectPath
 }
