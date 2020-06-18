@@ -395,15 +395,15 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	Set Project.ExportVersion = %request.Get("ExportVersion")
 	Set Project.PostProcessors = %request.Get("PostProcessors")
 	
-	;Make sure the project's directory exists
-	If ##class(Strix.Lib.File).IsPathAbsolute(Project.ProjectPath) {
-		Set Path = Project.ProjectPath
-	} Else {
-		Set Path = ##class(%File).SubDirectoryName(Config.BasePath, Project.ProjectPath)
-	}
-	If '##class(%File).DirectoryExists(Path) {
-		Quit $$$BuildErr("Project directory '{}' does not exist; please create it first.",, Path)
-	}
+#;	;Make sure the project's directory exists
+#;	If ##class(Strix.Lib.File).IsPathAbsolute(Project.ProjectPath) {
+#;		Set Path = Project.ProjectPath
+#;	} Else {
+#;		Set Path = ##class(Strix.Lib.File).AppendPath(Config.BasePath, Project.ProjectPath)
+#;	}
+#;	If '##class(%File).DirectoryExists(Path) {
+#;		Quit $$$BuildErr("Project directory '{}' does not exist; please create it first.",, Path)
+#;	}
 	
 	#dim Handlers As %ListOfDataTypes
 	Set sc = ##class(Strix.SCM.HandlerProxy).GetHandlers(.Handlers)
@@ -412,7 +412,7 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	
 	;Check config file
 	Set ConfigFilePath = Project.ConfigFilePath
-	If '##class(Strix.Lib.File).IsPathAbsolute(ConfigFilePath) {
+	If ConfigFilePath '= "", '##class(Strix.Lib.File).IsPathAbsolute(ConfigFilePath) {
 		Set ConfigFilePath = ##class(%File).SubDirectoryName(Config.BasePath, ConfigFilePath)
 	}
 	

@@ -15,7 +15,7 @@ Property GUID As %String [ InitialExpression = {$System.Util.CreateGUID()} ];
 // ===== Local information not present in configuration file
 
 /// The location of the external configuration file.
-Property ConfigFilePath As %String(MAXLEN = 512, XMLPROJECTION = "NONE") [ Required ];
+Property ConfigFilePath As %String(MAXLEN = 512, XMLPROJECTION = "NONE");
 
 // ===== Global information from configuration file
 
@@ -164,6 +164,9 @@ Method CopyFrom(Other As Strix.SCM.Project) [ CodeMode = objectgenerator ]
 /// the configuration file in the working copy.
 Method %OnAfterSave(Insert As %Boolean) As %Status [ Private, ServerOnly = 1 ]
 {
+	; If we're not using a config file, we're done
+	If ..ConfigFilePath = "" Quit $$$OK
+	
 	;If this is an insert and a config file already exists, we're loading that file.
 	;In this case, don't overwrite the file.
 	If Insert, ##class(%File).Exists(..ConfigFilePath) Quit $$$OK
@@ -323,10 +326,7 @@ Method GetExportFilename(ItemName As %String, Output Directory As %String, Outpu
 	Set Filename = Filename_"."_Type
 	If '..ExportUDL Set Filename = Filename_".xml"
 	
-	Set FullPath = ##class(%File).SubDirectoryName(Directory, Filename)
-	
-	Set ok = ##class(%File).CreateDirectoryChain(Directory)
-	If 'ok Set Status = $$$BuildErr("Can't create directory chain '"_Directory_"'", 1)
+	Set FullPath = ##class(Strix.Lib.File).AppendPath(Directory, Filename)
 	
 	Quit FullPath
 }
@@ -568,7 +568,7 @@ Storage Default
 <IdLocation>^Strix.SCM.ProjectD</IdLocation>
 <IndexLocation>^Strix.SCM.ProjectI</IndexLocation>
 <StreamLocation>^Strix.SCM.ProjectS</StreamLocation>
-<Type>%Library.CacheStorage</Type>
+<Type>%Storage.Persistent</Type>
 }
 
 }

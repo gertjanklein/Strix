@@ -179,7 +179,7 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 		If Version '= "" Set Version = "/exportversion="_Version
 		Set sc = $System.OBJ.Export(Item, Stream.Filename, "-d/diffexport"_Version)
 	}
-	If 'sc Quit $$$BuildStatus("Error exporting:", sc)
+	If 'sc Quit $$$BuildStatus("Error exporting {}:", sc, Item)
 	
 	; Call processors in order
 	For i = 1:1:Processors.Count() {
@@ -189,6 +189,10 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 		Set Stream = Processor.ProcessExport(Item, Stream, .sc)
 		If 'sc Return $$$BuildStatus("Error processing '{}':", sc, Item)
 	}
+	
+	; Make sure output directory exists
+	Set sc = ##class(Strix.Lib.File).EnsureDirectory(Filename)
+	If 'sc Quit $$$BuildStatus("Error exporting {}:", sc, Item)
 	
 	; Save resulting data to 
 	Set Output = ##class(%Stream.FileBinary).%New()
