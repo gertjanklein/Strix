@@ -16,8 +16,6 @@ Property Credentials As %List [ Transient ];
 
 // =====
 
-/// Returns a %List of settings applicable to this class. Each setting
-/// is returned as a %List with: name, type, origin
 ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
 {
 	Set Result = ""
@@ -25,6 +23,10 @@ ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
 	;Get list of settings to save in config file
 	Set GlobalSettings = $ListFromString(##class(Strix.Generator.Utilities).GetParameterValue(%compiledclass, "GlobalSettings"))
 	
+	; Initialize weight in superclass hierarchy
+	Set Levels("Strix.SCM.Handler.Base") = 1
+	
+	; Find appropriate properties and sort them
 	Set Key = ""
 	For  {
 		#dim Prop As %Dictionary.CompiledProperty
@@ -39,6 +41,34 @@ ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
 		; considered a setting.
 		If Prop.Transient Continue
 		
+		; Find the origin class' level for sorting
+		Set Origin = Prop.Origin
+		If '$Data(Levels(Origin), Level) {
+			; Determine level in superclass hierarchy. 0 is the base file; 1 a
+			; direct subclass, 2 a subclass of a subclass, etc.; used for sorting.
+			Set Level = 0
+			Set SuperList = $$$comClassKeyGet(Origin, $$$cCLASSprimarysuper)
+			For i = $Length(SuperList, "~"):-1:1 {
+				Set Super = $Piece(SuperList, "~", i)
+				If Level {
+					Set Level = Level + 1
+					If Super = Origin Quit
+				} Else {
+					If Super = "Strix.SCM.Handler.Base" Set Level = 1
+				}
+			}
+			Set Levels(Origin) = Level
+		}
+		
+		Set OrderKey = $Justify(Level,2)_$Justify(+Prop.SequenceNumber,3)_Prop.Name
+		Set Ordered(OrderKey) = Prop
+	}
+	
+	Set Key = ""
+	For  {
+		Set Key = $Order(Ordered(Key), 1, Prop)
+		If Key = "" Quit
+		
 		If Result '= "" Set Result = Result_","
 		
 		Set Name = Prop.Name
@@ -50,6 +80,7 @@ ClassMethod GetSettings() As %List [ CodeMode = objectgenerator ]
 		
 		Set Result = Result_"$lb("""_Name_""","""_Type_""","""_Origin_""","_IsGlobal_")"
 	}
+	
 	
 	If Result '= "" {
 		Set Result = "Quit $lb("_Result_")"

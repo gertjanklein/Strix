@@ -9,6 +9,11 @@ Property GitPath As %String;
 /// Full path and filename of the TortoiceGitProc.exe executable.
 Property GitGuiPath As %String;
 
+/// Base directory of the repostory (i.e., the one containing the
+/// ".git" directory). Some GUI commands only operate on this
+/// directory.
+Property RepositoryDir As %String(MAXLEN = 512);
+
 /// Full path to release base directory; releases are created below it.
 Property ReleasePath As %String;
 
@@ -25,11 +30,6 @@ Property ReleaseName As %String;
 /// • RemoveEnsProd: Removes Ensemble Production classes from the export.
 /// • Zip: Zips the release directory.
 Property PostProcessors As %String(MAXLEN = 80);
-
-/// Base directory of the repostory (i.e., the one containing the
-/// ".git" directory). Some GUI commands only operate on this
-/// directory.
-Property RepositoryDir As %String(MAXLEN = 512);
 
 // =====
 
