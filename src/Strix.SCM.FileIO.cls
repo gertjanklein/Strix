@@ -16,7 +16,7 @@ Property Item As %String;
 // =====
 
 /// Exports a single item to disk
-Method ExportItem(Output Filename As %String) As %Status
+Method ExportItem(Output Filename As %String, Output Action As %Integer, Output Target As %String) As %Status
 {
 	Set Filename = ..Project.GetExportFilename(..Item, , , .Status)
 	If 'Status Quit Status
@@ -31,7 +31,7 @@ Method ExportItem(Output Filename As %String) As %Status
 }
 
 /// Exports data for a class to disk
-Method ExportClassData(Output Filename As %String) As %Status
+Method ExportClassData(Output Filename As %String, Output Action As %Integer, Output Target As %String) As %Status
 {
 	;Item is a class; we must change type to stg for filename.
 	Set ClassName = ..Item
@@ -161,6 +161,8 @@ Method ImportProject(Quiet As %Boolean = 0) As %Status
 	
 	Quit $$$OK
 }
+
+// =====
 
 /// Exports an item, running post-processors if configured.
 Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, Filename As %String) As %Status

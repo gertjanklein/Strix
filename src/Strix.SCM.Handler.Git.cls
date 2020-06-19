@@ -26,6 +26,11 @@ Property ReleaseName As %String;
 /// • Zip: Zips the release directory.
 Property PostProcessors As %String(MAXLEN = 80);
 
+/// Base directory of the repostory (i.e., the one containing the
+/// ".git" directory). Some GUI commands only operate on this
+/// directory.
+Property RepositoryDir As %String(MAXLEN = 512);
+
 // =====
 
 Method UserAction(Type As %Integer, Name As %String, InternalName As %String, SelectedText As %String, ByRef Action As %String, ByRef Target As %String, ByRef Msg As %String, ByRef Reload As %Boolean) As %Status
@@ -151,24 +156,24 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	}
 	
 	
-	;===== Delete item
-	
-	If Name = "Source control,Delete", AsItem {
-		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
-		If 'Status Quit Status
-		
-		If ##class(%File).Exists(Filename) {
-			;Delete from source control
-			Set Output = ..GetCommandOutput(Project.GetProjectPath(), "rm --force --quiet """_Filename_"""", , .ErrorMsg)
-			If ErrorMsg '= "" Write !,"=== Error deleting "_Filename_":",!,ErrorMsg,! Quit $$$OK
-			Write !,"=== Deleted "_Filename_"."
-		}
-		
-		Set Status = $System.OBJ.Delete(InternalName, "d")
-		If 'Status Quit Status
-		
-		Quit $$$OK
-	}
+#;	;===== Delete item
+#;	
+#;	If Name = "Source control,Delete", AsItem {
+#;		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
+#;		If 'Status Quit Status
+#;		
+#;		If ##class(%File).Exists(Filename) {
+#;			;Delete from source control
+#;			Set Output = ..GetCommandOutput(Project.GetProjectPath(), "rm --force --quiet """_Filename_"""", , .ErrorMsg)
+#;			If ErrorMsg '= "" Write !,"=== Error deleting "_Filename_":",!,ErrorMsg,! Quit $$$OK
+#;			Write !,"=== Deleted "_Filename_"."
+#;		}
+#;		
+#;		Set Status = $System.OBJ.Delete(InternalName, "d")
+#;		If 'Status Quit Status
+#;		
+#;		Quit $$$OK
+#;	}
 	
 	
 	;== Make release
@@ -220,7 +225,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 // =====
 
 /// Appends this handlers menus to those of the superclass.
-ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
 {
 	;Get items for file handler
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
@@ -229,19 +234,33 @@ ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedT
 	;Items is a list of lists containing:
 	;  Name, Enabled, Save before execute, is separator
 	
-	;Append subversion-specific items
-	Set Items = Items_$lb(
-	  $lb("", 1, 0, 1),
-	  $lb("ShowDiff", 1, 0, 0),
-	  $lb("ShowItemLog", 1, 1, 0),
-	  $lb("Delete", 1, 1, 0),
-	  $lb("", 1, 0, 1),
-	  $lb("ShowLog", 1, 0, 0),
-	  $lb("Checkin", 1, 1, 0),
-	  $lb("", 1, 0, 1),
-	  $lb("CreateTag", 1, 1, 0),
-	  $lb("MakeRelease", 1, 1, 0),
-	)
+	;Append git-specific items
+	Set IsRemote = ..FileIO.%ClassName(0) = "RemoteFileIO"
+	If 'IsRemote {
+		Set Items = Items_$lb(
+		  $lb("", 1, 0, 1),
+		  $lb("ShowDiff", 1, 0, 0),
+		  $lb("ShowItemLog", 1, 1, 0),
+		  $lb("Delete", 1, 1, 0),
+		  $lb("", 1, 0, 1),
+		  $lb("ShowLog", 1, 0, 0),
+		  $lb("Checkin", 1, 1, 0),
+		  $lb("", 1, 0, 1),
+		  $lb("CreateTag", 1, 1, 0),
+		  $lb("MakeRelease", 1, 1, 0),
+		)
+	} Else {
+		Set Items = Items_$lb(
+		  $lb("", 1, 0, 1),
+		  $lb("ShowDiff", 1, 0, 0),
+		  $lb("ShowItemLog", 1, 1, 0),
+		  $lb("", 1, 0, 1),
+		  $lb("ShowLog", 1, 0, 0),
+		  $lb("Checkin", 1, 1, 0),
+		  $lb("", 1, 0, 1),
+		  $lb("CreateTag", 1, 1, 0),
+		)
+	}
 	
 	Quit Items
 }
@@ -328,8 +347,11 @@ Method HandlePostProcessors(Project As Strix.SCM.Project, Tag As %String, Releas
 
 // =====
 
-ClassMethod DetermineGitRoot(ProjectPath As %String, Output Found As %Boolean) As %String
+Method DetermineGitRoot(ProjectPath As %String, Output Found As %Boolean) As %String
 {
+	If ..RepositoryDir '= "" Set Found = 1 Quit ..RepositoryDir
+	If ..FileIO.%ClassName(0) = "RemoteFileIO" Set Found = 0 Quit ""
+	
 	Set Path = ProjectPath, Found = 0, Prev = ""
 	For  {
 		Set Tmp = ##class(%File).SubDirectoryName(Path, ".git")

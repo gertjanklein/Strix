@@ -45,9 +45,13 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Export item
 	
 	If Name = "Source control,ExportItem", AsItem {
-		Set Status = ..FileIO.ExportItem(.Filename)
+		Set Status = ..FileIO.ExportItem(.Filename, .Action, .Target)
 		If 'Status Quit Status
-		Write !,"== "_InternalName_" exported to "_Filename_"."
+		If Action {
+			Write !,"== Launched "_Target
+		} Else {
+			Write !,"== "_InternalName_" exported to "_Filename_"."
+		}
 		Quit $$$OK
 	}
 	
@@ -96,6 +100,12 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Reload item
 	
 	If Name = "Source control,LoadItem", AsItem {
+		If ..FileIO.%ClassName(0) = "RemoteFileIO" {
+			Set Status = ..FileIO.LoadItem(.Filename, .Action, .Target)
+			If 'Status Quit Status
+			Write !,"== Launched "_Target
+			Quit $$$OK
+		}
 		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
 		If 'Status Quit Status
 		Set Action = 1 ;Yes/no/cancel
@@ -135,6 +145,12 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
 {
 	Set Reload = 0
+	
+	If ..FileIO.%ClassName(0) = "RemoteFileIO" {
+		Write "== Action not supported for remote file io."
+		Quit $$$OK
+	}
+	
 	
 	;Studio-generated action (as opposed to menu item)
 	If Type = 1 Quit $$$OK
@@ -257,6 +273,7 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 {
 	If '..SyncToDisk Quit $$$OK
 	If InternalName = "" Quit $$$OK
+	If ..FileIO.%ClassName(0) = "RemoteFileIO" Quit $$$OK
 	
 	#dim Project As Strix.SCM.Project
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
@@ -283,6 +300,7 @@ Method OnAfterDelete(InternalName As %String) As %Status
 {
 	If '..SyncToDisk Quit $$$OK
 	If InternalName = "" Quit $$$OK
+	If ..FileIO.%ClassName(0) = "RemoteFileIO" Quit $$$OK
 	
 	; Get project this item belongs to
 	#dim Project As Strix.SCM.Project
@@ -312,7 +330,7 @@ Method OnAfterDelete(InternalName As %String) As %Status
 /// Returns a list of menu items for the top-level menu. In addition to
 /// the menu name, the name of the current document and the currently
 /// selected text are passed in.
-ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
 {
 	Set Status = $$$OK
 	
@@ -322,19 +340,32 @@ ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedT
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
-	Set Items = Items_$lb(
-	  ;Name, Enabled, Save before execute, is separator
-  	$lb("", 1, 0, 1),
-	  $lb("EditProject", 1, 0, 0),
-  	$lb("OpenFolder", 1, 0, 0),
-	  $lb("ExportProject", 1, 1, 0),
-	  $lb("ImportProject", 1, 0, 0),
-  	$lb("", 1, 0, 1),
-	  $lb("ExportItem", 1, 1, 0),
-	  $lb("ExportData", 0, 0, 0),
-	  $lb("LoadItem", 1, 1, 0),
-	  $lb("LoadData", 0, 0, 0)
-	)
+	Set IsRemote = ..FileIO.%ClassName(0) = "RemoteFileIO"
+	If 'IsRemote {
+		Set Items = Items_$lb(
+		  ;Name, Enabled, Save before execute, is separator
+	  	$lb("", 1, 0, 1),
+		  $lb("EditProject", 1, 0, 0),
+	  	$lb("OpenFolder", 1, 0, 0),
+		  $lb("ExportProject", 1, 1, 0),
+		  $lb("ImportProject", 1, 0, 0),
+	  	$lb("", 1, 0, 1),
+		  $lb("ExportItem", 1, 1, 0),
+		  $lb("ExportData", 0, 0, 0),
+		  $lb("LoadItem", 1, 1, 0),
+		  $lb("LoadData", 0, 0, 0)
+		)
+	} Else {
+		Set Items = Items_$lb(
+		  ;Name, Enabled, Save before execute, is separator
+	  	$lb("", 1, 0, 1),
+		  $lb("EditProject", 1, 0, 0),
+	  	$lb("OpenFolder", 1, 0, 0),
+	  	$lb("", 1, 0, 1),
+		  $lb("ExportItem", 1, 1, 0),
+		  $lb("LoadItem", 1, 1, 0)
+		)
+	}
 	
 	Quit Items
 }

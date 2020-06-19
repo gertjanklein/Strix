@@ -196,7 +196,7 @@ ClassMethod GetMainMenus(Output Status As %Status) As %List
 }
 
 /// Returns the menu items for a given menu and document
-ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
 {
 	Set Status = $$$OK
 	

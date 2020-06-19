@@ -2,48 +2,72 @@
 Class Strix.SCM.RemoteFileIO Extends Strix.SCM.FileIO
 {
 
-/// Loads all project members form the configured directory.
-/// This is unimplemented in remote configuration.
+/// Exports an item, running post-processors if configured.
+Method ExportItem(Output Filename As %String, Output Action As %Integer, Output Target As %String) As %Status
+{
+	If ..Handler.FileHandler = "" Set Status = $$$BuildStatus("FileHandler not configured.") Quit ""
+	
+	If '..Project.ExportUDL {
+		Quit $$$BuildStatus("XML export not implemented for remote site.")
+	}
+	
+	Set Filename = ..Project.GetExportFilename(..Item,,,.sc)
+	If 'sc Quit sc
+	
+	Set Action = 3
+	Set Target = ..GetIOCommand("GET", ..Item, Filename)
+	
+	Quit $$$OK
+}
+
+/// Exports data for a class to disk
+Method ExportClassData(Output Filename As %String) As %Status
+{
+	Quit $$$ERROR($$$NotImplemented)
+}
+
+Method LoadItem(Output Filename As %String, Output Action As %Integer, Output Target As %String) As %Status
+{
+	If ..Handler.FileHandler = "" Set Status = $$$BuildStatus("FileHandler not configured.") Quit ""
+	
+	If '..Project.ExportUDL {
+		Quit $$$BuildStatus("XML import not implemented for remote site.")
+	}
+	
+	Set Filename = ..Project.GetExportFilename(..Item,,,.sc)
+	If 'sc Quit sc
+	
+	Set Action = 3
+	Set Target = ..GetIOCommand("PUT", ..Item, Filename)
+	
+	Quit $$$OK
+}
+
+/// Loads data for a class from disk
+Method LoadClassData(Output Filename As %String) As %Status
+{
+	Quit $$$ERROR($$$NotImplemented)
+}
+
+/// Exports an entire project to disk
+Method ExportProject(Quiet As %Boolean = 0) As %Status
+{
+	Quit $$$ERROR($$$NotImplemented)
+}
+
+/// Loads all project members form the configured directory
 Method ImportProject(Quiet As %Boolean = 0) As %Status
 {
 	Quit $$$ERROR($$$NotImplemented)
 }
 
-/// Exports an item, running post-processors if configured.
-Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, Filename As %String) As %Status
-{
-	If AsUDL = 0 {
-		Quit $$$BuildStatus("XML export not implemented for remote site.")
-	}
-	
-	Set sc = ..ItemIO("GET", Item, Filename)
-	If 'sc Quit sc
-	
-	Quit $$$OK
-}
-
-Method Import(Filename As %String, Item As %String, Flags As %String = "ck-d") As %Status
-{
-	; Load external file
-	Set sc = ..ItemIO("PUT", Item, Filename)
-	If 'sc Quit sc
-	
-	; Compile
-	If $Piece(Flags, "/") [ "c", $$$NormalizedType(Item) = "cls" {
-		Set sc = $System.OBJ.Compile($$$ItemName(Item), Flags)
-		If 'sc Quit $$$BuildStatus("Error compiling {}:", sc, Item)
-	}
-	
-	Quit $$$OK
-}
+// =====
 
 /// Performs item I/O using the remote file transfer helper.
-Method ItemIO(Command As %String, Item As %String, Filename As %String) As %Status
+Method GetIOCommand(Command As %String, Item As %String, Filename As %String) As %String
 {
-	; Split executable in directory and file
-	Set Dir = ##class(%File).GetDirectory(..Handler.FileHandler)
-	Set Executable = ##class(%File).GetFilename(..Handler.FileHandler)
-	Set Executable = ##class(%File).NormalizeFilenameWithSpaces(Executable)
+	Set Executable = $Replace(..Handler.FileHandler, "/", "\")
+	If Executable [ " " Set Executable = $$$Quote(Executable)
 	
 	Set Url = ..GetServerUrl(Item)
 	If Command = "PUT" Set Url = Url_"?ignoreConflict=1"
@@ -54,17 +78,8 @@ Method ItemIO(Command As %String, Item As %String, Filename As %String) As %Stat
 	Set Creds = $System.Encryption.Base64Encode(Creds)
 	
 	Set Command = $$$BuildStr("{} {} {} {} {}", Executable, Command, Url, $$$Quote(Filename), Creds)
-	;Write !,$Length(Command)_": "_Command
 	
-	; Get output and determine if there's an error
-	Set Result = ##class(Strix.Lib.IO).GetCommandOutput(Command, , Dir, .ErrorMsg)
-	If ErrorMsg '= "" Quit $$$BuildStatus("Error running file transporter: {}",, ErrorMsg)
-	If $Match(Result, "^(Error|Usage).*") {
-		Quit $$$BuildStatus("Error from file transporter: {}",, Result)
-	}
-	;Write !,">>> "_Result
-	
-	Quit $$$OK
+	Quit Command
 }
 
 /// Returns the server URL for the current Studio connection.

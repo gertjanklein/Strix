@@ -248,7 +248,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 // =====
 
 /// Appends this handlers menus to those of the superclass.
-ClassMethod GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
+Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
 {
 	;Get items for file handler
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
