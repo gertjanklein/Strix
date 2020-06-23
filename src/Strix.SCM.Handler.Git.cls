@@ -219,6 +219,13 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 		
 	}
 	
+	If Enabled {
+		;Check if GUI executable present
+		Set HasGuiCmd = ##class(%File).Exists(..GitGuiPath)
+		Set NeedsGui = $ListFromString("Checkin,ShowLog,ShowItemLog,ShowDiff,CreateTag")
+		If 'HasGuiCmd, $ListFind(NeedsGui, ItemName) Set Enabled = 0
+	}
+	
 	Quit $$$OK
 }
 
@@ -231,11 +238,10 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
+	Set IsRemote = ..FileIO.%ClassName(0) = "RemoteFileIO"
+	
 	;Items is a list of lists containing:
 	;  Name, Enabled, Save before execute, is separator
-	
-	;Append git-specific items
-	Set IsRemote = ..FileIO.%ClassName(0) = "RemoteFileIO"
 	If 'IsRemote {
 		Set Items = Items_$lb(
 		  $lb("", 1, 0, 1),

@@ -242,6 +242,15 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 		
 	}
 	
+	If Enabled {
+		;Check if GUI executable present
+		Set Dir = ##class(%File).GetDirectory(..SvnPath)
+		Set Executable = ##class(%File).SubDirectoryName(Dir, "TortoiseProc.exe")
+		Set HasGuiCmd = ##class(%File).Exists(Executable)
+		Set NeedsGui = $ListFromString("Checkin,ShowLog,ShowItemLog,ShowDiff")
+		If 'HasGuiCmd, $ListFind(NeedsGui, ItemName) Set Enabled = 0
+	}
+	
 	Quit $$$OK
 }
 
