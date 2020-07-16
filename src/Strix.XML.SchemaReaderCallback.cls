@@ -191,13 +191,6 @@ Method RenameProperty(NewName As %String) As %Status
 	Quit $$$OK
 }
 
-/// Sets a property parameter for the current class
-Method SetPropertyParameter(Name As %String, Value As %String) As %Status
-{
-	Set @..PropertyNode@("Parameter", Name) = Value
-	Quit $$$OK
-}
-
 /// Sets a property required flag
 Method SetPropertyRequired(Required As %Boolean = 1) As %Status
 {
@@ -209,6 +202,19 @@ Method SetPropertyRequired(Required As %Boolean = 1) As %Status
 Method GetPropertyCollection() As %String
 {
 	Quit @..PropertyNode@("Collection")
+}
+
+/// Gets a property parameter for the current property
+Method GetPropertyParameter(Name As %String) As %String
+{
+	Quit $Get(@..PropertyNode@("Parameter", Name))
+}
+
+/// Sets a property parameter for the current property
+Method SetPropertyParameter(Name As %String, Value As %String) As %Status
+{
+	Set @..PropertyNode@("Parameter", Name) = Value
+	Quit $$$OK
 }
 
 // ===== Additional helpers
