@@ -37,11 +37,8 @@ Method Matches(Item As %String, Output AsItem As %Boolean, Output AsStorage As %
 	; here, and just ignore.
 	If ItemName = "" Quit 0
 	
-	If ItemType = "cls" {
-		;If this is a generated class, ignore it
-		If $$$defClassKeyGet(ItemName,$$$cCLASSgeneratedby) '= "" Quit 0
-	}
-	
+	; Some generated items may need to be exported, but most won't
+	Set IsGenerated = (ItemType = "cls") && ($$$defClassKeyGet(ItemName,$$$cCLASSgeneratedby) '= "")
 	
 	;Treat BPL and DTL types as the classes they are
 	If "bpl,dtl" [ ItemType Set $$$ItemType(Item) = "cls"
@@ -65,7 +62,11 @@ Method Matches(Item As %String, Output AsItem As %Boolean, Output AsStorage As %
 			If $$$ItemType(Spec) = "stg" Continue
 			
 			Set Pattern = ..MakePattern(Spec)
-			If Item ?@Pattern Set Found = 1 Quit
+			If Item ?@Pattern {
+				; Skip generated classes, unless they are specified explicity
+				If IsGenerated, Spec [ "*" Continue
+				Set Found = 1 Quit
+			}
 		}
 		If Found Set AsItem = 1
 	}

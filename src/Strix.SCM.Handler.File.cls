@@ -292,7 +292,35 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 /// Compilation may have changed storage.
 Method OnAfterCompile(InternalName As %String) As %Status
 {
-	Quit ..OnAfterSave(InternalName)
+	If '..SyncToDisk Quit $$$OK
+	If InternalName = "" Quit $$$OK
+	If ..FileIO.%ClassName(0) = "RemoteFileIO" Quit $$$OK
+	
+	; Normal processing first
+	Set sc = ..OnAfterSave(InternalName)
+	If 'sc Quit sc
+	
+	; Do the rest below only for BPLs
+	
+	Set Type = $$$NormalizedType(InternalName), ItemName = $$$ItemName(InternalName)
+	If Type '= "bpl" {
+		If Type '= "cls" Quit $$$OK
+		If $$$comClassKeyGet(ItemName,$$$cCLASSprimarysuper) '[ "~Ens.BusinessProcessBPL~" Quit $$$OK
+	}
+	
+	; Check if the Context class belonging to the BP is specified
+	Set ItemName = ItemName_".Context.cls"
+	If '..FileIO.Project.OwnsItem(ItemName, .AsItem) Quit $$$OK
+	If 'AsItem Quit $$$OK
+	
+	; We are expected to export the context class as well; do so:
+	Set ..FileIO.Item = ItemName
+	Set sc = ..FileIO.ExportItem(.Filename)
+	Set ..FileIO.Item = InternalName
+	If 'sc Quit sc
+	Write !,"== "_..FileIO.Item_" exported to "_Filename_"."
+	
+	Quit $$$OK
 }
 
 /// Delete on-disk version as well.
