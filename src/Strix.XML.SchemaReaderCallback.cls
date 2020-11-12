@@ -127,6 +127,12 @@ Method RemoveClass() As %Status
 	Quit $$$OK
 }
 
+/// Gets a parameter for the current class
+Method GetClassParameter(Name As %String) As %String
+{
+	Quit $Get(@..ClassNode@("Parameter", Name))
+}
+
 /// Sets a parameter for the current class
 Method SetClassParameter(Name As %String, Value As %String) As %Status
 {
@@ -174,6 +180,17 @@ Method GetClassType(Output NamespaceIdx As %Integer) As %String
 	Quit Type
 }
 
+/// Sets the abstract flag for a class
+Method SetClassAbstract(Abstract As %Boolean) As %Status
+{
+	If Abstract {
+		Set @..ClassNode@("abstract") = ""
+	} Else {
+		Kill @..ClassNode@("abstract")
+	}
+	Quit $$$OK
+}
+
 // -----
 
 /// Changes the name of the current property.
@@ -204,6 +221,12 @@ Method GetPropertyCollection() As %String
 	Quit @..PropertyNode@("Collection")
 }
 
+/// Sets the collection ("list", "array", "") for the current property
+Method SetPropertyCollection(Collection As %String)
+{
+	Set @..PropertyNode@("Collection") = Collection
+}
+
 /// Gets a property parameter for the current property
 Method GetPropertyParameter(Name As %String) As %String
 {
@@ -215,6 +238,12 @@ Method SetPropertyParameter(Name As %String, Value As %String) As %Status
 {
 	Set @..PropertyNode@("Parameter", Name) = Value
 	Quit $$$OK
+}
+
+/// Sets the type for the current property
+Method SetPropertyType(Type As %String)
+{
+	Set @..PropertyNode@("Type") = Type
 }
 
 // ===== Additional helpers
@@ -325,6 +354,7 @@ Method ProcessParseTree(ClassTree As %String) As %Status [ Internal ]
 		If $Get(@..ClassNode@("Removed")) Continue
 		
 		Set ..ClassName = $Get(@..ClassNode@("ClassName"))
+		If ..ClassName = "" Continue
 		
 		Set sc = ..ProcessClassNode(..ClassName)
 		If 'sc Return $$$BuildStatus("Error processing class '{}':", sc, ..ClassName)
