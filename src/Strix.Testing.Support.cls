@@ -131,5 +131,27 @@ ClassMethod KillExtent(ClassName As %String) As %Status
 	Quit $$$OK
 }
 
+/// Parses an XData block passed in by id, an returns all objects in it
+/// with the specified element/classname.
+ClassMethod XDataToObjects(XDataId As %String, ElementName As %String, ClassName As %String, Objects As %ListOfObjects) As %Status
+{
+	If '$IsObject(Objects) Set Objects = ##class(%ListOfObjects).%New()
+	
+	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(XDataId,, .sc)
+	If 'sc Quit $$$BuildStatus("Error opening XData '{}':", sc, XDataId)
+	
+	Set Reader = ##class(%XML.Reader).%New()
+	Set sc = Reader.OpenStream(XData.Data)
+	If 'sc Quit $$$BuildStatus("Error parsing XData '{}' as XML:", sc, XDataId)
+	
+	Do Reader.Correlate(ElementName, ClassName)
+	While Reader.Next(.Object, .sc) {
+		Do Objects.Insert(Object)
+	}
+	If 'sc Quit $$$BuildStatus("Error correlating object from XData '{}':", sc, XDataId)
+	
+	Quit $$$OK
+}
+
 }
 
