@@ -3,8 +3,6 @@
 Class Strix.Testing.Result Extends (%SerialObject, %XML.Adaptor)
 {
 
-Parameter XMLNAME = "Result";
-
 /// The type of info:
 /// Pass: an assertion was correct
 /// Fail: an assertion failed
