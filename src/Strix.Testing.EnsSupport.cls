@@ -79,7 +79,7 @@ ClassMethod CheckErrorStatus(SessionId As %String, Output Id As %String, Output 
 	
 	Set Id = rs.Id
 	Set Type = ##class(Ens.DataType.MessageType).LogicalToDisplay(rs.Type)
-	Set MessageDesc = Type_" "_rs.SourceConfigName_" -> "_rs.TargetConfigName
+	Set MessageDesc = Type_" "_rs.SourceConfigName_" ⭢ "_rs.TargetConfigName
 	Set Status = rs.ErrorStatus
 	
 	Quit 1
