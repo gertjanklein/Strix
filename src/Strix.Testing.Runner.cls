@@ -16,6 +16,9 @@ Property TestRunStart As %TimeStamp [ InitialExpression = {$ZDateTime($ZTimestam
 /// Date/time the test run finished
 Property TestRunDone As %TimeStamp;
 
+/// The test specification: which test(s) were run
+Property TestSpec As %String(MAXLEN = 500);
+
 /// Information on test failures, trapped errors, etc.
 Property Results As list Of Strix.Testing.Result(STORAGEDEFAULT = "array");
 
@@ -92,6 +95,8 @@ ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolea
 /// Run all tests in this namespace
 Method RunAll()
 {
+	Set ..TestSpec = "All"
+	
 	Set stm = ##class(%SQL.Statement).%New()
 	Set sc = stm.%PrepareClassQuery("%Dictionary.ClassDefinitionQuery","SubclassOf")
 	If 'sc {
@@ -115,6 +120,8 @@ Method RunAll()
 /// Run all tests in a package
 Method RunPackage(Package As %String)
 {
+	Set ..TestSpec = "Package:"_Package
+	
 	Set sc = $System.OBJ.GetPackageList(.Classes, Package, "/includesubpackages")
 	If 'sc {
 		Do ..RecordError("Error creating list of classes in '{}'", sc, Package)
@@ -143,6 +150,8 @@ Method RunPackage(Package As %String)
 /// Runs test methods in the specified subclass of Strix.Testing.TestCase
 Method RunClass(ClassName As %String, TestToRun As %String = "")
 {
+	Set ..TestSpec = $Select(TestToRun '= "": "Method:"_ClassName_":"_TestToRun, 1:"Class:"_ClassName)
+	
 	Set ..CurrentTestClass = ClassName, ..CurrentTestMethod = ""
 	Set ..TestCases = ..TestCases + 1
 	
@@ -192,7 +201,7 @@ Method RunClass(ClassName As %String, TestToRun As %String = "")
 	Quit
 }
 
-/// Runs a single test method on the test object. Traps and returns any error.
+/// Internal method: runs a single test method on the test object.
 Method RunMethod(TestObject As Strix.Testing.TestCase, MethodName As %String, Output Failed As %Integer, Output Errors As %Integer)
 {
 	Set $ZTrap = "Error"
@@ -511,6 +520,9 @@ Storage Default
 </Value>
 <Value name="10">
 <Value>Errors</Value>
+</Value>
+<Value name="11">
+<Value>TestSpec</Value>
 </Value>
 </Data>
 <DataLocation>^Strix.Testing.RunnerD</DataLocation>
