@@ -1,7 +1,9 @@
-/// This class records information about a testing 'event': a
-/// test failure, an error in setup code, etc.
-Class Strix.Testing.Info Extends %SerialObject
+/// This class records information about a testing 'event': an
+/// assertion passed/failed, an error in setup code, etc.
+Class Strix.Testing.Info Extends (%SerialObject, %XML.Adaptor)
 {
+
+Parameter XMLNAME = "Result";
 
 /// The type of info:
 /// Pass: an assertion was correct
@@ -12,27 +14,27 @@ Class Strix.Testing.Info Extends %SerialObject
 Property Type As %String(VALUELIST = ",Pass,Fail,Skip,Error,Log") [ Required ];
 
 /// The test class this information is related to
-Property ClassName As %String;
+Property ClassName As %String(MAXLEN = 220);
 
 /// The test method this info is related to
-Property MethodName As %String;
+Property MethodName As %String(MAXLEN = 180);
 
 /// For background tests, the location where the actual assertion
 /// was checked (in the form ClassName:MethodName)
-Property BackgroundLocation As %String(MAXLEN = 100);
+Property BackgroundLocation As %String(MAXLEN = 401);
 
 /// The type of test that was performed:
 /// Assert[Not]Equal, AssertTrue, AssertFalse, AssertStatusOk, AssertStatusFail
 Property AssertionType As %String;
 
 /// Expected result of the test (if appropriate)
-Property Expected As %String;
+Property Expected As %String(MAXLEN = 4000, TRUNCATE = 1);
 
 /// Actual result of the test (if appropriate)
-Property Result As %String;
+Property Result As %String(MAXLEN = 4000, TRUNCATE = 1);
 
 /// Description of the test or log line
-Property Description As %String;
+Property Description As %String(MAXLEN = 1000);
 
 /// The error status for type Error
 Property Status As %Status;

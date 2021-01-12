@@ -1,6 +1,6 @@
 Include Strix
 
-Class Strix.Testing.Runner Extends %RegisteredObject
+Class Strix.Testing.Runner Extends (%Persistent, %XML.Adaptor)
 {
 
 // =====
@@ -11,7 +11,7 @@ Property Debug As %Boolean [ InitialExpression = 0 ];
 // =====
 
 /// Date/time the test run started
-Property TestRunStart As %TimeStamp [ InitialExpression = {$ZDateTime($ZUtil(188), 3, 1, 3)} ];
+Property TestRunStart As %TimeStamp [ InitialExpression = {$ZDateTime($ZTimestamp, 3, 1, 3)} ];
 
 /// Date/time the test run finished
 Property TestRunDone As %TimeStamp;
@@ -47,41 +47,79 @@ Property CurrentTestMethod As %String [ Internal, Transient ];
 
 // =====
 
-/// Runs all tests in the specified package.
-ClassMethod Run(Package As %String, Debug As %Boolean = 0, Output Runner As Strix.Testing.Runner) As %Status
+/// Terminal entry. Runs the specified tests. The test specification
+/// may be:
+/// - Empty: all tests in the current namespace are run.
+/// - A class name: all tests in the class are run
+/// - A methodname (in the form ClassName:MethodName): that test is run
+/// - A package name: all tests in that package are run.
+/// If a class with the same name as the package to run the tests in
+/// exists, force using the package by appending ".pkg".
+ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolean = 0) As %Status
 {
 	Set Runner = ..%New()
 	Set Runner.Debug = Debug
 	
-	Set (ClassName, MethodName) = ""
-	If Package [ ":" {
-		Set ClassName = $Piece(Package, ":", 1)
-		Set MethodName = $Piece(Package, ":", 2)
+	; If no spec, run all tests
+	If TestSpec = "" {
+		Do Runner.RunAll()
 		
-	} ElseIf ##class(%Dictionary.ClassDefinition).%ExistsId(Package) {
-		Set ClassName = Package
+	} ElseIf $Extract(TestSpec, *-3, *) = ".pkg" {
+		; Forced package
+		Do Runner.RunPackage($Extract(TestSpec, 1, *-4))
+		
+	} ElseIf TestSpec [ ":" {
+		; Specific test method
+		Set ClassName = $Piece(TestSpec, ":", 1)
+		Set MethodName = $Piece(TestSpec, ":", 2)
+		Do Runner.RunClass(ClassName, MethodName)
+		
+	} ElseIf ##class(%Dictionary.ClassDefinition).%ExistsId(TestSpec) {
+		; This is a class
+		Do Runner.RunClass(TestSpec)
+		
+	} Else {
+		; Must be a package
+		Do Runner.RunPackage(TestSpec)
 		
 	}
 	
-	If ClassName '= "" {
-		Set sc = Runner.RunClass(ClassName, MethodName)
-		If 'sc Do Runner.RecordError("Error running testcase '"_ClassName_"'", sc)
-		Set Runner.TestRunDone = $ZDateTime($ZUtil(188), 3, 1, 3)
-		Do Runner.ReportToTerminal()
-		
-	} Else {
-		Set sc = Runner.RunPackage(Package)
-		If 'sc Quit sc
-		
-	}
+	Do Runner.ReportToTerminal(Save)
 	
 	Quit $$$OK
 }
 
-Method RunPackage(Package As %String) As %Status
+/// Run all tests in this namespace
+Method RunAll()
+{
+	Set stm = ##class(%SQL.Statement).%New()
+	Set sc = stm.%PrepareClassQuery("%Dictionary.ClassDefinitionQuery","SubclassOf")
+	If 'sc {
+		Do ..RecordError("Error preparing query to determine tests", sc)
+		Quit
+	}
+	
+	#dim rs As %SQL.StatementResult
+	Set rs = stm.%Execute("Strix.Testing.TestCase")
+	
+	While rs.%Next() {
+		Set Name = rs.%Get("Name")
+		Do ..RunClass(Name)
+	}
+	
+	Set ..TestRunDone = $ZDateTime($ZTimestamp, 3, 1, 3)
+	
+	Quit
+}
+
+/// Run all tests in a package
+Method RunPackage(Package As %String)
 {
 	Set sc = $System.OBJ.GetPackageList(.Classes, Package, "/includesubpackages")
-	If 'sc Quit $$$BuildErr("Error creating list of classes in '"_Package_"'", sc)
+	If 'sc {
+		Do ..RecordError("Error creating list of classes in '{}'", sc, Package)
+		Quit
+	}
 	
 	Set ClassName = ""
 	For  {
@@ -94,39 +132,46 @@ Method RunPackage(Package As %String) As %Status
 		;Skip classes not inheriting from the test superclass
 		If '$ZObjClassMethod(ClassName, "%IsA", "Strix.Testing.TestCase") Continue
 		
-		Set sc = ..RunClass(ClassName)
-		If 'sc Do ..RecordError("Error running testcase '"_ClassName_"'", sc)
+		Do ..RunClass(ClassName)
 	}
 	
-	Set ..TestRunDone = $ZDateTime($ZUtil(188), 3, 1, 3)
+	Set ..TestRunDone = $ZDateTime($ZTimestamp, 3, 1, 3)
 	
-	Do ..ReportToTerminal()
-	
-	
-	Quit $$$OK
+	Quit
 }
 
 /// Runs test methods in the specified subclass of Strix.Testing.TestCase
-Method RunClass(ClassName As %String, TestToRun As %String = "") As %Status
+Method RunClass(ClassName As %String, TestToRun As %String = "")
 {
 	Set ..CurrentTestClass = ClassName, ..CurrentTestMethod = ""
 	Set ..TestCases = ..TestCases + 1
 	
 	#dim TestObject As Strix.Testing.TestCase
 	Set TestObject = $ZObjClassMethod(ClassName, "%New")
-	If '$IsObject(TestObject) Quit $$$BuildErr("Error creating instance of '"_ClassName_"'", %objlasterror)
-	Set TestObject.Runner = ##this
-	
+	If '$IsObject(TestObject) {
+		Do ..RecordError("Error creating instance of test class '{}'", %objlasterror, ClassName)
+		Quit
+	}
+	#dim MethodNames As %ListOfDataTypes
 	Set sc = ..GetTestMethods(ClassName, .MethodNames)
-	If 'sc Quit $$$BuildErr("Error determining test methods in class '"_ClassName_"'", sc)
+	If 'sc {
+		Do ..RecordError("Error determining test methods in class '{}'", sc, ClassName)
+		Quit
+	}
+	
+	; Set runner on testobject
+	Set TestObject.Runner = ##this
 	
 	;Run setup
 	Set ..CurrentTestMethod = "Setup"
 	Set sc = TestObject.Setup()
-	If 'sc Quit $$$BuildErr("Error running Setup", sc)
+	If 'sc {
+		Do ..RecordError("Error running Setup method in '{}'", sc, ClassName)
+		Quit
+	}
 	
+	; Keep list of methods that failed
 	Set FailedMethods = ""
-	#dim MethodNames As %ListOfDataTypes
 	For i = 1:1:MethodNames.Count() {
 		Set MethodName = MethodNames.GetAt(i)
 		If TestToRun '= "", TestToRun '= MethodName Continue
@@ -137,9 +182,14 @@ Method RunClass(ClassName As %String, TestToRun As %String = "") As %Status
 	;Run teardown
 	Set ..CurrentTestMethod = "TearDown"
 	Set sc = TestObject.TearDown($lts(FailedMethods))
-	If 'sc Quit $$$BuildErr("Error running TearDown", sc)
+	If 'sc {
+		Do ..RecordError("Error running TearDown method in '{}'", sc, ClassName)
+		Quit
+	}
 	
-	Quit $$$OK
+	Set ..TestRunDone = $ZDateTime($ZTimestamp, 3, 1, 3)
+	
+	Quit
 }
 
 /// Runs a single test method on the test object. Traps and returns any error.
@@ -156,15 +206,16 @@ Method RunMethod(TestObject As Strix.Testing.TestCase, MethodName As %String, Ou
 	; Run code in OnBeforeTest, if present
 	If ##class(Strix.Generator.Utilities).HasConcreteMethod(..CurrentTestClass, "OnBeforeTest") {
 		Set sc = $ZObjMethod(TestObject, "OnBeforeTest", MethodName)
-		If 'sc Do ..RecordError("OnBeforeTest in "_..CurrentTestClass_" returned an error.", sc)
+		If 'sc Do ..RecordError("OnBeforeTest in {} returned an error.", sc, ..CurrentTestClass)
 	}
 	
 	; Run the actual test
 	Do $ZObjMethod(TestObject, MethodName)
 	
+	; Run code in OnAfterTest, if present
 	If ##class(Strix.Generator.Utilities).HasConcreteMethod(..CurrentTestClass, "OnAfterTest") {
 		Set sc = $ZObjMethod(TestObject, "OnAfterTest", MethodName)
-		If 'sc Do ..RecordError("OnAfterTest in "_..CurrentTestClass_" returned an error.", sc)
+		If 'sc Do ..RecordError("OnAfterTest in {} returned an error.", sc, ..CurrentTestClass)
 	}
 	
 	Set Failed = ..Failed - CurrentFailed
@@ -176,7 +227,7 @@ Method RunMethod(TestObject As Strix.Testing.TestCase, MethodName As %String, Ou
 Error
 	Set $ZTrap = ""
 	
-	Do ..RecordError("Error running test method '"_MethodName_"': "_$ZError)
+	Do ..RecordError("Error running test method {}:{}: {}", , ..CurrentTestClass, MethodName, $ZError)
 	Set Failed = ..Failed - CurrentFailed
 	Set Errors = ..Errors - CurrentErrors
 	
@@ -348,8 +399,9 @@ Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Info
 }
 
 /// Records an error (e.g. trapped error, error status, etc.).
-Method RecordError(Description As %String = "", Status As %Status = "") As Strix.Testing.Info
+Method RecordError(Description As %String = "", Status As %Status = "", Parms... As %String) As Strix.Testing.Info
 {
+	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	Set ..Errors = ..Errors + 1
 	Do ..ToTerm("E")
 	Set Info = ##class(Strix.Testing.Info).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
@@ -366,17 +418,41 @@ Method ToTerm(What As %String)
 	Write What
 }
 
-/// Writes test run results to the terminal
-Method ReportToTerminal()
+ClassMethod UTCTimestampToLocal(In As %TimeStamp) As %TimeStamp
+{
+	; To $Ztimestamp format:
+	Set InZts = $ZDateTimeH(In, 3, 1)
+	
+	; Get precision:
+	Set Prec = $Length($Piece(InZts, ".", 2))
+	
+	; To local time
+	Set LocalZts = $ZDateTimeH(InZts, -3)
+	
+	; To timestamp format
+	Set Out = $ZDateTime(LocalZts, 3, 1, Prec)
+	
+	Quit Out
+}
+
+/// Writes test run results to the terminal. Optionally saves the run first.
+Method ReportToTerminal(Save As %Boolean = 0)
 {
 	If $X Write !
 	Write !
 	
+	; Save test run, if so requested
+	If Save {
+		Set sc = ..%Save()
+		If 'sc Write "[Error saving test run:] "_$System.Status.GetErrorText(sc),!
+	}
+	
 	Set Duration = $System.SQL.DATEDIFF("second", ..TestRunStart, ..TestRunDone)
-	Write "Tests started at "_$Piece(..TestRunStart, ".")_" and took "_Duration_" seconds.",!
+	Write "Tests started at "_$Piece(..UTCTimestampToLocal(..TestRunStart), ".")_" and took "_Duration_" seconds.",!
 	Write "Ran "_..Tests_" tests in "_..TestCases_" testcases.",!
 	Write "A total of "_..Asserts_" assertions were successful; "_..Skipped_" were skipped.",!
 	Write "There were "_..Failed_" failed assertions and "_..Errors_" errors.",!
+	If ..%Id() '= "" Write "The test run is saved under id "_..%Id(),!
 	
 	If '(..Failed+..Skipped+..Errors) Quit
 	Write !,"Details below:",!
@@ -396,6 +472,53 @@ Method ReportToTerminal()
 		Write !,"#"_i_" "_Info.ClassName_":"_Info.MethodName_":",!
 		Do Info.ReportToTerminal()
 	}
+}
+
+Storage Default
+{
+<Data name="Results">
+<Attribute>Results</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"Results"</Subscript>
+</Data>
+<Data name="RunnerDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Debug</Value>
+</Value>
+<Value name="3">
+<Value>TestRunStart</Value>
+</Value>
+<Value name="4">
+<Value>TestRunDone</Value>
+</Value>
+<Value name="5">
+<Value>TestCases</Value>
+</Value>
+<Value name="6">
+<Value>Tests</Value>
+</Value>
+<Value name="7">
+<Value>Asserts</Value>
+</Value>
+<Value name="8">
+<Value>Failed</Value>
+</Value>
+<Value name="9">
+<Value>Skipped</Value>
+</Value>
+<Value name="10">
+<Value>Errors</Value>
+</Value>
+</Data>
+<DataLocation>^Strix.Testing.RunnerD</DataLocation>
+<DefaultData>RunnerDefaultData</DefaultData>
+<IdLocation>^Strix.Testing.RunnerD</IdLocation>
+<IndexLocation>^Strix.Testing.RunnerI</IndexLocation>
+<StreamLocation>^Strix.Testing.RunnerS</StreamLocation>
+<Type>%Library.CacheStorage</Type>
 }
 
 }
