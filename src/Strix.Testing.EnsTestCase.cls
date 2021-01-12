@@ -153,7 +153,7 @@ Method RecordAssertionOk(AssertionType As %String, Expected As %String = "", Res
 	
 	Set Node = ##class(Strix.Testing.Runner).NextBgTestNode(..%SessionId)
 	Set @Node@("w") = $ClassName()_":"_..TestMethod
-	Set Info = ##class(Strix.Testing.Info).Get("Pass", $ClassName(), ..TestMethod, AssertionType, Expected, Result, Description)
+	Set Info = ##class(Strix.Testing.Result).Get("Pass", $ClassName(), ..TestMethod, AssertionType, Expected, Result, Description)
 	Set @Node = Info.ToJSON()
 	
 	Quit 1
@@ -167,7 +167,7 @@ Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "",
 	
 	Set Node = ##class(Strix.Testing.Runner).NextBgTestNode(..%SessionId)
 	Set @Node@("w") = $ClassName()_":"_..TestMethod
-	Set Info = ##class(Strix.Testing.Info).Get("Fail", $ClassName(), ..TestMethod, AssertionType, Expected, Result, Description)
+	Set Info = ##class(Strix.Testing.Result).Get("Fail", $ClassName(), ..TestMethod, AssertionType, Expected, Result, Description)
 	Set @Node = Info.ToJSON()
 	
 	Quit 0
@@ -179,7 +179,7 @@ Method RecordTestSkipped(Reason As %String = "")
 	If ..%SessionId = "" $$$LOGWARNING("No session set in "_$ClassName()_"/"_..TestMethod_".") Quit
 	Set Node = ##class(Strix.Testing.Runner).NextBgTestNode(..%SessionId)
 	Set @Node@("w") = $ClassName()_":"_..TestMethod
-	Set Info = ##class(Strix.Testing.Info).Get("Skip", $ClassName(), ..TestMethod, , , , Reason)
+	Set Info = ##class(Strix.Testing.Result).Get("Skip", $ClassName(), ..TestMethod, , , , Reason)
 	Set @Node = Info.ToJSON()
 	Quit
 }
@@ -190,7 +190,7 @@ Method RecordError(Description As %String = "", Status As %Status = "")
 	If ..%SessionId = "" $$$LOGWARNING("No session set in "_$ClassName()_"/"_..TestMethod_".") Quit
 	Set Node = ##class(Strix.Testing.Runner).NextBgTestNode(..%SessionId)
 	Set @Node@("w") = $ClassName()_":"_..TestMethod
-	Set Info = ##class(Strix.Testing.Info).GetForError($ClassName(), ..TestMethod, Description, Status)
+	Set Info = ##class(Strix.Testing.Result).GetForError($ClassName(), ..TestMethod, Description, Status)
 	Set @Node = Info.ToJSON()
 	Quit
 }

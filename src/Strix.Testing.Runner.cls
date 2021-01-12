@@ -17,7 +17,7 @@ Property TestRunStart As %TimeStamp [ InitialExpression = {$ZDateTime($ZTimestam
 Property TestRunDone As %TimeStamp;
 
 /// Information on test failures, trapped errors, etc.
-Property Results As list Of Strix.Testing.Info(STORAGEDEFAULT = "array");
+Property Results As list Of Strix.Testing.Result(STORAGEDEFAULT = "array");
 
 /// Number of testcases (classes) seen in this test run
 Property TestCases As %Integer [ InitialExpression = 0 ];
@@ -306,8 +306,8 @@ Method CollectBgTests(NodeId As %String, Clear As %Boolean = 1)
 	For i = 1:1:Count {
 		; Get JSON-serialized testresult data and convert to Info object
 		Set Data = @Node@(i)
-		#dim Info As Strix.Testing.Info
-		Set Info = ##class(Strix.Testing.Info).FromJSON(Data)
+		#dim Info As Strix.Testing.Result
+		Set Info = ##class(Strix.Testing.Result).FromJSON(Data)
 		
 		; Update test location information
 		Set Info.BackgroundLocation = Info.ClassName_":"_Info.MethodName
@@ -373,38 +373,38 @@ Method RecordAssertionOk(AssertionType As %String, Expected As %String = "", Res
 {
 	Set ..Asserts = ..Asserts + 1
 	Do ..ToTerm(".")
-	Set Info = ##class(Strix.Testing.Info).Get("Pass", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
+	Set Info = ##class(Strix.Testing.Result).Get("Pass", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
 	Do ..Results.Insert(Info)
 	Quit 1
 }
 
 /// Records a failed assertion.
-Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "", Result As %String = "", Description As %String = "") As Strix.Testing.Info
+Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "", Result As %String = "", Description As %String = "") As Strix.Testing.Result
 {
 	Set ..Failed = ..Failed + 1
 	Do ..ToTerm("F")
-	Set Info = ##class(Strix.Testing.Info).Get("Fail", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
+	Set Info = ##class(Strix.Testing.Result).Get("Fail", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
 	Do ..Results.Insert(Info)
 	Quit Info
 }
 
 /// Records a test skip.
-Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Info
+Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Result
 {
 	Set ..Skipped = ..Skipped + 1
 	Do ..ToTerm("S")
-	Set Info = ##class(Strix.Testing.Info).Get("Skip", ..CurrentTestClass, ..CurrentTestMethod, , , , Reason)
+	Set Info = ##class(Strix.Testing.Result).Get("Skip", ..CurrentTestClass, ..CurrentTestMethod, , , , Reason)
 	Do ..Results.Insert(Info)
 	Quit Info
 }
 
 /// Records an error (e.g. trapped error, error status, etc.).
-Method RecordError(Description As %String = "", Status As %Status = "", Parms... As %String) As Strix.Testing.Info
+Method RecordError(Description As %String = "", Status As %Status = "", Parms... As %String) As Strix.Testing.Result
 {
 	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
 	Set ..Errors = ..Errors + 1
 	Do ..ToTerm("E")
-	Set Info = ##class(Strix.Testing.Info).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
+	Set Info = ##class(Strix.Testing.Result).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
 	Do ..Results.Insert(Info)
 	Quit Info
 }
@@ -460,7 +460,7 @@ Method ReportToTerminal(Save As %Boolean = 0)
 	; Width for test number
 	Set w = $Length(..Results.Count())+2
 	For i = 1:1:..Results.Count() {
-		#dim Info As Strix.Testing.Info
+		#dim Info As Strix.Testing.Result
 		Set Info = ..Results.GetAt(i)
 		If Info.Type = "Pass" {
 			Continue

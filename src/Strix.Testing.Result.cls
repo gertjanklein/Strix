@@ -1,6 +1,6 @@
 /// This class records information about a testing 'event': an
 /// assertion passed/failed, an error in setup code, etc.
-Class Strix.Testing.Info Extends (%SerialObject, %XML.Adaptor)
+Class Strix.Testing.Result Extends (%SerialObject, %XML.Adaptor)
 {
 
 Parameter XMLNAME = "Result";
@@ -42,7 +42,7 @@ Property Status As %Status;
 // =====
 
 /// Contructor for normal info
-ClassMethod Get(Type As %String, ClassName As %String = "", MethodName As %String = "", AssertionType As %String = "", Expected As %String = "", Result As %String = "", Description As %String = "") As Info
+ClassMethod Get(Type As %String, ClassName As %String = "", MethodName As %String = "", AssertionType As %String = "", Expected As %String = "", Result As %String = "", Description As %String = "") As Strix.Testing.Result
 {
 	Set Me = ..%New()
 	Set Me.Type = Type
@@ -56,7 +56,7 @@ ClassMethod Get(Type As %String, ClassName As %String = "", MethodName As %Strin
 }
 
 /// Constructor for error info
-ClassMethod GetForError(ClassName As %String = "", MethodName As %String = "", Description As %String = "", Status As %Status = "") As Info
+ClassMethod GetForError(ClassName As %String = "", MethodName As %String = "", Description As %String = "", Status As %Status = "") As Strix.Testing.Result
 {
 	Set Me = ..%New()
 	Set Me.Type = "Error"
@@ -137,7 +137,7 @@ Method ToJSON() As %String
 }
 
 /// Simple JSON deserialization
-ClassMethod FromJSON(JSON As %String) As Strix.Testing.Info
+ClassMethod FromJSON(JSON As %String) As Strix.Testing.Result
 {
 	Set Obj = {}.%FromJSON(JSON)
 	Set Me = ..%New()
@@ -156,7 +156,7 @@ ClassMethod FromJSON(JSON As %String) As Strix.Testing.Info
 
 Storage Default
 {
-<Data name="InfoState">
+<Data name="ResultState">
 <Value name="1">
 <Value>Type</Value>
 </Value>
@@ -167,26 +167,26 @@ Storage Default
 <Value>MethodName</Value>
 </Value>
 <Value name="4">
-<Value>AssertionType</Value>
-</Value>
-<Value name="5">
-<Value>Expected</Value>
-</Value>
-<Value name="6">
-<Value>Result</Value>
-</Value>
-<Value name="7">
-<Value>Description</Value>
-</Value>
-<Value name="8">
-<Value>Status</Value>
-</Value>
-<Value name="9">
 <Value>BackgroundLocation</Value>
 </Value>
+<Value name="5">
+<Value>AssertionType</Value>
+</Value>
+<Value name="6">
+<Value>Expected</Value>
+</Value>
+<Value name="7">
+<Value>Result</Value>
+</Value>
+<Value name="8">
+<Value>Description</Value>
+</Value>
+<Value name="9">
+<Value>Status</Value>
+</Value>
 </Data>
-<State>InfoState</State>
-<StreamLocation>^Strix.Testing.InfoS</StreamLocation>
+<State>ResultState</State>
+<StreamLocation>^Strix.Testing.ResultS</StreamLocation>
 <Type>%Library.CacheSerialState</Type>
 }
 
