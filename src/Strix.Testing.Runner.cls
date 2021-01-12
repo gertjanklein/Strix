@@ -152,11 +152,19 @@ Method RunMethod(TestObject As Strix.Testing.TestCase, MethodName As %String, Ou
 	Set ..Tests = ..Tests + 1
 	
 	Set CurrentFailed = ..Failed, CurrentErrors = ..Errors
+	
+	; Run code in OnBeforeTest, if present
+	If ##class(Strix.Generator.Utilities).HasConcreteMethod(..CurrentTestClass, "OnBeforeTest") {
+		Set sc = $ZObjMethod(TestObject, "OnBeforeTest", MethodName)
+		If 'sc Do ..RecordError("OnBeforeTest in "_..CurrentTestClass_" returned an error.", sc)
+	}
+	
+	; Run the actual test
 	Do $ZObjMethod(TestObject, MethodName)
 	
 	If ##class(Strix.Generator.Utilities).HasConcreteMethod(..CurrentTestClass, "OnAfterTest") {
 		Set sc = $ZObjMethod(TestObject, "OnAfterTest", MethodName)
-		If 'sc Do TestObject.AssertStatusOk(sc, "OnAfterTest should not return an error.")
+		If 'sc Do ..RecordError("OnAfterTest in "_..CurrentTestClass_" returned an error.", sc)
 	}
 	
 	Set Failed = ..Failed - CurrentFailed
@@ -171,6 +179,113 @@ Error
 	Do ..RecordError("Error running test method '"_MethodName_"': "_$ZError)
 	Set Failed = ..Failed - CurrentFailed
 	Set Errors = ..Errors - CurrentErrors
+	
+	Quit
+}
+
+// ===== Support for background tests (EnsTestCase)
+
+/// Returns the global node to use for background test communication.
+/// A unique node number must be passed in; in Ensemble testcases
+/// this should be the session id, as it's available everywhere.
+ClassMethod GetBgTestNode(NodeId As %String, Clear As %Boolean = 0) As %String
+{
+	Set Node = $Name(^Strix.Testing.BgTestCase(NodeId, "tests"))
+	If Clear Kill @Node
+	Quit Node
+}
+
+/// Increments the test node counter, and returns a reference to the 
+/// new test node subscript.
+ClassMethod NextBgTestNode(NodeId As %String) As %String
+{
+	Set Idx = $Increment(^Strix.Testing.BgTestCase(NodeId, "tests"))
+	Quit $Name(^Strix.Testing.BgTestCase(NodeId, "tests", Idx))
+}
+
+/// Stores the source of the tests, i.e., the test class+method where
+/// the Ensemble call was made. Source may be specified as one string,
+/// or as separate classname and methodname.
+ClassMethod SetSource(NodeId As %String, Source As %String, Method As %String = "")
+{
+	If Method '= "" Set Source = Source_":"_Method
+	Set ^Strix.Testing.BgTestCase(NodeId, "src") = Source
+	Quit
+}
+
+/// Retrieves the source of the tests, i.e., the test class+method where
+/// the Ensemble call was made.
+ClassMethod GetSource(NodeId As %String) As %String
+{
+	Quit $Get(^Strix.Testing.BgTestCase(NodeId, "src"))
+}
+
+/// Places named test data in the test node. Can be used to communicate
+/// information to a background test.
+ClassMethod SetTestData(NodeId As %String, Name As %String, Value As %String)
+{
+	Set ^Strix.Testing.BgTestCase(NodeId, "data", Name) = Value
+	Quit
+}
+
+/// Retrieves anamed test data from the test node. If not present, an
+/// empty string is returned.
+ClassMethod GetTestData(NodeId As %String, Name As %String, Output Found As %Boolean) As %String
+{
+	Set Found = $Data(^Strix.Testing.BgTestCase(NodeId, "data", Name)) # 10
+	If Found Quit ^Strix.Testing.BgTestCase(NodeId, "data", Name)
+	Quit ""
+}
+
+/// Clears all test data in the test node.
+ClassMethod ClearTestData(NodeId As %String)
+{
+	Kill ^Strix.Testing.BgTestCase(NodeId, "data")
+}
+
+/// Collects test information for tests that have run in the background.
+/// Pass in the node where the tests were collected; clears the node
+/// unless told not to. Note that this clears the test data as well.
+Method CollectBgTests(NodeId As %String, Clear As %Boolean = 1)
+{
+	Set Node = ..GetBgTestNode(NodeId)
+	Set Count = $Get(@Node)
+	Set ..Asserts = ..Asserts + Count
+	
+	For i = 1:1:Count {
+		; Get JSON-serialized testresult data and convert to Info object
+		Set Data = @Node@(i)
+		#dim Info As Strix.Testing.Info
+		Set Info = ##class(Strix.Testing.Info).FromJSON(Data)
+		
+		; Update test location information
+		Set Info.BackgroundLocation = Info.ClassName_":"_Info.MethodName
+		Set Info.ClassName = ..CurrentTestClass
+		Set Info.MethodName = ..CurrentTestMethod
+		
+		; Insert in results
+		Do ..Results.Insert(Info)
+		
+		; Count type 
+		If Info.Type = "Pass" {
+			Do ..ToTerm(".")
+		} ElseIf Info.Type = "Fail" {
+			Set ..Failed = ..Failed + 1
+			Do ..ToTerm("F")
+		} ElseIf Info.Type = "Skip" {
+			Set ..Skipped = ..Skipped + 1
+			Do ..ToTerm("S")
+		} ElseIf Info.Type = "Error" {
+			Set ..Errors = ..Errors + 1
+			Do ..ToTerm("E")
+		} Else {
+			; We don't really support logging yet
+			Do ..ToTerm("L")
+		}
+	}
+	
+	; Remove all data if so requested
+	If Clear Kill ^Strix.Testing.BgTestCase(NodeId)
 	
 	Quit
 }
@@ -200,19 +315,23 @@ ClassMethod GetTestMethods(ClassName As %String, Methods As %ListOfDataTypes) As
 	Quit $$$OK
 }
 
-// =====
+// ===== TestCase callbacks
 
-/// Records a successful assertion (mainly for counting)
-Method RecordAssertionOk()
+/// Records a successful assertion
+Method RecordAssertionOk(AssertionType As %String, Expected As %String = "", Result As %String = "", Description As %String = "") As %Boolean
 {
 	Set ..Asserts = ..Asserts + 1
-	Quit
+	Do ..ToTerm(".")
+	Set Info = ##class(Strix.Testing.Info).Get("Pass", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
+	Do ..Results.Insert(Info)
+	Quit 1
 }
 
 /// Records a failed assertion.
 Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "", Result As %String = "", Description As %String = "") As Strix.Testing.Info
 {
 	Set ..Failed = ..Failed + 1
+	Do ..ToTerm("F")
 	Set Info = ##class(Strix.Testing.Info).Get("Fail", ..CurrentTestClass, ..CurrentTestMethod, AssertionType, Expected, Result, Description)
 	Do ..Results.Insert(Info)
 	Quit Info
@@ -222,6 +341,7 @@ Method RecordAssertionFailed(AssertionType As %String, Expected As %String = "",
 Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Info
 {
 	Set ..Skipped = ..Skipped + 1
+	Do ..ToTerm("S")
 	Set Info = ##class(Strix.Testing.Info).Get("Skip", ..CurrentTestClass, ..CurrentTestMethod, , , , Reason)
 	Do ..Results.Insert(Info)
 	Quit Info
@@ -231,12 +351,20 @@ Method RecordTestSkipped(Reason As %String = "") As Strix.Testing.Info
 Method RecordError(Description As %String = "", Status As %Status = "") As Strix.Testing.Info
 {
 	Set ..Errors = ..Errors + 1
+	Do ..ToTerm("E")
 	Set Info = ##class(Strix.Testing.Info).GetForError(..CurrentTestClass, ..CurrentTestMethod, Description, Status)
 	Do ..Results.Insert(Info)
 	Quit Info
 }
 
 // =====
+
+/// Writes what's passed in to the current device, if this is a terminal.
+Method ToTerm(What As %String)
+{
+	If '$$$IsTerm Quit
+	Write What
+}
 
 /// Writes test run results to the terminal
 Method ReportToTerminal()
@@ -250,12 +378,20 @@ Method ReportToTerminal()
 	Write "A total of "_..Asserts_" assertions were successful; "_..Skipped_" were skipped.",!
 	Write "There were "_..Failed_" failed assertions and "_..Errors_" errors.",!
 	
-	If '..Results.Count() Quit
+	If '(..Failed+..Skipped+..Errors) Quit
 	Write !,"Details below:",!
 	
+	; Width for test number
+	Set w = $Length(..Results.Count())+2
 	For i = 1:1:..Results.Count() {
 		#dim Info As Strix.Testing.Info
 		Set Info = ..Results.GetAt(i)
+		If Info.Type = "Pass" {
+			Continue
+			Write !,"#"_i,?w,Info.ClassName_":"_Info.MethodName_": "_Info.Description,!
+			If Info.BackgroundLocation '= "" Write ?w,"("_Info.BackgroundLocation_")",!
+			Continue
+		}
 		
 		Write !,"#"_i_" "_Info.ClassName_":"_Info.MethodName_":",!
 		Do Info.ReportToTerminal()

@@ -4,17 +4,22 @@ Class Strix.Testing.Info Extends %SerialObject
 {
 
 /// The type of info:
+/// Pass: an assertion was correct
+/// Fail: an assertion failed
+/// Skip: assertion skipped (optionally with reason)
+/// Error: an error occurred (trapped)
 /// Log: a message
-/// Fail: a test fail
-/// Skip: test skipped (optionally with reason)
-/// Error: an error occurred
-Property Type As %String(VALUELIST = ",Log,Fail,Skip,Error") [ Required ];
+Property Type As %String(VALUELIST = ",Pass,Fail,Skip,Error,Log") [ Required ];
 
 /// The test class this information is related to
 Property ClassName As %String;
 
 /// The test method this info is related to
 Property MethodName As %String;
+
+/// For background tests, the location where the actual assertion
+/// was checked (in the form ClassName:MethodName)
+Property BackgroundLocation As %String(MAXLEN = 100);
 
 /// The type of test that was performed:
 /// Assert[Not]Equal, AssertTrue, AssertFalse, AssertStatusOk, AssertStatusFail
@@ -113,6 +118,38 @@ Method ReportToTerminal()
 	Quit
 }
 
+/// Simple JSON serialization
+Method ToJSON() As %String
+{
+	Set JSON = {
+	  "type": (..Type),
+	  "classname": (..ClassName),
+	  "methodname": (..MethodName),
+	  "assertiontype": (..AssertionType),
+	  "expected": (..Expected),
+	  "result": (..Result),
+	  "description": (..Description),
+	  "status": (..Status)
+	}
+	Quit JSON.%ToJSON()
+}
+
+/// Simple JSON deserialization
+ClassMethod FromJSON(JSON As %String) As Strix.Testing.Info
+{
+	Set Obj = {}.%FromJSON(JSON)
+	Set Me = ..%New()
+	Set Me.Type = Obj.type
+	Set Me.ClassName = Obj.classname
+	Set Me.MethodName = Obj.methodname
+	Set Me.AssertionType = Obj.assertiontype
+	Set Me.Expected = Obj.expected
+	Set Me.Result = Obj.result
+	Set Me.Description = Obj.description
+	Set Me.Status = Obj.status
+	Quit Me
+}
+
 // =====
 
 Storage Default
@@ -141,6 +178,9 @@ Storage Default
 </Value>
 <Value name="8">
 <Value>Status</Value>
+</Value>
+<Value name="9">
+<Value>BackgroundLocation</Value>
 </Value>
 </Data>
 <State>InfoState</State>
