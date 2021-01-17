@@ -75,21 +75,19 @@ Method ReportToTerminal()
 		If $ListFind($ListFromString("AssertEqual,AssertNotEqual,AssertStatusParameter"), ..AssertionType) {
 			Set Expected = ..Expected
 			Set Result = ..Result
-			Write "Expected: ",Expected,!
-			Write "Result:   ",Result,!
+			Write "Expected: ",$$Quote^%qcr(Expected),!
+			Write "Result:   ",$$Quote^%qcr(Result),!
 			
 		} ElseIf $ListFind($ListFromString("AssertListEqual,AssertListNotEqual"), ..AssertionType) {
-			Set Expected = ..Expected
-			Set Result = ..Result
-			ZWrite Expected
-			ZWrite Result
+			Write "Expected: ",$$Quote^%qcr(Expected),!
+			Write "Result:   ",$$Quote^%qcr(Result),!
 			
 		} ElseIf $ListFind($ListFromString("AssertStatusOk,AssertErrorStatus,AssertTrue,AssertFalse"), ..AssertionType) {
-			Write "Got: "_..Result,!
+			Write "Got: "_$$Quote^%qcr(..Result),!
 			
 		} ElseIf ..AssertionType = "AssertStatusEqual" {
-			Write "Status1: "_..Expected,!
-			Write "Status2: "_..Result,!
+			Write "Status1: "_$$Quote^%qcr(..Expected),!
+			Write "Status2: "_$$Quote^%qcr(..Result),!
 			
 		}
 		
