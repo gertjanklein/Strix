@@ -120,7 +120,7 @@ Method RunAll()
 /// Run all tests in a package
 Method RunPackage(Package As %String)
 {
-	Set ..TestSpec = "Package:"_Package
+	If ..TestSpec = "" Set ..TestSpec = "Package:"_Package
 	
 	Set sc = $System.OBJ.GetPackageList(.Classes, Package, "/includesubpackages")
 	If 'sc {
@@ -150,7 +150,7 @@ Method RunPackage(Package As %String)
 /// Runs test methods in the specified subclass of Strix.Testing.TestCase
 Method RunClass(ClassName As %String, TestToRun As %String = "")
 {
-	Set ..TestSpec = $Select(TestToRun '= "": "Method:"_ClassName_":"_TestToRun, 1:"Class:"_ClassName)
+	If ..TestSpec = "" Set ..TestSpec = $Select(TestToRun '= "": "Method:"_ClassName_":"_TestToRun, 1:"Class:"_ClassName)
 	
 	Set ..CurrentTestClass = ClassName, ..CurrentTestMethod = ""
 	Set ..TestCases = ..TestCases + 1
