@@ -16,7 +16,12 @@ Property Data As %String;
 ClassMethod Start() As Strix.Lib.Spooler
 {
 	Set Spooler = ..%New()
-	Set Spooler.SavedIO = $IO
+	If $IO '= 2 {
+		Set Spooler.SavedIO = $IO
+	} Else {
+		Set Spooler.SavedIO = "2:("_$ZB_")"
+		Close 2
+	}
 	Set Spooler.Data = ""
 	Set Spooler.DocumentNumber = Spooler.GetDocNumber()
 	Open 2:(Spooler.DocumentNumber)
@@ -30,7 +35,11 @@ Method Stop() As %String
 {
 	;Stop spooler and restore previous device
 	Close 2
-	Use ..SavedIO
+	If $Piece(..SavedIO, ":") '= 2 {
+		Use ..SavedIO
+	} Else {
+		Do ..Reopen()
+	}
 	
 	;Get collected data
 	Set Data = ""
@@ -59,6 +68,31 @@ Method GetDocNumber() As %Integer [ Private ]
 	Set DocumentNumber = $Order(^SPOOL(""), -1) + 1
 	Lock -^SPOOL
 	Quit DocumentNumber
+}
+
+Method Reopen()
+{
+	Set DocNr = $Piece($Piece(..SavedIO, "(", 2), ")")
+	
+	; Save current document state
+	Kill ^||Save(DocNr)
+	Merge ^||Save(DocNr) = ^SPOOL(DocNr)
+	
+	; Open and use the document
+	Open @..SavedIO
+	Use @..SavedIO
+	
+	; The first write of a complete line will clear the target
+	; document. Write the line and remove it, so the spooler
+	; code is initialized properly.
+	Write !
+	Kill ^SPOOL(DocNr)
+	
+	; Put the original document back
+	Merge ^SPOOL(DocNr) = ^||Save(DocNr)
+	Kill ^||Save(DocNr)
+	
+	Quit
 }
 
 }
