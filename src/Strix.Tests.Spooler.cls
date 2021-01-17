@@ -8,19 +8,20 @@ Method TestReentrancy()
 {
 	; Start first spooler and write something
 	Set Spooler1 = ##class(Strix.Lib.Spooler).Start()
-	Write "Line 1!",!
+	Write 1,!,2,!,3,!
 	
 	; Start second spooler and write something
 	Set Spooler2 = ##class(Strix.Lib.Spooler).Start()
-	Write "Line 2!",!
+	Write "Line for 2!",!
 	
 	Set Spooler2Out = Spooler2.Stop()
-	Write "Line 3!",!
+	Write "Line for 1!",!
 	
 	Set Spooler1Out = Spooler1.Stop()
 	
-	Do ..AssertEqual(Spooler2Out, "Line 2!"_$c(13,10), "Inner spooler filed one line")
-	Do ..AssertEqual(Spooler1Out, "Line 1!"_$c(13,10)_"Line 3!"_$c(13,10), "Outer spooler filed two lines")
+	Do ..AssertEqual(Spooler2Out, "Line for 2!"_$c(13,10), "Inner spooler filed one line")
+	Do ..AssertEqual(Spooler1Out, 1_$c(13,10)_2_$c(13,10)_3_$c(13,10)_"Line for 1!"_$c(13,10),
+	  "Outer spooler filed pre- and post-inner lines")
 	
 	Quit
 }

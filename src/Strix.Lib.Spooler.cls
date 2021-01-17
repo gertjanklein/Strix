@@ -77,15 +77,15 @@ Method Reopen()
 	; Save current document state
 	Kill ^||Save(DocNr)
 	Merge ^||Save(DocNr) = ^SPOOL(DocNr)
+	Set Lines = +$Order(^SPOOL(DocNr, 2147483647), -1)
 	
 	; Open and use the document
 	Open @..SavedIO
-	Use @..SavedIO
+	Use 2
 	
-	; The first write of a complete line will clear the target
-	; document. Write the line and remove it, so the spooler
-	; code is initialized properly.
-	Write !
+	; Recreate spooler state by writing as many lines as there were,
+	; then delete them to mergin proper result
+	For i = 1:1:Lines Write !
 	Kill ^SPOOL(DocNr)
 	
 	; Put the original document back
