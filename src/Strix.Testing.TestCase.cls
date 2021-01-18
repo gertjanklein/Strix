@@ -212,8 +212,9 @@ Method AssertErrorStatus(Status As %Status, Description As %String = "", Parms..
 	Set Ok =  (Status '= "") && (Codes '= "") && (Codes '= $$$InvalidStatusCodeStruct)
 	If '$IsObject(..Runner) Quit Ok
 	
+	Set Result = $System.Status.GetErrorText(Status)
 	If $Get(Parms) Set Description = $$$BuildStr(Description, Parms...)
-	If Ok Quit ..Runner.RecordAssertionOk($$$CurrentMethod, , , Description)
+	If Ok Quit ..Runner.RecordAssertionOk($$$CurrentMethod, , Result, Description)
 	
 	Set Got = $Select(Status = $$$OK: "[ok status]", Status = "": "[empty status]", Codes = $$$InvalidStatusCodeStruct: "[invalid status]", 1: "[unknown]")
 	Set Info = ..Runner.RecordAssertionFailed($$$CurrentMethod, , Got, Description)
