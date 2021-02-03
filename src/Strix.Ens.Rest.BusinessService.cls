@@ -74,8 +74,10 @@ Method SendRequest(Target As %String, Request As Strix.Ens.Rest.RESTRequest, Out
     Quit $$$OK
   }
   
-  ; Set HTTP status
-  Set %response.Status = Response.Status
+  ; Set HTTP status; support just specifying the numeric code
+  Set Status = Response.Status
+  If Status ? 1.N Set Status = ..StatusWithDesc(Status)
+  Set %response.Status = Status
   
   ; If we do a server-side redirect, we can't output contents
   If Response.ServerSideRedirect '= "" {
@@ -93,6 +95,24 @@ Method SendRequest(Target As %String, Request As Strix.Ens.Rest.RESTRequest, Out
   }
   
   Quit $$$OK
+}
+
+/// Given a single HTTP status code (e.g. "200"), attempt to find the
+/// full HTTP status line value (e.g. "200 OK") by scanning the parameters
+/// in %CSP.REST that define such lines.
+ClassMethod StatusWithDesc(StatusCode As %String) As %String
+{
+  Set Name = ""
+  For  {
+  	Set Name = $$$defMemberNext("%CSP.REST", $$$cCLASSparameter, Name)
+  	If Name = "" Quit
+  	If Name '? 1"HTTP"3N1.E Continue
+  	
+  	Set Value = $$$defMemberKeyGet("%CSP.REST", $$$cCLASSparameter, Name, $$$cPARAMdefault)
+  	If +Value = StatusCode Return Value
+  }
+	; Can't find the description, return unaltered.
+	Quit StatusCode
 }
 
 }
