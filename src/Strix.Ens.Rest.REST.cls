@@ -18,9 +18,18 @@ Parameter HandleCorsRequest = 0;
 /// errors will be returned.
 Parameter ExposeServerExceptions = 0;
 
+/// The name of the Ensemble Business Service class to create. If not
+/// specified, the name of the class the projection is used in will
+/// be suffixed with ".Service".
+Parameter ServiceClassName;
+
 /// The name of the Business Service as used in the Ensemble
 /// production. Required for proper operation.
 Parameter ServiceName;
+
+/// Comma-separated list of REST methods to create entry points for
+/// in the generated service class. The default is *, meaning all.
+Parameter Methods = "*";
 
 // =====
 

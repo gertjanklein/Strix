@@ -1,11 +1,6 @@
 Class Strix.Ens.Rest.RESTServiceProjection Extends %Projection.AbstractProjection
 {
 
-/// The name of the Ensemble Business Service class to create. If not
-/// specified, the name of the class the projection is used in will
-/// be suffixed with ".Service".
-Parameter ServiceClassName;
-
 /// This method creates the Ensemble Business Service class intended
 /// to handle method calls in the REST class.
 ClassMethod CreateProjection(ClassName As %String, ByRef Parameters As %String, Modified As %String, qstruct) As %Status
@@ -15,7 +10,7 @@ ClassMethod CreateProjection(ClassName As %String, ByRef Parameters As %String, 
   If '$ClassMethod(ClassName, "%IsA", "%CSP.REST") Quit ..BuildStatus("Class {} is not a %CSP.REST.",,ClassName)
   
   ; Determine the name of the service class to create
-  Set ServiceClassName = $Get(Parameters("ServiceClassName"))
+  Set ServiceClassName = $Parameter(ClassName, "ServiceClassName")
   If ServiceClassName = "" Set ServiceClassName = ClassName_".Service"
   
   ; Determine the target methods (as specified in UrlMap)
@@ -30,6 +25,9 @@ ClassMethod CreateProjection(ClassName As %String, ByRef Parameters As %String, 
     Set ClassDef = ##class(%Dictionary.ClassDefinition).%New(ServiceClassName, 25)
   }
   Set ClassDef.Super = "Strix.Ens.Rest.BusinessService"
+  ; Don't show class as generated, default tooling will not place it in source control
+  Do ClassDef.GeneratedByReset()
+  Set ClassDef.Description = "Generated for "_ClassName_"; do not edit."
   
   ; Add methods and associated settings to the service class
   For i = 1:1: $ListLength(Methods) {
@@ -129,6 +127,9 @@ ClassMethod GetMethods(ClassName As %String, Output Methods As %List) As %Status
 {
   Set Methods = ""
   
+  Set Allowed = $Parameter(ClassName, "Methods")
+  If Allowed '= "*" Set Allowed = $ListFromString(Allowed)
+  
   Set XDataName = ClassName_"||UrlMap"
   Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(XDataName, , .sc)
   If 'sc Quit ..BuildStatus("Error opening UrlMap in {}:", sc, ClassName)
@@ -140,6 +141,8 @@ ClassMethod GetMethods(ClassName As %String, Output Methods As %List) As %Status
   For i = 1:1:Doc.GetValueAt("/Routes/Route[*]") {
     Set Method = Doc.GetValueAt("/Routes/Route["_i_"]/@Call", "", .sc)
     If 'sc Return ..BuildStatus("Error retrieving Route {} in {}:", sc, i, XDataName)
+    ; Skip this method if not listed
+    If Allowed '= "*", '$ListFind(Allowed, Method) Continue
     Set Methods = Methods_$lb(Method)
   }
   
