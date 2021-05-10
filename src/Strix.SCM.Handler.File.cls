@@ -310,6 +310,7 @@ Method OnAfterCompile(InternalName As %String) As %Status
 	
 	; Check if the Context class belonging to the BP is specified
 	Set ItemName = ItemName_".Context.cls"
+	If '##class(%Dictionary.ClassDefinition).%ExistsId(ItemName) Quit $$$OK
 	If '..FileIO.Project.OwnsItem(ItemName, .AsItem) Quit $$$OK
 	If 'AsItem Quit $$$OK
 	
