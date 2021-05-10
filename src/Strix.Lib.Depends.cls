@@ -81,7 +81,7 @@ Method CheckClass(ClassName As %String) As %Status
 	Set ..Checked(ClassName_".cls") = ""
 	
 	; Start with what this returns:
-	Set sc = $System.OBJ.GetDependencies(ClassName, .Items, "ckrby")
+	Set sc = $System.OBJ.GetDependencies(ClassName, .Items, "")
 	If 'sc Quit ..BuildStatus("Error from system for class {}:", sc, ClassName)
 	
 	Set Item = ""
@@ -177,6 +177,7 @@ Method AddItem(Name, ClassName)
 	If Name ? 1"EnsLib."1.E Quit
 	If Name ? 1"EnsPortal."1.E Quit
 	If Name ? 1"CSPX."1.E Quit
+	If Name = "Ensemble.inc" Quit
 	Set ..Dependencies(Name) = ClassName
 	Quit
 }
