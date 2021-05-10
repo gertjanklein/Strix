@@ -34,6 +34,26 @@ Property CgiEnv As array Of %String(MAXLEN = "", XMLITEMNAME = "Value", XMLKEYNA
 
 // =====
 
+/// Mimick %CSP.Request's Get method
+Method Get(ParameterName As %String, Default As %String = "", Index As %Integer = 1) As %String
+{
+	If '..Parameters.IsDefined(ParameterName) Quit Default
+	Set Values = ..Parameters.GetAt(ParameterName)
+	If '$ListData(Values, Index) Quit Default
+	Quit $List(Values, Index)
+}
+
+/// Returns all (0..n) parameter values, stored as a %List, as a %ListOfDataTypes
+Method GetList(ParameterName As %String) As %ListOfDataTypes
+{
+	Set Values = ..Parameters.GetAt(ParameterName)
+	Set Result = ##class(%ListOfDataTypes).%New()
+	For i = 1:1:$ListLength(Values) Do Result.Insert($ListGet(Values, i))
+	Quit Result
+}
+
+// =====
+
 Storage Default
 {
 <Data name="CSPRequestDefaultData">
