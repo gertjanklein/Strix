@@ -324,6 +324,39 @@ Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Pa
 	Quit $$$OK
 }
 
+/// Runs a SOAP WSDL reader
+Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Package As %String, SchemaReader As Strix.XML.SchemaReader = "") As %Status [ Internal ]
+{
+	; Get class creation times of currently existing classes in Package
+	Set sc = ..GetTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error determining class creation times:", sc)
+	
+	; Initialize schemareader and callback, if needed
+	If SchemaReader = "" Set SchemaReader = ##class(Strix.XML.SchemaReader).%New()
+	If SchemaReader.Callback = "" Set SchemaReader.Callback = $this
+	
+	Set sc = Reader.Process(Location, Package, , SchemaReader)
+	If 'sc Quit ..ShowError("Error processing WSDL in {}:", sc, Location)
+	
+	; Restore class creation time for classes that still exist
+	Set sc = ..UpdateTimes(Package, .Times)
+	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
+	
+	; Allow postprocessing the generated classes. This does not include the
+	; service/operation/message classes (if any).
+	Set ClassName = ""
+	For  {
+		Set ClassName = $Order(Reader.TypeClassList(ClassName))
+		If ClassName = "" Quit
+		
+		Set sc = ..PostProcessClass(ClassName)
+		If 'sc Quit
+	}
+	If 'sc Quit $$$BuildStatus("Error postprocessing class {}:", sc, ClassName)
+	
+	Quit $$$OK
+}
+
 // -----
 
 /// Load the creation times of all classes in Package, and return them
