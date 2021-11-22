@@ -57,6 +57,7 @@ Method HandleProperty(Name As %String, XmlName As %String, Type As %String, IsDa
 	Quit $$$OK
 }
 
+/// Callback to post-process a class after it has been created.
 Method PostProcessClass(ClassName As %String) As %Status
 {
 	Quit $$$OK
@@ -127,6 +128,8 @@ Method RemoveClass() As %Status
 	Quit $$$OK
 }
 
+// -----
+
 /// Gets a parameter for the current class
 Method GetClassParameter(Name As %String) As %String
 {
@@ -139,6 +142,38 @@ Method SetClassParameter(Name As %String, Value As %String) As %Status
 	Set @..ClassNode@("Parameter", Name) = Value
 	Quit $$$OK
 }
+
+// -----
+
+/// Gets the CompileAfter setting for the current class
+Method GetCompileAfter() As %String
+{
+	Quit $Get(@..ClassNode@("CompileAfter"))
+}
+
+/// Sets the CompileAfter setting for the current class
+Method SetCompileAfter(Value As %String) As %Status
+{
+	Set @..ClassNode@("CompileAfter") = Value
+	Quit $$$OK
+}
+
+// -----
+
+/// Gets the Description for the current class
+Method GetDescription() As %String
+{
+	Quit $Get(@..ClassNode@("Description"))
+}
+
+/// Sets the Description for the current class
+Method SetDescription(Value As %String) As %Status
+{
+	Set @..ClassNode@("Description") = Value
+	Quit $$$OK
+}
+
+// -----
 
 /// Returns the superclass for the currently processed class
 Method GetSuperClass(Output NamespaceIdx As %Integer) As %String
@@ -160,6 +195,8 @@ Method SetSuperClass(SuperClass As %String) As %Status
 	Set @..ClassNode@("Super") = SuperClass
 	Quit $$$OK
 }
+
+// -----
 
 /// Retrieves the type of the current class. Output parameter
 /// NamespaceIdx receives the index in the schemareader ..NSInfo
@@ -191,7 +228,7 @@ Method SetClassAbstract(Abstract As %Boolean) As %Status
 	Quit $$$OK
 }
 
-// -----
+// =====
 
 /// Changes the name of the current property.
 Method RenameProperty(NewName As %String) As %Status
@@ -215,6 +252,8 @@ Method SetPropertyRequired(Required As %Boolean = 1) As %Status
 	Quit $$$OK
 }
 
+// -----
+
 /// Returns the collection ("list", "array", "") for the current property
 Method GetPropertyCollection() As %String
 {
@@ -226,6 +265,8 @@ Method SetPropertyCollection(Collection As %String)
 {
 	Set @..PropertyNode@("Collection") = Collection
 }
+
+// -----
 
 /// Gets a property parameter for the current property
 Method GetPropertyParameter(Name As %String) As %String
@@ -240,6 +281,8 @@ Method SetPropertyParameter(Name As %String, Value As %String) As %Status
 	Quit $$$OK
 }
 
+// -----
+
 /// Sets the type for the current property
 Method SetPropertyType(Type As %String)
 {
@@ -249,7 +292,7 @@ Method SetPropertyType(Type As %String)
 // ===== Additional helpers
 
 /// Runs the schema reader for the given schema and package.
-Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Package As %String, ByRef Features As %String) [ Internal ]
+Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Package As %String, ByRef Features As %String) As %Status [ Internal ]
 {
 	; Get class creation times of currently existing classes in Package
 	Set sc = ..GetTimes(Package, .Times)
