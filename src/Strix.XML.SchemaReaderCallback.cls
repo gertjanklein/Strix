@@ -20,6 +20,13 @@ Property PropertyName As %String;
 /// Global node containing the property information
 Property PropertyNode As %String;
 
+// -----
+
+/// Classes renamed through ..RenameClass. Used to update CompileAfter
+/// settings of other classes. Stored as a list to support multiple
+/// renames of the same class.
+Property RenamedClasses As list Of %List [ Internal ];
+
 // =====
 
 /// Basic entry point; can be overridden in a subclass to further
@@ -113,6 +120,9 @@ Method RenameClass(NewName As %String) As %Status
 		Set ShortName = $Piece(..ClassName, ".", *)
 		Set @..ClassNode@("Parameter", "XMLNAME") = ShortName
 	}
+	
+	; Remember old name for later processing.
+	Do ..RenamedClasses.Insert($ListBuild(..ClassName, NewName))
 	
 	; Change class name
 	Set @..ClassNode@("ClassName") = NewName
@@ -281,6 +291,12 @@ Method SetPropertyParameter(Name As %String, Value As %String) As %Status
 	Quit $$$OK
 }
 
+/// Removes a property parameter for the current property
+Method KillPropertyParameter(Name As %String)
+{
+	Kill @..PropertyNode@("Parameter", Name)
+}
+
 // -----
 
 /// Sets the type for the current property
@@ -396,6 +412,26 @@ ClassMethod UpdateTimes(Package As %String, Times As %String) As %Status
 	Quit $$$OK
 }
 
+/// Called in second pass through parse tree: updates CompileAfter
+/// for classes that have been renamed.
+Method UpdateCompileAfter() As %Status [ Private ]
+{
+	For i = 1:1:..RenamedClasses.Count() {
+		Set Map = ..RenamedClasses.GetAt(i)
+		Set From = $List(Map, 1), To = $List(Map, 2)
+		
+		; Check whether the current class has the renamed one in CompileAfter
+		Set CompileAfter = $ListFromString(..GetCompileAfter())
+		If CompileAfter = "" Continue
+		Set Idx = $ListFind(CompileAfter, From)
+		If 'Idx Continue
+		Set $List(CompileAfter, Idx) = To
+		Do ..SetCompileAfter($ListToString(CompileAfter))
+	}
+	
+	Quit $$$OK
+}
+
 // -----
 
 /// Displays an error message and/or %Status.
@@ -434,6 +470,23 @@ Method ProcessParseTree(ClassTree As %String) As %Status [ Internal ]
 		
 		Set sc = ..ProcessClassNode(..ClassName)
 		If 'sc Return $$$BuildStatus("Error processing class '{}':", sc, ..ClassName)
+	}
+	
+	; Second pass
+	
+	Set ckey = ""
+	For  {
+		Set ckey = $Order(@ClassTree@(ckey))
+		If ckey = "" Quit
+		
+		Set ..ClassNode = $Name(@ClassTree@(ckey))
+		If $Get(@..ClassNode@("Removed")) Continue
+		
+		Set ..ClassName = $Get(@..ClassNode@("ClassName"))
+		If ..ClassName = "" Continue
+		
+		Set sc = ..UpdateCompileAfter()
+		If 'sc Return $$$BuildStatus("Error updating CompileAfter settings", sc)
 	}
 	
 	Quit $$$OK
