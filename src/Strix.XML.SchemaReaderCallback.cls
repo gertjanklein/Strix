@@ -65,7 +65,7 @@ Method HandleProperty(Name As %String, XmlName As %String, Type As %String, IsDa
 }
 
 /// Callback to post-process a class after it has been created.
-Method PostProcessClass(ClassName As %String) As %Status
+Method PostProcessClass(ClassName As %String, Type As %String) As %Status
 {
 	Quit $$$OK
 }
@@ -327,15 +327,8 @@ Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Pa
 	Merge Classes = SchemaResult.Classes
 	
 	; Allow postprocessing the generated classes
-	Set ClassName = ""
-	For  {
-		Set ClassName = $Order(Classes(ClassName))
-		If ClassName = "" Quit
-		
-		Set sc = ..PostProcessClass(ClassName)
-		If 'sc Quit
-	}
-	If 'sc Quit $$$BuildStatus("Error postprocessing class {}:", sc, ClassName)
+	Set sc = ..PostprocessLoop(.Classes, "type")
+	If 'sc Quit sc
 	
 	Quit $$$OK
 }
@@ -358,14 +351,37 @@ Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Packag
 	Set sc = ..UpdateTimes(Package, .Times)
 	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
 	
-	; Allow postprocessing the generated classes. This does not include the
-	; service/operation/message classes (if any).
+	; Postprocessing the generated type classes.
+	Kill Classes Merge Classes = Reader.TypeClassList
+	Set sc = ..PostprocessLoop(.Classes, "type")
+	If 'sc Quit sc
+	
+	; Postprocessing the generated client classes.
+	Kill Classes Merge Classes = Reader.ClientClassList
+	Set sc = ..PostprocessLoop(.Classes, "client")
+	If 'sc Quit sc
+	
+	; Postprocessing the generated business operation classes.
+	Kill Classes Merge Classes = Reader.BOClassList
+	Set sc = ..PostprocessLoop(.Classes, "operation")
+	If 'sc Quit sc
+	
+	Quit $$$OK
+}
+
+/// Loops through the array of class names, and calls PostProcessClass
+/// for each of them
+Method PostprocessLoop(ByRef Classes As %String, Type As %String = "") As %Status
+{
+	; If no classes are present, sc will not be set below
+	Set sc = $$$OK
+	
 	Set ClassName = ""
 	For  {
-		Set ClassName = $Order(Reader.TypeClassList(ClassName))
+		Set ClassName = $Order(Classes(ClassName))
 		If ClassName = "" Quit
 		
-		Set sc = ..PostProcessClass(ClassName)
+		Set sc = ..PostProcessClass(ClassName, Type)
 		If 'sc Quit
 	}
 	If 'sc Quit $$$BuildStatus("Error postprocessing class {}:", sc, ClassName)
