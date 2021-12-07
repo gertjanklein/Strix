@@ -315,5 +315,45 @@ ClassMethod SqlName(ClassName As %String) As %String
 	Quit Schema_"."_SqlName
 }
 
+/// Renames a class definition. Optionally deletes an existing class
+/// with the new name, optionally compiles the renamed class. If
+/// successful, the original class is deleted.
+/// Does not attempt to check any property/parameter/method return types.
+ClassMethod RenameClass(From As %String, To As %String, Clear As %Boolean = 0, Compile As %Boolean = 0) As %Status
+{
+	; Make sure source can be opened
+	Set FromDef = ##class(%Dictionary.ClassDefinition).%OpenId(From, , .sc)
+	If 'sc Quit $$$BuildStatus("Error opening source class '{}'", sc, From)
+	
+	; Default to same package as source
+	If To '[ ".", From [ "." Set To = $Piece(From, ".", 1, *-1)_"."_To
+	
+	; Check whether detination exists
+	If ##class(%Dictionary.ClassDefinition).%ExistsId(To) {
+		If 'Clear Quit $$$BuildStatus("Target class '{}' exists", , To)
+		Set sc = ##class(%Dictionary.ClassDefinition).%DeleteId(To)
+		If 'sc Quit $$$BuildStatus("Error deleting target class '{}'", sc, To)
+	}
+	
+	; Copy class to new name
+	#dim ToDef As %Dictionary.ClassDefinition
+	Set ToDef = FromDef.%ConstructClone(1)
+	Set ToDef.Name = To
+	Set sc = ToDef.%Save()
+	If 'sc Quit $$$BuildStatus("Error saving cloned class '{}'", sc, To)
+	
+	; Delete original
+	Set sc = ##class(%Dictionary.ClassDefinition).%DeleteId(From)
+	If 'sc Quit $$$BuildStatus("Error deleting original class '{}'", sc, From)
+	
+	; Compile
+	If Compile {
+		Set sc = $System.OBJ.Compile(To, "-duk")
+		If 'sc Quit $$$BuildStatus("Error compiling target class '{}'", sc, To)
+	}
+	
+	Quit $$$OK
+}
+
 }
 
