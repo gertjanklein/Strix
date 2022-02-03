@@ -450,6 +450,22 @@ Method UpdateCompileAfter() As %Status [ Private ]
 
 // -----
 
+/// Callback method; if implemented in a subclass, allows to
+/// process the raw parse tree before regular callbacks are
+/// executed.
+Method OnBeforeProcessParseTree(ClassTree As %String) As %Status [ Abstract ]
+{
+	Set ckey = ""
+	For  {
+		Set ckey = $Order(@ClassTree@(ckey))
+		If ckey = "" Quit
+		
+	}
+	Quit $$$OK
+}
+
+// -----
+
 /// Displays an error message and/or %Status.
 ClassMethod ShowError(Message As %String = "", Status As %Status = "", Args...) [ Internal ]
 {
@@ -472,6 +488,11 @@ ClassMethod ShowError(Message As %String = "", Status As %Status = "", Args...) 
 /// global node that contains the classes part of the parse tree.
 Method ProcessParseTree(ClassTree As %String) As %Status [ Internal ]
 {
+	If $$$comMemberKeyGet(..%ClassName(1),$$$cCLASSmethod,"OnBeforeProcessParseTree",$$$cMETHrunnable) {
+		Set sc = ..OnBeforeProcessParseTree(ClassTree)
+		If 'sc Quit $$$BuildStatus("Method OnBeforeProcessParseTree returned an error:", sc)
+	}
+	
 	; Loop through classes to be generated
 	Set ckey = ""
 	For  {
