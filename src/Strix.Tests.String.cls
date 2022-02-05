@@ -146,5 +146,33 @@ Method TestRxReplace()
 	Quit
 }
 
+/// Do ##class(Strix.Testing.Runner).Run("Strix.Tests.String:TestRemoveFromList")
+Method TestRemoveFromList()
+{
+	Set Input = "a,b,c"
+	
+	Set Result = ##class(Strix.Lib.String).RemoveFromList(Input, ,"b", .Found)
+	Do ..Assert(Found, "The string to remove was found")
+	Do ..AssertEqual(Result, "a,c", "Entry in middle is removed")
+	
+	Set Result = ##class(Strix.Lib.String).RemoveFromList(Input, ,"a", .Found)
+	Do ..Assert(Found, "The string to remove was found")
+	Do ..AssertEqual(Result, "b,c", "Entry at start is removed")
+	
+	Set Result = ##class(Strix.Lib.String).RemoveFromList(Input, ,"c", .Found)
+	Do ..Assert(Found, "The string to remove was found")
+	Do ..AssertEqual(Result, "a,b", "Entry at end is removed")
+	
+	Set Result = ##class(Strix.Lib.String).RemoveFromList(Input, ,"d", .Found)
+	Do ..Assert('Found, "The string to remove was not found")
+	Do ..AssertEqual(Result, Input, "Input is unchanged")
+	
+	Set Result = ##class(Strix.Lib.String).RemoveFromList("", ,"", .Found)
+	Do ..Assert('Found, "No replacement on empty input")
+	Do ..AssertEqual(Result, "", "Input is unchanged")
+	
+	Quit
+}
+
 }
 

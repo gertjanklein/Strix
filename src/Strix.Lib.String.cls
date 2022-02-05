@@ -227,5 +227,21 @@ ClassMethod UnQuote(Input As %String, Unescape As %Boolean = 0) As %String
 	Quit Input
 }
 
+/// Removes an entry from a (by default) comma-separated list.
+/// Returns the new list with the entry removed, or the unaltered
+/// input if LookFor is not found. Outputs whether is was in Found.
+ClassMethod RemoveFromList(Input As %String, Sep As %String = ",", LookFor As %String, Output Found As %Boolean) As %String
+{
+	Set Found = 0
+	If Input = "" Quit ""
+	Set List = $ListFromString(Input, Sep)
+	Set Index = $ListFind(List, LookFor)
+	If 'Index Quit Input
+	
+	Set $List(List, Index, Index) = ""
+	Set Found = 1
+	Quit $ListToString(List, Sep)
+}
+
 }
 
