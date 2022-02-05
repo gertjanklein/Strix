@@ -568,7 +568,7 @@ Storage Default
 <IdLocation>^Strix.SCM.ProjectD</IdLocation>
 <IndexLocation>^Strix.SCM.ProjectI</IndexLocation>
 <StreamLocation>^Strix.SCM.ProjectS</StreamLocation>
-<Type>%Storage.Persistent</Type>
+<Type>%Library.CacheStorage</Type>
 }
 
 }
