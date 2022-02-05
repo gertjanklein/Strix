@@ -369,9 +369,81 @@ Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Packag
 	Quit $$$OK
 }
 
+// -----
+
+/// Helper method, optionally to be called from callback
+/// OnBeforeProcessParseTree. Processes the parse tree, and removes all
+/// string/date classes that are just there to host parameters; instead,
+/// sets the parameters on the properties themselves.
+Method ReduceDatatypeClasses(ClassTree As %String) As %Status
+{
+	; Datatypes in the parse tree to look for, and what to replace them with
+	Set Replace = $ListFromString("string,date,nonNegativeInteger,positiveInteger")
+	Set ReplaceWith =  $ListFromString("%String,%Date,%xsd.nonNegativeInteger,%xsd.positiveInteger")
+	
+	; Loop through classes in the parse tree
+	Set ckey = ""
+	For  {
+		Set ckey = $Order(@ClassTree@(ckey))
+		If ckey = "" Quit
+		
+		; Give the current node its own name
+		Set Node = $Name(@ClassTree@(ckey))
+		If @Node@("ClassType") '= "datatype" Continue
+		If @Node@("DataType") '= "datatype" Continue
+		
+		; Check if this is one of the datatypes defined above
+		Set Type = $Piece(@Node@("Super"), "^", 2)
+		Set TypeIdx = $ListFind(Replace, Type)
+		If 'TypeIdx Continue
+		
+		; Start looking for properties that use this "class"
+		Set UsedByNode = $Name(@Node@("UsedBy"))
+		Set UsedByNodeLen = $QLength(UsedByNode)
+		
+		; Loop through all "UsedBy" subnodes
+		For  {
+			Set UsedByNode = $Query(@UsedByNode)
+			If UsedByNode = "" Quit
+			If $QSubscript(UsedByNode, UsedByNodeLen) '= "UsedBy" Quit
+			
+			; Get the class and property indices
+			Set ClassKey = $QSubscript(UsedByNode, UsedByNodeLen+1)
+			Set PropKey = $QSubscript(UsedByNode, UsedByNodeLen+2)
+			
+			; Change the property to the replacement datatype
+			Set Current = @ClassTree@(ClassKey, "Property", PropKey, "Type")
+			Set New = $List(ReplaceWith, TypeIdx)
+			Set @ClassTree@(ClassKey, "Property", PropKey, "Type") = New
+			
+			; Copy the parameters from the current class to the property
+			Set ParmName = ""
+			For  {
+				Set ParmName = $Order(@Node@("Parameter", ParmName), 1, ParmValue)
+				If ParmName = "" Quit
+				Set @ClassTree@(ClassKey, "Property", PropKey, "Parameter", ParmName) = ParmValue
+			}
+			
+			; Check if the class to remove is in the CompileAfter list; if so,
+			; take it our.
+			Set CompileAfter = $Get(@ClassTree@(ClassKey, "CompileAfter"))
+			Set CompileAfter = ##class(Strix.Lib.String).RemoveFromList(
+			    CompileAfter,, @Node@("ClassName"), .Found)
+			If Found Set @ClassTree@(ClassKey, "CompileAfter") = CompileAfter
+		}
+		
+		; Signal to the XML processor the class is no longer needed
+		Set @ClassTree@(ckey, "Removed") = 1
+	}
+	
+	Quit $$$OK
+}
+
+// -----
+
 /// Loops through the array of class names, and calls PostProcessClass
 /// for each of them
-Method PostprocessLoop(ByRef Classes As %String, Type As %String = "") As %Status
+Method PostprocessLoop(ByRef Classes As %String, Type As %String = "") As %Status [ Internal ]
 {
 	; If no classes are present, sc will not be set below
 	Set sc = $$$OK
@@ -388,8 +460,6 @@ Method PostprocessLoop(ByRef Classes As %String, Type As %String = "") As %Statu
 	
 	Quit $$$OK
 }
-
-// -----
 
 /// Load the creation times of all classes in Package, and return them
 /// in output parameter Times. This can be used in conjunction with
