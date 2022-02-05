@@ -8,11 +8,11 @@ Property Reader As Strix.XML.SchemaReader;
 
 // -----
 
-/// Name of the currently handled class
-Property ClassName As %String;
-
 /// Global node containing the class information
 Property ClassNode As %String;
+
+/// Name of the currently handled class
+Property ClassName As %String;
 
 /// Name of the currently handled property
 Property PropertyName As %String;
@@ -21,6 +21,9 @@ Property PropertyName As %String;
 Property PropertyNode As %String;
 
 // -----
+
+/// Count of datatype classes that were removed by ReduceDatatypeClasses
+Property ReducedClasses As %Integer;
 
 /// Classes renamed through ..RenameClass. Used to update CompileAfter
 /// settings of other classes. Stored as a list to support multiple
@@ -434,6 +437,7 @@ Method ReduceDatatypeClasses(ClassTree As %String) As %Status
 		
 		; Signal to the XML processor the class is no longer needed
 		Set @ClassTree@(ckey, "Removed") = 1
+		Set ..ReducedClasses = ..ReducedClasses + 1
 	}
 	
 	Quit $$$OK
