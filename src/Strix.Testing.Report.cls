@@ -185,9 +185,9 @@ ClassMethod AssertionSummary(Run As Strix.Testing.Runner, AddLinks As %Boolean =
      <td>#(Result.AssertionType)#</td>
      <td>#(Where)#</td>
     </tr>
-    <tr class="#(Result.Type)#">
+    <tr class="#(Result.Type)#Desc">
      <td colspan=2>#($ZConvert(Result.Description, "O", "HTML"))#</td>
-    </tr>>	
+    </tr>>
 	}
 	
 	&html<
@@ -586,7 +586,7 @@ ClassMethod AssertionListCSS() As %String
   color: white;
 }
 #reslist tbody tr:nth-child(odd) { background-color: white; color: black; }
-#reslist tbody tr:nth-child(even) { background-color: #f3e7dc; border-bottom: 1px solid #ccc; }
+#reslist tbody tr:nth-child(even) { background-color: #eee; border-bottom: 1px solid #ccc; }
 #reslist tbody tr:nth-child(odd) td:first-child {
   text-align: right; background-color: #eee;
 }
@@ -594,10 +594,11 @@ ClassMethod AssertionListCSS() As %String
   background-color: #eee; color: green;
   text-align: right; font-weight: bold;
 }
-#reslist tr.Pass td:nth-child(2) { background-color: #afa; }
-#reslist tr.Fail td:nth-child(2) { background-color: #f99; }
-#reslist tr.Error td:nth-child(2) { background-color: #f66; }
-#reslist tr.Skip td:nth-child(2) { background-color: #ccc; }
+#reslist tr.Pass td:nth-child(2), #reslist tr.PassDesc td { background-color: #afa; }
+#reslist tr.Fail td:nth-child(2), #reslist tr.FailDesc td { background-color: #f99; }
+#reslist tr.Error td:nth-child(2), #reslist tr.ErrorDesc td { background-color: #f66; }
+#reslist tr.Skip td:nth-child(2), #reslist tr.SkipDesc td { background-color: #ccc; }
+#reslist tr.Log td:nth-child(2), #reslist tr.LogDesc td { background-color: #ded; }
 </style>>	
 	
 	Quit ""

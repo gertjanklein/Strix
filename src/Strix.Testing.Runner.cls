@@ -418,6 +418,15 @@ Method RecordError(Description As %String = "", Status As %Status = "", Parms...
 	Quit Info
 }
 
+/// Records a log message
+Method RecordLog(Message As %String = "", Parms... As %String) As Strix.Testing.Result
+{
+	If $Get(Parms) Set Message = $$$BuildStr(Message, Parms...)
+	Set Info = ##class(Strix.Testing.Result).Get("Log", ..CurrentTestClass, ..CurrentTestMethod, , , , Message)
+	Do ..Results.Insert(Info)
+	Quit Info
+}
+
 // =====
 
 /// Writes what's passed in to the current device, if this is a terminal.

@@ -252,6 +252,13 @@ Method AssertStatusParameter(Status As %Status, ParmNr As %Integer, ParmValue As
 
 // ==
 
+Method Log(Message As %String, Parms... As %String)
+{
+	Do ..Runner.RecordLog(Message, Parms...)
+}
+
+// ==
+
 Method Skipped(Reason As %String) As %Boolean
 {
 	If '$IsObject(..Runner) Quit 0
