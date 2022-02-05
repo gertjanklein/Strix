@@ -8,17 +8,20 @@ Property Reader As Strix.XML.SchemaReader;
 
 // -----
 
-/// Global node containing the class information
+/// Global node containing the tree of classes to be generated
+Property ClassTree As %String;
+
+/// Global node for the currently processed class
 Property ClassNode As %String;
 
-/// Name of the currently handled class
+/// Name of the currently processed class
 Property ClassName As %String;
 
-/// Name of the currently handled property
-Property PropertyName As %String;
-
-/// Global node containing the property information
+/// Global node for the currently processed property
 Property PropertyNode As %String;
+
+/// Name of the currently processed property
+Property PropertyName As %String;
 
 // -----
 
@@ -378,7 +381,7 @@ Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Packag
 /// OnBeforeProcessParseTree. Processes the parse tree, and removes all
 /// string/date classes that are just there to host parameters; instead,
 /// sets the parameters on the properties themselves.
-Method ReduceDatatypeClasses(ClassTree As %String) As %Status
+Method ReduceDatatypeClasses() As %Status
 {
 	; Datatypes in the parse tree to look for, and what to replace them with
 	Set Replace = $ListFromString("string,date,nonNegativeInteger,positiveInteger")
@@ -387,11 +390,11 @@ Method ReduceDatatypeClasses(ClassTree As %String) As %Status
 	; Loop through classes in the parse tree
 	Set ckey = ""
 	For  {
-		Set ckey = $Order(@ClassTree@(ckey))
+		Set ckey = $Order(@..ClassTree@(ckey))
 		If ckey = "" Quit
 		
 		; Give the current node its own name
-		Set Node = $Name(@ClassTree@(ckey))
+		Set Node = $Name(@..ClassTree@(ckey))
 		If @Node@("ClassType") '= "datatype" Continue
 		If @Node@("DataType") '= "datatype" Continue
 		
@@ -415,28 +418,28 @@ Method ReduceDatatypeClasses(ClassTree As %String) As %Status
 			Set PropKey = $QSubscript(UsedByNode, UsedByNodeLen+2)
 			
 			; Change the property to the replacement datatype
-			Set Current = @ClassTree@(ClassKey, "Property", PropKey, "Type")
+			Set Current = @..ClassTree@(ClassKey, "Property", PropKey, "Type")
 			Set New = $List(ReplaceWith, TypeIdx)
-			Set @ClassTree@(ClassKey, "Property", PropKey, "Type") = New
+			Set @..ClassTree@(ClassKey, "Property", PropKey, "Type") = New
 			
 			; Copy the parameters from the current class to the property
 			Set ParmName = ""
 			For  {
 				Set ParmName = $Order(@Node@("Parameter", ParmName), 1, ParmValue)
 				If ParmName = "" Quit
-				Set @ClassTree@(ClassKey, "Property", PropKey, "Parameter", ParmName) = ParmValue
+				Set @..ClassTree@(ClassKey, "Property", PropKey, "Parameter", ParmName) = ParmValue
 			}
 			
 			; Check if the class to remove is in the CompileAfter list; if so,
 			; take it our.
-			Set CompileAfter = $Get(@ClassTree@(ClassKey, "CompileAfter"))
+			Set CompileAfter = $Get(@..ClassTree@(ClassKey, "CompileAfter"))
 			Set CompileAfter = ##class(Strix.Lib.String).RemoveFromList(
 			    CompileAfter,, @Node@("ClassName"), .Found)
-			If Found Set @ClassTree@(ClassKey, "CompileAfter") = CompileAfter
+			If Found Set @..ClassTree@(ClassKey, "CompileAfter") = CompileAfter
 		}
 		
 		; Signal to the XML processor the class is no longer needed
-		Set @ClassTree@(ckey, "Removed") = 1
+		Set @..ClassTree@(ckey, "Removed") = 1
 		Set ..ReducedClasses = ..ReducedClasses + 1
 	}
 	
@@ -527,11 +530,11 @@ Method UpdateCompileAfter() As %Status [ Private ]
 /// Callback method; if implemented in a subclass, allows to
 /// process the raw parse tree before regular callbacks are
 /// executed.
-Method OnBeforeProcessParseTree(ClassTree As %String) As %Status [ Abstract ]
+Method OnBeforeProcessParseTree() As %Status [ Abstract ]
 {
 	Set ckey = ""
 	For  {
-		Set ckey = $Order(@ClassTree@(ckey))
+		Set ckey = $Order(@..ClassTree@(ckey))
 		If ckey = "" Quit
 		
 	}
@@ -562,8 +565,12 @@ ClassMethod ShowError(Message As %String = "", Status As %Status = "", Args...) 
 /// global node that contains the classes part of the parse tree.
 Method ProcessParseTree(ClassTree As %String) As %Status [ Internal ]
 {
+	; Save root node for other methods to use
+	Set ..ClassTree = ClassTree
+	
+	; If a callable OnBeforeProcessParseTree method is present, call it
 	If $$$comMemberKeyGet(..%ClassName(1),$$$cCLASSmethod,"OnBeforeProcessParseTree",$$$cMETHrunnable) {
-		Set sc = ..OnBeforeProcessParseTree(ClassTree)
+		Set sc = ..OnBeforeProcessParseTree()
 		If 'sc Quit $$$BuildStatus("Method OnBeforeProcessParseTree returned an error:", sc)
 	}
 	
