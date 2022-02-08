@@ -251,7 +251,7 @@ Method GetProcessors(Output Status As %Status) As %ListOfObjects
 	If Names = "" Quit Processors
 	
 	For i = 1:1:$Length(Names, ",") {
-		Set ClassName = $ZStrip(Names, "<>W")
+		Set ClassName = $ZStrip($Piece(Names, ",", i), "<>W")
 		If ClassName = "" Continue
 		
 		If ClassName '[ ".", ##class(%Dictionary.ClassDefinition).%ExistsId("Strix.SCM.Processor."_ClassName) {
