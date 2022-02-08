@@ -29,7 +29,7 @@ ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Director
 		
 		; Get the pipe data
 		Use Pipe
-		Read Output:5
+		Read Output#$$$MaxStringLength:15
 		If $Test {
 			; Success; get exit code if available
 			Set ExitCode = ..PipeExitCode(Pipe, .sc)
