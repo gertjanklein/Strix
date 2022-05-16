@@ -24,7 +24,7 @@ Property Name As %String [ Required ];
 
 /// The path, relative to the configuration file directory, where to store the
 /// exported classes etc.; can be empty for same directory as that of config file.
-Property ProjectPath As %String;
+Property ProjectPath As %String(MAXLEN = 1024);
 
 /// The members of this project, defined as a list of 'patterns' supporting
 /// wildcards. Examples:
