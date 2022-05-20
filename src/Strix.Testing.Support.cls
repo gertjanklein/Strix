@@ -133,9 +133,11 @@ ClassMethod KillExtent(ClassName As %String) As %Status
 
 /// Parses an XData block passed in by id, an returns all objects in it
 /// with the specified element/classname.
-ClassMethod XDataToObjects(XDataId As %String, ElementName As %String, ClassName As %String, Objects As %ListOfObjects) As %Status
+ClassMethod XDataToObjects(XDataId As %String, ElementName As %String = "", ClassName As %String, Objects As %ListOfObjects) As %Status
 {
 	If '$IsObject(Objects) Set Objects = ##class(%ListOfObjects).%New()
+	If ElementName = "" Set ElementName = $Parameter(ClassName, "XMLTYPE")
+	If ElementName = "" Set ElementName = $Piece(ClassName, ".", *)
 	
 	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(XDataId,, .sc)
 	If 'sc Quit $$$BuildStatus("Error opening XData '{}':", sc, XDataId)
