@@ -329,6 +329,7 @@ Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Pa
 	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
 	
 	; Determine the classes that were created
+	If Reader.%ClassName(1) = "Strix.XML.WSDLReader" Set Reader = Reader.SchemaReader
 	Set SchemaResult = ##class(%XML.Utils.SchemaResult).CreateResult(Reader, , .Features)
 	Merge Classes = SchemaResult.Classes
 	
