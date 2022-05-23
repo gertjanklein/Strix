@@ -58,7 +58,7 @@ Property CurrentTestMethod As %String [ Internal, Transient ];
 /// - A package name: all tests in that package are run.
 /// If a class with the same name as the package to run the tests in
 /// exists, force using the package by appending ".pkg".
-ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolean = 0) As %Status
+ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolean = 0) As Strix.Testing.Runner
 {
 	Set Runner = ..%New()
 	Set Runner.Debug = Debug
@@ -89,7 +89,22 @@ ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolea
 	
 	Do Runner.ReportToTerminal(Save)
 	
-	Quit $$$OK
+	Quit Runner
+}
+
+/// Runs tests according to spec and halts the process. If any tests
+/// failed, returns an exit status 1, otherwise 0. Intended for use
+/// in e.g. GitHub Actions.
+ClassMethod RunAndQuit(TestSpec As %String = "", Save As %Boolean = 0)
+{
+	Set Runner = ..Run(TestSpec, 0, Save)
+	
+	If Runner.Failed+Runner.Errors {
+		; This returns exit status 1
+		Do $System.Process.Terminate()
+	}
+	
+	Halt
 }
 
 /// Run all tests in this namespace
