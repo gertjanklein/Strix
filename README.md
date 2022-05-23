@@ -1,4 +1,4 @@
-![Tests](https://github.com/gertjanklein/strix-py-ns/actions/workflows/run-tests.yml/badge.svg)
+![Tests](https://github.com/gertjanklein/Strix/actions/workflows/run-tests.yml/badge.svg)
 
 # Strix
 
