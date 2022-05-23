@@ -1,0 +1,4 @@
+Set sc=$System.OBJ.ImportDir("/home/irisowner/src",,"ckd",,1)
+If 'sc Do $System.Status.DisplayError(sc) Quit
+Do ##class(Strix.Testing.Runner).RunAndQuit()
+Halt
