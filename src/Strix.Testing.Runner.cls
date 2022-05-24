@@ -97,6 +97,8 @@ ClassMethod Run(TestSpec As %String = "", Debug As %Boolean = 0, Save As %Boolea
 /// in e.g. GitHub Actions.
 ClassMethod RunAndQuit(TestSpec As %String = "", Save As %Boolean = 0)
 {
+	Set $ZTrap = "Error"
+	
 	Set Runner = ..Run(TestSpec, 0, Save)
 	
 	If Runner.Failed+Runner.Errors {
@@ -104,6 +106,11 @@ ClassMethod RunAndQuit(TestSpec As %String = "", Save As %Boolean = 0)
 		Do $System.Process.Terminate()
 	}
 	
+	Halt
+	
+Error
+	Set $ZTrap = ""
+	Do $System.Process.Terminate()
 	Halt
 }
 
