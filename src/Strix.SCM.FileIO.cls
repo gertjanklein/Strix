@@ -175,6 +175,8 @@ Method Export(Item As %String, AsUDL As %Boolean, Processors As %ListOfObjects, 
 	
 	; Export to it
 	If AsUDL {
+		; ExportUDL can't handle BPL/DTL extension, change to cls
+		If $lf($lfs("bpl,dtl"), $$$NormalizedType(Item)) Set $$$ItemType(Item) = "cls"
 		Set sc = $System.OBJ.ExportUDL(Item, Stream.Filename, "-d/diffexport")
 	} Else {
 		Set Version = ..Project.ExportVersion
