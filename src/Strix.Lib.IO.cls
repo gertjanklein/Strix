@@ -21,7 +21,7 @@ ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Director
 	Set Pipe = "|CPIPE|"_$Job
 	
 	; Open the pipe
-	Open Pipe:(Command:"QRU"):5
+	Open Pipe:(Command:"QRU"):15
 	If $Test {
 		; A command may not return any data at all; this by default results
 		; in an <ENDOFFILE> error. Prevent this by setting a flag:
@@ -29,7 +29,7 @@ ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Director
 		
 		; Get the pipe data
 		Use Pipe
-		Read Output#$$$MaxStringLength:15
+		Read Output#$$$MaxStringLength:30
 		If $Test {
 			; Success; get exit code if available
 			Set ExitCode = ..PipeExitCode(Pipe, .sc)
