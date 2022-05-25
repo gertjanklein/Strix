@@ -16,13 +16,11 @@ jobs:
       with:
         path: './strix'
     
-    - run: docker build ci/ --file ci/Dockerfile --tag testiris
-    - run: docker run -d --name testiris testiris --check-caps false --up false
+    - run: docker run --detach --rm --name testiris containers.intersystems.com/intersystems/iris-community:2022.1.0.199.0 --check-caps false --up false
     
     - run: docker cp ci/test.script testiris:/home/irisowner/test.script
     - run: docker cp strix/src testiris:/home/irisowner/src
     
     - run: docker exec testiris sh -c "iris start iris && iris session iris < /home/irisowner/test.script"
     
-    - run: docker rm testiris --force
-    - run: docker rmi testiris --force
+    - run: docker stop testiris
