@@ -10,17 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        path: './strix'
     
     - run: docker run --detach --rm --name testiris containers.intersystems.com/intersystems/iris-community:2022.1.0.199.0 --check-caps false --up false
     
+    - run: docker cp docker/merge.cpf testiris:/home/irisowner/merge.cpf
     - run: docker cp ci/test.script testiris:/home/irisowner/test.script
-    - run: docker cp strix/src testiris:/home/irisowner/src
+    - run: docker cp src testiris:/home/irisowner/src
     
-    - run: docker exec testiris sh -c "iris start iris && iris session iris < /home/irisowner/test.script"
+    - run: docker exec --env ISC_CPF_MERGE_FILE=/home/irisowner/merge.cpf testiris sh -c "iris start iris quietly >/dev/null && iris session iris < /home/irisowner/test.script"
     
     - run: docker stop testiris
