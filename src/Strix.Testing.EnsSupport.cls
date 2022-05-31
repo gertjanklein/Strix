@@ -25,9 +25,13 @@ ClassMethod EnsureProduction(Name As %String) As %Status
 		Set sc = ##class(Ens.Director).StopProduction()
 		If 'sc Quit $$$BuildStatus("Error stopping current production ({}):", sc, Current)
 	}
+	If Current = "" Set Current = $Get(^Ens.Configuration("csp","LastProduction"))
 	
 	Set sc = ##class(Ens.Director).StartProduction(Name)
 	If 'sc Quit $$$BuildStatus("Error starting production '{}':", sc, Name)
+	
+	; Remember previous production for restoring later
+	Set ^||Strix.Testing.EnsSupport("PrevProduction") = Current
 	
 	Quit $$$OK
 }
@@ -39,7 +43,15 @@ ClassMethod StopProduction() As %Status
 {
 	New %QUIET
 	Set %QUIET = 1
-	Quit ##class(Ens.Director).StopProduction()
+	
+	Set sc = ##class(Ens.Director).StopProduction()
+	If 'sc Quit sc
+	
+	; Restore previous production, if saved
+	Set Prev = $Get(^||Strix.Testing.EnsSupport("PrevProduction"))
+	If Prev '= "" Set ^Ens.Configuration("csp","LastProduction") = Prev
+	
+	Quit $$$OK
 }
 
 /// Returns an EnsLib.Testing.Service instance to use for sending
