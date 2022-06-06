@@ -1,0 +1,8 @@
+[Source]
+type = 'directory'
+srcdir = 'src'
+[Directory]
+path = '.'
+[Local]
+outfile = 'export.xml'
+export_version = 25
