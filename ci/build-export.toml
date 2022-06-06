@@ -2,7 +2,7 @@
 type = 'directory'
 srcdir = 'src'
 [Directory]
-path = '.'
+path = '../'
 [Local]
 outfile = 'export.xml'
 export_version = 25
