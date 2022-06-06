@@ -41,7 +41,7 @@ jobs:
         mv ci/export.xml "Strix-${{ github.ref_name }}.xml"
         zip --junk-paths "Strix-${{ github.ref_name }}.zip" "Strix-${{ github.ref_name }}.xml"
     
-    - name: Prepare UDL → XML conversion server
+    - name: Shutdown UDL → XML conversion server
       run: docker stop testiris
     
     - name: Upload release asset
