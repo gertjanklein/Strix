@@ -40,11 +40,12 @@ jobs:
         python ieb/src/build-export.py ci/build-export.toml
         mv ci/export.xml "Strix-${{ github.ref_name }}.xml"
         zip --junk-paths "Strix-${{ github.ref_name }}.zip" "Strix-${{ github.ref_name }}.xml"
+        tar cvzf "Strix-${{ github.ref_name }}.tgz" "Strix-${{ github.ref_name }}.xml"
     
     - name: Shutdown UDL → XML conversion server
       run: docker stop testiris
     
-    - name: Upload release asset
+    - name: Upload release zip
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,4 +54,14 @@ jobs:
         asset_path: Strix-${{ github.ref_name }}.zip
         asset_name: Strix-${{ github.ref_name }}.zip
         asset_content_type: application/zip
+    
+    - name: Upload release tgz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: Strix-${{ github.ref_name }}.tgz
+        asset_name: Strix-${{ github.ref_name }}.tgz
+        asset_content_type: application/gzip
     
