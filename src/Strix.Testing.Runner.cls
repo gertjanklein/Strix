@@ -99,9 +99,10 @@ ClassMethod RunAndQuit(TestSpec As %String = "", Save As %Boolean = 0)
 {
 	Set $ZTrap = "Error"
 	
+	#dim Runner As Strix.Testing.Runner
 	Set Runner = ..Run(TestSpec, 0, Save)
 	
-	If Runner.Failed+Runner.Errors {
+	If (Runner.Failed+Runner.Errors) || 'Runner.Asserts {
 		; This returns exit status 1
 		Do $System.Process.Terminate()
 	}
