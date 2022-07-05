@@ -115,7 +115,8 @@ Error
 	Halt
 }
 
-/// Run all tests in this namespace
+/// Run all tests in this namespace (except for those in
+/// the Strix package).
 Method RunAll()
 {
 	Set ..TestSpec = "All"
@@ -132,6 +133,8 @@ Method RunAll()
 	
 	While rs.%Next() {
 		Set Name = rs.%Get("Name")
+		; Skip the Strix tests themselves
+		If $Piece(Name, ".") = "Strix" Continue
 		Do ..RunClass(Name)
 	}
 	
