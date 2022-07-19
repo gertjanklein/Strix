@@ -135,6 +135,8 @@ Method RunAll()
 		Set Name = rs.%Get("Name")
 		; Skip the Strix tests themselves
 		If $Piece(Name, ".") = "Strix" Continue
+		; Skip tests intended to be run manually only
+		If $Parameter(Name, "ManualOnly") Continue
 		Do ..RunClass(Name)
 	}
 	
@@ -164,6 +166,9 @@ Method RunPackage(Package As %String)
 		
 		;Skip classes not inheriting from the test superclass
 		If '$ZObjClassMethod(ClassName, "%IsA", "Strix.Testing.TestCase") Continue
+		
+		; Skip tests intended to be run manually only
+		If $Parameter(ClassName, "ManualOnly") Continue
 		
 		Do ..RunClass(ClassName)
 	}

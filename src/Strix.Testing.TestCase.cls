@@ -4,6 +4,8 @@ Include Strix
 Class Strix.Testing.TestCase Extends %RegisteredObject
 {
 
+Parameter ManualOnly As BOOLEAN = 0;
+
 /// The test runner
 Property Runner As Strix.Testing.Runner;
 
