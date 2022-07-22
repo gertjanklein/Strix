@@ -6,6 +6,8 @@ Class Strix.XML.SchemaReaderCallback Extends %RegisteredObject
 /// The reader we receive the callback from
 Property Reader As Strix.XML.SchemaReader;
 
+Property Classes As %String [ MultiDimensional ];
+
 // -----
 
 /// Global node containing the tree of classes to be generated
@@ -331,10 +333,13 @@ Method RunReader(Reader As Strix.XML.SchemaReader, SchemaLocation As %String, Pa
 	; Determine the classes that were created
 	If Reader.%ClassName(1) = "Strix.XML.WSDLReader" Set Reader = Reader.SchemaReader
 	Set SchemaResult = ##class(%XML.Utils.SchemaResult).CreateResult(Reader, , .Features)
-	Merge Classes = SchemaResult.Classes
+	
+	Merge ..Classes = SchemaResult.Classes
+	; Remove meaningless reader internal data
+	Set k = "" For  Set k = $Order(..Classes(k)) Quit:k=""  Set ..Classes(k) = ""
 	
 	; Allow postprocessing the generated classes
-	Set sc = ..PostprocessLoop(.Classes, "type")
+	Set sc = ..PostprocessLoop("type")
 	If 'sc Quit sc
 	
 	Quit $$$OK
@@ -358,19 +363,26 @@ Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Packag
 	Set sc = ..UpdateTimes(Package, .Times)
 	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
 	
+	; Merge list of all classes:
+	Merge ..Classes = Reader.TypeClassList
+	Merge ..Classes = Reader.ClientClassList
+	Merge ..Classes = Reader.BOClassList
+	; Remove meaningless reader internal data
+	Set k = "" For  Set k = $Order(..Classes(k)) Quit:k=""  Set ..Classes(k) = ""
+	
 	; Postprocessing the generated type classes.
 	Kill Classes Merge Classes = Reader.TypeClassList
-	Set sc = ..PostprocessLoop(.Classes, "type")
+	Set sc = ..PostprocessLoop("type")
 	If 'sc Quit sc
 	
 	; Postprocessing the generated client classes.
 	Kill Classes Merge Classes = Reader.ClientClassList
-	Set sc = ..PostprocessLoop(.Classes, "client")
+	Set sc = ..PostprocessLoop("client")
 	If 'sc Quit sc
 	
 	; Postprocessing the generated business operation classes.
 	Kill Classes Merge Classes = Reader.BOClassList
-	Set sc = ..PostprocessLoop(.Classes, "operation")
+	Set sc = ..PostprocessLoop("operation")
 	If 'sc Quit sc
 	
 	Quit $$$OK
@@ -451,14 +463,14 @@ Method ReduceDatatypeClasses() As %Status
 
 /// Loops through the array of class names, and calls PostProcessClass
 /// for each of them
-Method PostprocessLoop(ByRef Classes As %String, Type As %String = "") As %Status [ Internal ]
+Method PostprocessLoop(Type As %String = "") As %Status [ Internal ]
 {
 	; If no classes are present, sc will not be set below
 	Set sc = $$$OK
 	
 	Set ClassName = ""
 	For  {
-		Set ClassName = $Order(Classes(ClassName))
+		Set ClassName = $Order(..Classes(ClassName))
 		If ClassName = "" Quit
 		
 		Set sc = ..PostProcessClass(ClassName, Type)
