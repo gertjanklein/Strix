@@ -450,6 +450,7 @@ Method ReduceDatatypeClasses() As %Status
 			For  {
 				Set ParmName = $Order(@Node@("Parameter", ParmName), 1, ParmValue)
 				If ParmName = "" Quit
+				If ParmName = "NAMESPACE" Continue
 				Set @..ClassTree@(ClassKey, "Property", PropKey, "Parameter", ParmName) = ParmValue
 			}
 			
