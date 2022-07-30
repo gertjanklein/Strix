@@ -408,13 +408,20 @@ Method ReduceDatatypeClasses() As %Status
 		
 		; Give the current node its own name
 		Set Node = $Name(@..ClassTree@(ckey))
+		
+		; Skip classes marked temporary
+		If $Get(@Node@("temporary")) Continue
+		
 		If @Node@("ClassType") '= "datatype" Continue
-		If @Node@("DataType") '= "datatype" Continue
+		If $Data(@Node@("DataType")), @Node@("DataType") '= "datatype" Continue
 		
 		; Check if this is one of the datatypes defined above
 		Set Type = $Piece(@Node@("Super"), "^", 2)
 		Set TypeIdx = $ListFind(Replace, Type)
 		If 'TypeIdx Continue
+		
+		; We don't support reducing classes that are a superclass
+		If $Data(@Node@("SuperBy")) Continue
 		
 		; Start looking for properties that use this "class"
 		Set UsedByNode = $Name(@Node@("UsedBy"))
@@ -429,6 +436,9 @@ Method ReduceDatatypeClasses() As %Status
 			; Get the class and property indices
 			Set ClassKey = $QSubscript(UsedByNode, UsedByNodeLen+1)
 			Set PropKey = $QSubscript(UsedByNode, UsedByNodeLen+2)
+			
+			; Property may have been removed
+			If '$Data(@..ClassTree@(ClassKey, "Property", PropKey)) Continue
 			
 			; Change the property to the replacement datatype
 			Set Current = @..ClassTree@(ClassKey, "Property", PropKey, "Type")
@@ -642,6 +652,7 @@ Method ProcessClassNode(Name As %String) As %Status [ Internal ]
 	; Loop through properties
 	For pkey = 1:1:$Get(@..ClassNode@("Property")) {
 		Set ..PropertyNode = $Name(@..ClassNode@("Property", pkey))
+		If '$Data(@..PropertyNode) Continue
 		Set (..PropertyName, PropertyName) = @..PropertyNode@("Name")
 		
 		Set Type = ..Reader.TypeToClass($Get(@..PropertyNode@("Type")), .IsDatatype)
