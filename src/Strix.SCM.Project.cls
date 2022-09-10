@@ -134,7 +134,7 @@ Method SaveProjectFile() As %Status
 }
 
 /// Copies properties from another Project instance into the current one.
-Method CopyFrom(Other As Strix.SCM.Project) [ CodeMode = objectgenerator ]
+Method CopyFrom(Other As Strix.SCM.Project, Full As %Boolean = 1) [ CodeMode = objectgenerator ]
 {
 	#define Write(%s) Do %code.WriteLine($Char(9)_%s)
 	
@@ -144,14 +144,14 @@ Method CopyFrom(Other As Strix.SCM.Project) [ CodeMode = objectgenerator ]
 		
 		Set Name = PropDef.Name
 		If $Extract(Name) = "%" Continue
-		If Name = "GUID" Continue
 		If PropDef.Calculated Continue
-		If PropDef.Parameters.GetAt("XMLPROJECTION") = "NONE" Continue
 		
+		Set Prefix = ""
+		If (Name = "GUID") || (Name= "LocalSettings") Set Prefix = "If Full "
 		If PropDef.Collection = "" {
-			$$$Write("Set .."_Name_" = Other."_Name)
+			$$$Write(Prefix_"Set .."_Name_" = Other."_Name)
 		} ElseIf (PropDef.Collection = "list") || (PropDef.Collection = "array") {
-			$$$Write("Set .."_Name_" = Other."_Name_".%ConstructClone()")
+			$$$Write(Prefix_"Set .."_Name_" = Other."_Name_".%ConstructClone()")
 		}
 	}
 	
