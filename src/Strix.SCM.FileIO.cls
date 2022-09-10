@@ -118,46 +118,32 @@ Method ExportProject(Quiet As %Boolean = 0) As %Status
 /// Loads all project members form the configured directory
 Method ImportProject(Quiet As %Boolean = 0) As %Status
 {
-	;Get list of XML files in the project directory
-	If 'Quiet Write !,"== Reading directory: "
-	Set stm = ##class(%SQL.Statement).%New()
-	Set sc = stm.%PrepareClassQuery("%File","FileSet")
-	If 'sc Quit $$$BuildErr("Error preparing FileSet query:", sc)
-	
+	; Determine types of files to load
 	If ..Project.ExportUDL {
-		Set FileSpec = "*.cls;*.inc"
+		Set FileSpec = "*.cls;*.inc;*.mac;*.int"
 	} Else {
-		Set FileSpec = "*.xml"
+		Set FileSpec = "*.cls.xml;*.inc.xml;*.mac.xml;*.int.xml"
 	}
 	
-	#dim rs As %SQL.StatementResult
-	Set rs = stm.%Execute(..Project.GetProjectPath(), FileSpec)
+	; Determine where to load from
+	Set Path = ..Project.GetProjectPath()
+	Set Recursive = ..Project.PackageSubdirs
 	
-	While rs.%Next() {
-		Set Name = rs.%Get("Name")
-		Set ItemName = rs.%Get("ItemName")
-		Set Files(ItemName) = Name
+	; Load the files
+	If 'Quiet Write !,$$$BuildStr("== Loading sources from {}: ", Path)
+	Set sc = $System.OBJ.ImportDir(Path, FileSpec, "cku-d", , Recursive, .Imported)
+	If 'sc Quit sc
+	
+	If 'Quiet {
+		; Display what we loaded
+		Set Name = ""
+		For  {
+			Set Name = $Order(Imported(Name))
+			If Name = "" Quit
+			Write !,"  Loaded "_Name
+		}
+		Write !
 	}
-	Kill rs
-	If 'Quiet Write "ok",!
-	
-	Set ItemName = ""
-	For  {
-		Set ItemName = $Order(Files(ItemName), 1, FullPath)
-		If ItemName = "" Quit
-		
-		Write "Importing "_ItemName_": "
-		
-		Set sc = $System.OBJ.Load(FullPath, "-d", , .FileItems)
-		Merge Loaded = FileItems
-		
-		Write "ok.",!
-	}
-	
-	If 'Quiet Write !,"Compiling: "
-	Set sc = $System.OBJ.CompileList(.Loaded, "cku-d")
-	If 'sc Quit $$$BuildErr("Error compiling loaded items:", sc)
-	If 'Quiet Write "ok",!
 	
 	Quit $$$OK
 }
