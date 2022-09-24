@@ -15,13 +15,13 @@ Property GitGuiPath As %String;
 Property RepositoryDir As %String(MAXLEN = 512);
 
 /// Full path to release base directory; releases are created below it.
-Property ReleasePath As %String;
+Property ReleasePath As %String [ Transient ];
 
 /// The name to use for the release directory. Default is R{rev}.\
 /// Available variables:
 /// {rev}: revision number
 /// {date}: date (format YYYY-MM-DD)
-Property ReleaseName As %String;
+Property ReleaseName As %String [ Transient ];
 
 /// Comma-separated list of release post-processors to run. Available \
 /// processors are:
@@ -29,7 +29,7 @@ Property ReleaseName As %String;
 /// • RemoveCfgFile: Removes the SCM configuration file from the release.
 /// • RemoveEnsProd: Removes Ensemble Production classes from the export.
 /// • Zip: Zips the release directory.
-Property PostProcessors As %String(MAXLEN = 80);
+Property PostProcessors As %String(MAXLEN = 80) [ Transient ];
 
 // =====
 
@@ -48,15 +48,6 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	#dim Project As Strix.SCM.Project
 	If '##class(Strix.SCM.Project).CheckItem(.InternalName, .Project, .AsItem, .AsStorage, .Msg) {
 		If Msg '= "" Set Action = 6 ; MesssageBox
-		Quit $$$OK
-	}
-	
-	
-	;== Delete item
-	
-	If Name = "Source control,Delete", AsItem {
-		Set Action = 1 ;Yes/no/cancel
-		Set Target = "Are you sure you want to delete '"_InternalName_"'?"
 		Quit $$$OK
 	}
 	
@@ -156,26 +147,6 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	}
 	
 	
-#;	;===== Delete item
-#;	
-#;	If Name = "Source control,Delete", AsItem {
-#;		Set Filename = Project.GetExportFilename(InternalName, , , .Status)
-#;		If 'Status Quit Status
-#;		
-#;		If ##class(%File).Exists(Filename) {
-#;			;Delete from source control
-#;			Set Output = ..GetCommandOutput(Project.GetProjectPath(), "rm --force --quiet """_Filename_"""", , .ErrorMsg)
-#;			If ErrorMsg '= "" Write !,"=== Error deleting "_Filename_":",!,ErrorMsg,! Quit $$$OK
-#;			Write !,"=== Deleted "_Filename_"."
-#;		}
-#;		
-#;		Set Status = $System.OBJ.Delete(InternalName, "d")
-#;		If 'Status Quit Status
-#;		
-#;		Quit $$$OK
-#;	}
-	
-	
 	;== Make release
 	
 	If Name = "Source control,MakeRelease", Msg '= "" {
@@ -196,14 +167,12 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 {
 	Set ItemName = $Piece(MenuName, ",", 2)
 	Set Name = $Case(ItemName,
-	  ;"ShowRevisions": "Revisions for "_InternalName_"",
-	  "Delete": "Delete item",
 	  "Checkin": "Open checkin dialog",
 	  "ShowLog": "View repository log",
 	  "ShowItemLog": "View log ",
 	  "ShowDiff": "View diff",
-	  "MakeRelease": "Make release",
-	  "CreateTag": "Create tag",
+#;	  "MakeRelease": "Make release",
+#;	  "CreateTag": "Create tag",
 	  : ""
 	)
 	
@@ -244,13 +213,12 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	  $lb("", 1, 0, 1),
 	  $lb("ShowDiff", 1, 0, 0),
 	  $lb("ShowItemLog", 1, 1, 0),
-	  $lb("Delete", 1, 1, 0),
 	  $lb("", 1, 0, 1),
 	  $lb("ShowLog", 1, 0, 0),
 	  $lb("Checkin", 1, 1, 0),
-	  $lb("", 1, 0, 1),
-	  $lb("CreateTag", 1, 1, 0),
-	  $lb("MakeRelease", 1, 1, 0),
+#;	  $lb("", 1, 0, 1),
+#;	  $lb("CreateTag", 1, 1, 0),
+#;	  $lb("MakeRelease", 1, 1, 0),
 	)
 	
 	Quit Items
