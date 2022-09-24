@@ -1,0 +1,5 @@
+Set sc=$System.OBJ.Load("/tmp/Strix.xml","ckd")
+If 'sc Do $System.Process.Terminate()
+Set ok=##class(Strix.Lib.Export).Export("Strix.Testing.pkg","/tmp/Strix.Testing.xml","Strix.Lib.Log.cls")
+If 'ok Do $System.Process.Terminate()
+Halt

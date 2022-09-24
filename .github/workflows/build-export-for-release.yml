@@ -29,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r ieb/requirements.txt
     
-    - name: Prepare UDL → XML conversion server
+    - name: Prepare IRIS
       run: |
         docker run --detach --rm -p 52773:52773 --name testiris containers.intersystems.com/intersystems/iris-community:2022.1.0.209.0 --check-caps false --up false
         docker cp ci/build.script testiris:/tmp/build.script
@@ -40,9 +40,16 @@ jobs:
         python ieb/src/build-export.py ci/build-export.toml
         mv ci/export.xml "Strix-${{ github.ref_name }}.xml"
         zip --junk-paths "Strix-${{ github.ref_name }}.zip" "Strix-${{ github.ref_name }}.xml"
-        tar cvzf "Strix-${{ github.ref_name }}.tgz" "Strix-${{ github.ref_name }}.xml"
     
-    - name: Shutdown UDL → XML conversion server
+    - name: Create separate export for testing
+      run: |
+        docker cp "Strix-${{ github.ref_name }}.xml" testiris:/tmp/Strix.xml
+        docker cp ci/extract.script testiris:/tmp/extract.script
+        docker exec testiris sh -c "iris session iris < /tmp/extract.script"
+        docker cp testiris:/tmp/Strix.Testing.xml "Strix.Testing-${{ github.ref_name }}.xml"
+        zip --junk-paths "Strix.Testing-${{ github.ref_name }}.zip" "Strix.Testing-${{ github.ref_name }}.xml"
+    
+    - name: Shutdown IRIS
       run: docker stop testiris
     
     - name: Upload release zip
@@ -55,13 +62,13 @@ jobs:
         asset_name: Strix-${{ github.ref_name }}.zip
         asset_content_type: application/zip
     
-    - name: Upload release tgz
+    - name: Upload testing release zip
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: Strix-${{ github.ref_name }}.tgz
-        asset_name: Strix-${{ github.ref_name }}.tgz
-        asset_content_type: application/gzip
+        asset_path: Strix.Testing-${{ github.ref_name }}.zip
+        asset_name: Strix.Testing-${{ github.ref_name }}.zip
+        asset_content_type: application/zip
     
