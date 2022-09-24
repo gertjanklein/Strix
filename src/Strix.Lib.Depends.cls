@@ -7,6 +7,8 @@ Property Checked As %String [ MultiDimensional ];
 
 Property Dependencies As %String [ MultiDimensional ];
 
+Property Warn As %Boolean [ InitialExpression = 1 ];
+
 // -----
 
 /// Cached regex objects (performance)
@@ -29,7 +31,6 @@ Method CheckPackage(Packages As %String) As %Status
 			Set Item = $Order(Items(Item))
 			If Item= "" Quit
 			
-			Do ..AddItem(Item_".cls", Item)
 			Set sc = ..CheckItem(Item_".cls")
 			If 'sc Return ..BuildStatus("Error checking '{}':", sc, Item)
 		}
@@ -38,48 +39,38 @@ Method CheckPackage(Packages As %String) As %Status
 	Quit $$$OK
 }
 
-/// Checks dependencies for a single item.
-Method CheckItem(Item As %String, Recursive As %Boolean = 1) As %Status
+/// Checks dependencies for a single item. Item should end with
+/// it's type (e.g. '.cls', '.inc', ...)
+Method CheckItem(Item As %String, Source As %String = "") As %Status
 {
+	; Make sure we know what to do with Item
+	Set Types = $ListFromString("cls,mac,inc")
 	Set Type = $ZConvert($Piece(Item, ".", *), "l")
-	If Type = "cls" {
-		Set sc = ..CheckClass($Piece(Item, ".", 1, *-1))
-		If 'sc Quit sc
-		
-	} Else {
+	If '$ListFind(Types, Type) {
 		Quit ..BuildStatus("Error: unsupported type '{}'.",, Type)
 	}
 	
-	Set Dep = ""
-	For  {
-		Set Dep = $Order(..Dependencies(Dep), 1, ReferencedBy)
-		If Dep = "" Quit
-		If $Data(..Checked(Dep)) Continue
+	; If we've seen this one before, quit here
+	If '..AddItem(Item, Source) Quit $$$OK
+	
+	If Type = "cls" {
+		Set sc = ..CheckClassDeps($Piece(Item, ".", 1, *-1))
+		If 'sc Quit sc
 		
-		Set Type = $Piece(Dep, ".", *)
-		If Type = "cls" {
-			Set Cls = $Piece(Dep, ".", 1, *-1)
-			If '##class(%Dictionary.ClassDefinition).%ExistsId(Cls) {
-				Write "Warning: dependency "_Cls_" of "_ReferencedBy_" does not exist.",!
-				Set ..Checked(Dep) = ""
-				Continue
-			}
-			
-			If Recursive {
-				Set sc = ..CheckItem(Dep)
-				If 'sc Return ..BuildStatus("Error checking dependency {}:", sc, Dep)
-			}
-		}
+	} ElseIf Type = "inc" {
+		Set Inc = ##class(%Routine).%OpenId(Item, , .sc)
+		If 'sc Quit sc
+		Set sc = ..CheckCode(Inc, , Item)
+		
 	}
 	
 	Quit $$$OK
 }
 
-/// Checks a single class for its dependencies
-Method CheckClass(ClassName As %String) As %Status
+/// Checks a single class for its dependencies. Name should not
+/// include the '.cls' type.
+Method CheckClassDeps(ClassName As %String) As %Status [ Private ]
 {
-	Set ..Checked(ClassName_".cls") = ""
-	
 	; Start with what this returns:
 	Set sc = $System.OBJ.GetDependencies(ClassName, .Items, "")
 	If 'sc Quit ..BuildStatus("Error from system for class {}:", sc, ClassName)
@@ -89,14 +80,14 @@ Method CheckClass(ClassName As %String) As %Status
 		Set Item = $Order(Items(Item))
 		If Item = "" Quit
 		Set Name = Item_".cls"
-		If '$Data(..Checked(Name)) Do ..AddItem(Name, ClassName)
+		If '$Data(..Checked(Name)) Do ..CheckItem(Name, ClassName)
 	}
 	
 	
 	Set Def = ##class(%Dictionary.ClassDefinition).%OpenId(ClassName, , .sc)
 	If 'sc Quit ..BuildStatus("Error opening definition for class {}:", sc, ClassName)
 	
-	#define AddCsv(%t,%l) If %l '="" {For i = 1:1:$l(%l,",") Set n=$p(%l,",",i)_%t i $e(n)'="%",'$d(..Checked(n)) Do ..AddItem(n, ClassName)}
+	#define AddCsv(%t,%l) If %l '="" {For i = 1:1:$l(%l,",") Set n=$p(%l,",",i)_%t i $e(n)'="%",'$d(..Checked(n)) s sc=..CheckItem(n, ClassName) i 'sc return sc}
 	
 	$$$AddCsv(".cls",Def.CompileAfter)
 	$$$AddCsv(".cls",Def.ConstraintClass)
@@ -132,7 +123,7 @@ Method CheckClass(ClassName As %String) As %Status
 }
 
 /// Checks code, passed as a stream, for references to classes.
-Method CheckCode(Code As %Stream, Package As %String = "User", ClassName = "") As %Status
+Method CheckCode(Code As %Stream, Package As %String = "User", Source = "") As %Status
 {
 	; Check for classmethod calls and #dim statements
 	Set RegExes = $lb("##class\(([^)%]+)\)", "(?i)#dim +\w+ +As +([\w.]+)")
@@ -158,7 +149,9 @@ Method CheckCode(Code As %Stream, Package As %String = "User", ClassName = "") A
 				Set Item = Matcher.Group(1)
 				If Item '[ "." Set Item = Package_"."_Item
 				Set Item = Item_".cls"
-				If '$Data(..Checked(Item)) Do ..AddItem(Item, ClassName)
+				If $Data(..Checked(Item)) Continue
+				Set sc = ..CheckItem(Item, Source)
+				If 'sc Return sc
 			}
 		}
 	}
@@ -169,25 +162,52 @@ Method CheckCode(Code As %Stream, Package As %String = "User", ClassName = "") A
 // =====
 
 /// Adds an item to the dependency array, after checking that
-/// it is not a system item.
-Method AddItem(Name, ClassName)
+/// it is not a system item, and making sure it exists. Returns
+/// a boolean indicating whether further processing is needed.
+Method AddItem(Name, ClassName) As %Boolean
 {
-	If $Extract(Name) = "%" Quit
-	If Name ? 1"Ens."1.E Quit
-	If Name ? 1"EnsLib."1.E Quit
-	If Name ? 1"EnsPortal."1.E Quit
-	If Name ? 1"CSPX."1.E Quit
-	If Name = "Ensemble.inc" Quit
+	Set Seen = $Data(..Checked(Name))
+	If Seen Quit 0
+	Set ..Checked(Name) = ""
+	
+	If $Extract(Name) = "%" Quit 0
+	If Name ? 1"Ens."1.E Quit 0
+	If Name ? 1"EnsLib."1.E Quit 0
+	If Name ? 1"EnsPortal."1.E Quit 0
+	If Name ? 1"HS."1.E Quit 0
+	If Name ? 1"HSFHIR."1.E Quit 0
+	If Name ? 1"HSMOD."1.E Quit 0
+	If Name ? 1"CSPX."1.E Quit 0
+	If Name = "Ensemble.inc" Quit 0
+	
+	Set Type = $Piece(Name, ".", *)
+	Set Item = $Piece(Name, ".", 1, *-1)
+	
+	If Type = "cls", '##class(%Dictionary.ClassDefinition).%ExistsId(Item) {
+		If ..Warn Write ..BuildMsg("Warning: class {} referenced in {} not found.", Name, ClassName),!
+		Quit 0
+	}
+	
 	Set ..Dependencies(Name) = ClassName
-	Quit
+	
+	Quit 1
+}
+
+/// Assemble a message with placeholders
+ClassMethod BuildMsg(Message As %String, Args... As %String) As %String
+{
+	For i = 1:1:$Get(Args) {
+		Set Message = $Replace(Message, "{}", $Get(Args(i)), , 1)
+	}
+	
+	Quit Message
 }
 
 /// Helper for creating updated status
 ClassMethod BuildStatus(Message As %String, Status As %Status = "", Args... As %String) As %Status
 {
-	For i = 1:1:$Get(Args) {
-		Set Message = $Replace(Message, "{}", $Get(Args(i)), 1, 1)
-	}
+	; Replace message parameters, if any
+	If $Get(Args) Set Message = ..BuildMsg(Message, Args...)
 	
 	;Convert message to %Status
 	Set MsgStatus = $System.Status.Error($$$GeneralError, Message)
