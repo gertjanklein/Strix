@@ -238,35 +238,20 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	Set Items = ##super(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Items
 	
-	Set IsRemote = ..FileIO.%ClassName(0) = "RemoteFileIO"
-	
 	;Items is a list of lists containing:
 	;  Name, Enabled, Save before execute, is separator
-	If 'IsRemote {
-		Set Items = Items_$lb(
-		  $lb("", 1, 0, 1),
-		  $lb("ShowDiff", 1, 0, 0),
-		  $lb("ShowItemLog", 1, 1, 0),
-		  $lb("Delete", 1, 1, 0),
-		  $lb("", 1, 0, 1),
-		  $lb("ShowLog", 1, 0, 0),
-		  $lb("Checkin", 1, 1, 0),
-		  $lb("", 1, 0, 1),
-		  $lb("CreateTag", 1, 1, 0),
-		  $lb("MakeRelease", 1, 1, 0),
-		)
-	} Else {
-		Set Items = Items_$lb(
-		  $lb("", 1, 0, 1),
-		  $lb("ShowDiff", 1, 0, 0),
-		  $lb("ShowItemLog", 1, 1, 0),
-		  $lb("", 1, 0, 1),
-		  $lb("ShowLog", 1, 0, 0),
-		  $lb("Checkin", 1, 1, 0),
-		  $lb("", 1, 0, 1),
-		  $lb("CreateTag", 1, 1, 0),
-		)
-	}
+	Set Items = Items_$lb(
+	  $lb("", 1, 0, 1),
+	  $lb("ShowDiff", 1, 0, 0),
+	  $lb("ShowItemLog", 1, 1, 0),
+	  $lb("Delete", 1, 1, 0),
+	  $lb("", 1, 0, 1),
+	  $lb("ShowLog", 1, 0, 0),
+	  $lb("Checkin", 1, 1, 0),
+	  $lb("", 1, 0, 1),
+	  $lb("CreateTag", 1, 1, 0),
+	  $lb("MakeRelease", 1, 1, 0),
+	)
 	
 	Quit Items
 }
@@ -356,7 +341,6 @@ Method HandlePostProcessors(Project As Strix.SCM.Project, Tag As %String, Releas
 Method DetermineGitRoot(ProjectPath As %String, Output Found As %Boolean) As %String
 {
 	If ..RepositoryDir '= "" Set Found = 1 Quit ..RepositoryDir
-	If ..FileIO.%ClassName(0) = "RemoteFileIO" Set Found = 0 Quit ""
 	
 	Set Path = ProjectPath, Found = 0, Prev = ""
 	For  {
@@ -404,7 +388,7 @@ Method GetGUICommand(Command As %String, Output ErrorMsg As %String) As %String
 {
 	Set ErrorMsg = ""
 	
-	If '..RemoteFileIO, '##class(%File).Exists(..GitGuiPath) {
+	If '##class(%File).Exists(..GitGuiPath) {
 		Set ErrorMsg = "Option not available: TortoiseGit executable '"_..GitGuiPath_"' not found."
 		Quit ""
 	}
