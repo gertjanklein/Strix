@@ -15,9 +15,8 @@ Property RemoteFileIO As %Boolean [ InitialExpression = 0 ];
 /// RemoteFileIO.
 Property FileHandler As %String(MAXLEN = 1000);
 
-/// An instance of the class that handles the file IO. Can be
-/// Strix.SCM.FileIO or Strix.SCM.RemoteFileIO. Made transient
-/// so it won't be seen as a setting.
+/// An instance of the class that handles the file IO.
+/// Made transient so it won't be seen as a setting.
 Property FileIO As Strix.SCM.FileIO [ Transient ];
 
 // ===== Studio menu actions
