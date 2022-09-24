@@ -9,10 +9,47 @@ Property Dependencies As %String [ MultiDimensional ];
 
 Property Warn As %Boolean [ InitialExpression = 1 ];
 
-// -----
-
 /// Cached regex objects (performance)
 Property Matchers As array Of %Regex.Matcher;
+
+// =====
+
+/// Terminal helper to find dependencies of one or more items.
+/// Specify with type suffix (xx.cls, xx.pkg, ...).
+/// Do ##class(Strix.Lib.Depends).Check("...")
+ClassMethod Check(Items As %String)
+{
+	Set Me = ..%New()
+	
+	; Search for dependencies:
+	For i = 1:1:$Length(Items, ",") {
+		Set Item = $Piece(Items, ",", i)
+		
+		If $ZConvert($Piece(Item, ".", *), "l") = "pkg" {
+			Set Item = $Piece(Item, ".", 1, *-1)
+			Set sc = Me.CheckPackage(Item)
+			
+		} Else {
+			Set sc = Me.CheckItem(Item)
+			
+		}
+		If 'sc {
+			Write ..BuildMsg("Error checking dependencies for {}:", sc, Item),!
+			Return
+		}
+	}
+	
+	; Display
+	Write "Dependencies detected:",!
+	Set Name = ""
+	For  {
+		Set Name = $Order(Me.Dependencies(Name))
+		If Name = "" Quit
+		Write Name,!
+	}
+	
+	Return
+}
 
 // =====
 
