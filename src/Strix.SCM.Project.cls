@@ -229,11 +229,7 @@ ClassMethod GetHandler(InternalName As %String = "", Output Handler As Strix.SCM
 	
 	If Handler.%IsA("Strix.SCM.Handler.File") {
 		; Create an instance of the class handling file IO:
-		If 'Handler.RemoteFileIO {
-			Set Handler.FileIO = ##class(Strix.SCM.FileIO).%New()
-		} Else {
-			Set Handler.FileIO = ##class(Strix.SCM.RemoteFileIO).%New()
-		}
+		Set Handler.FileIO = ##class(Strix.SCM.FileIO).%New()
 		Set Handler.FileIO.Handler = Handler
 		Set Handler.FileIO.Project = Project
 		Set Handler.FileIO.Item = InternalName
