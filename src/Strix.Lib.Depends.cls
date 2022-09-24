@@ -47,7 +47,8 @@ Method CheckItem(Item As %String, Source As %String = "") As %Status
 	Set Types = $ListFromString("cls,mac,inc")
 	Set Type = $ZConvert($Piece(Item, ".", *), "l")
 	If '$ListFind(Types, Type) {
-		Quit ..BuildStatus("Error: unsupported type '{}'.",, Type)
+		Quit ..BuildStatus("Error: unsupported type '{}' (known types are {}).",
+		  , Type, $ListToString(Types))
 	}
 	
 	; If we've seen this one before, quit here
