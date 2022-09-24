@@ -249,15 +249,23 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
   <th>Export version:</th>
   <td>
     #(..TextInput("ExportVersion", 15))#
-    <p class=Explain>When exporting, what version to export for. Can be used to keep
-      XML exports backwards compatible. Specify major.minor, e.g. 2010.1.</p>
+    <p class=Explain>When exporting, what version to export for. Only
+    applicable to XML exports; can be used to keep these backwards
+    compatible. Specify major.minor, e.g. 2010.1.</p>
   </td>
 </tr>
 <tr>
   <th>Postprocessors:</th>
   <td>
     #(..TextInput("PostProcessors", 80))#
-    <p class=Explain>List of item postprocessors to run on export.</p>
+    <p class=Explain>Comma-separated list of item postprocessors to run on
+    export. Available are:</p>
+    <ul class=Explain>
+      <li>VSCodeCompat: export one final newline too few, as the ObjectScript
+          VS Code plugin does
+      <li>Iris2Cache: attempt to make the export backwards compatible with
+          Caché.
+    </ul>
   </td>
 </tr>
 >
