@@ -17,10 +17,8 @@ ClassMethod CreateClass(ClassName As %String, Super As %String = "%Persistent", 
 		If 'Status Quit $$$BuildErr("Error deleting test class '"_ClassName_"'", Status)
 	}
 	
-	Set ClassDef = ##class(%Dictionary.ClassDefinition).%New()
-	Set ClassDef.Name = ClassName
+	Set ClassDef = ##class(%Dictionary.ClassDefinition).%New(ClassName, 25)
 	Set ClassDef.Super = Super
-	Set ClassDef.ProcedureBlock = 1
 	
 	Quit $$$OK
 }
