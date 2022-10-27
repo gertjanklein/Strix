@@ -28,7 +28,11 @@ ClassMethod SortListOfObjects(List As %ListOfObjects, SortOn As %String) As %Sta
 		;Construct array for sorting
 		For i = 1:1:List.Count() {
 			Set Object = List.GetAt(i)
-			Set Value = $ZObjProperty(Object, Property)
+			If Property '[ "." {
+				Set Value = $ZObjProperty(Object, Property)
+			} Else {
+				Set Value = ..GetPropertyValue(Object, Property)
+			}
 			If Value = "" Set Value = Default
 			If Flags [ "N" {
 				;Numeric
@@ -137,6 +141,17 @@ ClassMethod ParseSortSpec(SortSpec As %String, Output SortSpecList As %List) As 
 	If 'Status Quit Status
 	
 	Quit $$$OK
+}
+
+/// Returns the value of a dotted path, e.g. "prop.subprop".
+ClassMethod GetPropertyValue(Object As %RegisteredObject, Path As %String) As %String
+{
+	Set Result = Object
+	For i = 1:1:$Length(Path, ".") {
+		Set Name = $Piece(Path, ".", i)
+		Set Result = $Property(Result, Name)
+	}
+	Quit Result
 }
 
 }
