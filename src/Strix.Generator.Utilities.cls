@@ -181,7 +181,11 @@ ClassMethod GetMethod(ClassNameOrObj As %Dictionary.ClassDefinition, MethodName 
 /// Returns whether the given method is present and non-abstract.
 ClassMethod HasConcreteMethod(ClassDef As %Dictionary.CompiledClass, MethodName As %String) As %Boolean
 {
-	If '$IsObject(ClassDef) Set ClassDef = ..GetClassDef(ClassDef)
+	If '$IsObject(ClassDef) {
+		If '##class(%Dictionary.CompiledClass).%ExistsId(ClassDef) Quit 0
+		Set ClassDef = ##class(%Dictionary.CompiledClass).%OpenId(ClassDef)
+		If '$IsObject(ClassDef) Quit 0
+	}
 	Set Method = ..GetInCollection(ClassDef.Methods, MethodName)
 	If Method = "" Quit 0
 	Quit 'Method.Abstract
