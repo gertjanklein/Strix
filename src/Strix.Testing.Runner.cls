@@ -519,6 +519,7 @@ Method ReportToTerminal(Save As %Boolean = 0)
 		}
 		
 		Write !,"#"_i_" "_Info.ClassName_":"_Info.MethodName_":",!
+		If Info.BackgroundLocation '= "" Write ?w,"> "_Info.BackgroundLocation,!
 		Do Info.ReportToTerminal()
 	}
 }
