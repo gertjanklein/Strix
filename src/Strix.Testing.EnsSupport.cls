@@ -39,12 +39,12 @@ ClassMethod EnsureProduction(Name As %String) As %Status
 /// Stops the currently running production. Makes sure that the
 /// messages that would normally be written to the terminal
 /// are silenced.
-ClassMethod StopProduction() As %Status
+ClassMethod StopProduction(Timeout As %Numeric, Force As %Boolean) As %Status
 {
 	New %QUIET
 	Set %QUIET = 1
 	
-	Set sc = ##class(Ens.Director).StopProduction()
+	Set sc = ##class(Ens.Director).StopProduction(.Timeout, .Force)
 	If 'sc Quit sc
 	
 	; Restore previous production, if saved
