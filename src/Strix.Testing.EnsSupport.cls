@@ -97,5 +97,30 @@ ClassMethod CheckErrorStatus(SessionId As %String, Output Id As %String, Output 
 	Quit 1
 }
 
+/// Returns a fragment of code consisting of assertions for the
+/// calls in the run this is called from. Can be used to record
+/// the calls after a successful test run, and copy/paste the
+/// assertions for subsequent runs.
+/// Parameter Calls is expected to be the Calls property of a
+/// Strix.Testing.EnsTestHelper instance.
+ClassMethod GetCallAssertions(Calls As %Collection.AbstractArrayOfDT) As %String
+{
+	Set Result = ""
+	
+	Set Tpl = $Char(9)_"Do ..AssertInCalls(""{}"", {})"_$$$EOL
+	
+	Set Name = ""
+	For  {
+		Set Ids = Calls.GetNext(.Name)
+		If Name = "" Quit
+		
+		Set Count = $Length(Ids, ",")
+		Set Line = $$$BuildMsg(Tpl, Name, Count)
+		Set Result = Result_Line
+	}
+	
+	Quit Result
+}
+
 }
 
