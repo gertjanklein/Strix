@@ -19,6 +19,11 @@ Parameter ProductionName;
 
 // =====
 
+/// Whether to check for requests/responses with error status
+/// automatically after each test. This can be turned off in
+/// tests for error handling, but should normally be on.
+Property CheckEnsembleErrors As %Boolean [ InitialExpression = 1 ];
+
 /// The testing service to use to send requests with. Will be initialized
 /// before each test run.
 Property Service As EnsLib.Testing.Service;
@@ -58,6 +63,17 @@ Method OnAfterTest(Name As %String) As %Status
 {
 	; Collect background tests, and clear test data
 	Do ..Runner.CollectBgTests(..SessionId, 1)
+	
+	; No check for error status: we're done
+	If '..CheckEnsembleErrors Quit $$$OK
+	
+	; Check whether any Ensemble message in the session has an error status
+	Set err = ##class(Strix.Testing.EnsSupport).CheckErrorStatus(..SessionId, .MsgId, .MsgDesc, .MsgStatus) 
+	If 'err Quit $$$OK
+	
+	; Report the error via an assertion
+	Do ..AssertStatusOk(MsgStatus, "Message {} in session {} ({}) has error status", MsgId, ..SessionId, MsgDesc)
+	
 	Quit $$$OK
 }
 
