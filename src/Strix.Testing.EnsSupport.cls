@@ -44,6 +44,11 @@ ClassMethod StopProduction(Timeout As %Numeric, Force As %Boolean) As %Status
 	New %QUIET
 	Set %QUIET = 1
 	
+	; Production started and stopped in rapid succession may sometimes
+	; fail to stop with error "<Ens>ErrProductionNotQuiescent: IRIS
+	; can not become quiescent". Waiting a tiny bit seems to fix this.
+	Hang 0.1
+	
 	Set sc = ##class(Ens.Director).StopProduction(.Timeout, .Force)
 	If 'sc Quit sc
 	
@@ -103,6 +108,13 @@ ClassMethod CheckErrorStatus(SessionId As %String, Output Id As %String, Output 
 /// assertions for subsequent runs.
 /// Parameter Calls is expected to be the Calls property of a
 /// Strix.Testing.EnsTestHelper instance.
+/// 
+/// Example call in test method, after ..GetCalls has been run:
+/// 
+/// Write !,##class(Strix.Testing.EnsSupport).GetCallAssertions(..Calls),!
+/// 
+/// This writes the assertions that can be copy/pasted into the
+/// test method.
 ClassMethod GetCallAssertions(Calls As %Collection.AbstractArrayOfDT) As %String
 {
 	Set Result = ""
