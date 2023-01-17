@@ -105,11 +105,13 @@ Method GetCalls(ClearIn As %Boolean = 1, ClearOut As %Boolean = 1)
 	Quit
 }
 
-/// Helper that makes sure at least one call with the specified
-/// request classname is recorded. Optionally checks for a specific
-/// number of calls as well.
+/// Helper that checks whether calls with the specified request
+/// classname are recorded. Optionally checks for a specific
+/// number of calls as well. Count may be 0 to check no calls
+/// were performed.
 Method AssertInCalls(ClassName As %String, Count As %Integer = "") As %Boolean
 {
+	If Count = 0 Quit ..Assert('..Calls.IsDefined(ClassName), "Expected no {} call", ClassName)
 	If '..Assert(..Calls.IsDefined(ClassName), "Expected a {} call", ClassName) Quit 0
 	If Count = "" Quit 1
 	Set Present = $Length(..Calls.GetAt(ClassName), ",")
