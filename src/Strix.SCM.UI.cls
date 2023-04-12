@@ -38,6 +38,15 @@ ClassMethod OnPreHTTP() As %Boolean [ PublicList = (ErrorMsg, Message, Config, P
 			If 'sc Set ErrorMsg = ..DecomposeStatus("Error exporting project:", sc) Quit 1
 			Set %response.Redirect = ..%ClassName(1)_".cls?Page=Project&Project="_..EscapeURL(Project.%Id())_"&msg=eok"
 			
+		} ElseIf %request.IsDefined("Copy") {
+			Set New = ##class(Strix.SCM.Project).%New()
+			Do New.CopyFrom(Project)
+			Set New.Name = New.Name_" (copy)"
+			Set New.GUID = $System.Util.CreateGUID()
+			Set sc = New.%Save()
+			If 'sc Set ErrorMsg = ..DecomposeStatus("Error saving new project:", sc) Quit 1
+			Set %response.Redirect = ..%ClassName(1)_".cls?Page=Project&Project="_..EscapeURL(New.%Id())
+			
 		} ElseIf %request.IsDefined("Delete") {
 			Set sc = ..DeleteProject(Project)
 			If 'sc Set ErrorMsg = ..DecomposeStatus("Error deleting project object:", sc) Quit 1
@@ -303,6 +312,7 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
   <input type=submit name=Save value="Save">>
 	
 	If Project.%Id() '= "" {
+		&html<<input type=submit name=Copy value="Copy">>
 		&html<<input type=submit name=Export value="Export">>
 		;&html<<input type=button name=Import value="Import" onclick="document.location='#(..%ClassName(1))#.cls?Page=Import&amp;Project=#(Project.%Id())#'">>
 		&html<<input type=submit name=Delete value="Delete" onclick="return Ays();">>
