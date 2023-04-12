@@ -122,4 +122,3 @@ ClassMethod StorageToLogical(%val) As %String [ CodeMode = objectgenerator, NoCo
 }
 
 }
-

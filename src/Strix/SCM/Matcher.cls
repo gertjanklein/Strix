@@ -322,4 +322,3 @@ ClassMethod MakePattern(Specification As %String) As %String
 }
 
 }
-

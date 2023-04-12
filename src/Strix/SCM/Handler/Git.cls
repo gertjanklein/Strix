@@ -368,4 +368,3 @@ Method GetGUICommand(Command As %String, Output ErrorMsg As %String) As %String
 }
 
 }
-

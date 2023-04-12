@@ -108,4 +108,3 @@ ClassMethod IsValid(%val As Strix.Lib.DateTime) As %Status [ CodeMode = generato
 }
 
 }
-

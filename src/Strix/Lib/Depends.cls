@@ -257,4 +257,3 @@ ClassMethod BuildStatus(Message As %String, Status As %Status = "", Args... As %
 }
 
 }
-

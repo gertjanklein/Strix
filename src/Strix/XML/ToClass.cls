@@ -591,4 +591,3 @@ ClassMethod HandleError(Message As %String, Status As %Status, Args... As %Strin
 }
 
 }
-

@@ -8,4 +8,3 @@ Parameter JSONNAME;
 Parameter JSONIO As STRING [ Constraint = ",IN,OUT,CALC,NONE", Flags = ENUM ];
 
 }
-

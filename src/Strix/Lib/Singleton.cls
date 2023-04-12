@@ -38,4 +38,3 @@ ClassMethod GetId() [ CodeMode = objectgenerator ]
 }
 
 }
-

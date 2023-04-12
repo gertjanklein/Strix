@@ -64,4 +64,3 @@ ClassMethod Modulo97(BigNumber As %String) As %String
 }
 
 }
-

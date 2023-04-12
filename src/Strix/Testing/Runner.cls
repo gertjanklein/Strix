@@ -376,7 +376,7 @@ Method CollectBgTests(NodeId As %String, Clear As %Boolean = 1)
 	}
 	
 	; Remove all data if so requested
-	If Clear Do ..ClearTestData(NodeId)
+	If Clear Kill ^Strix.Testing.BgTestCase(NodeId)
 	
 	Quit
 }
@@ -575,4 +575,3 @@ Storage Default
 }
 
 }
-

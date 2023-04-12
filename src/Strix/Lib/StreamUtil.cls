@@ -80,4 +80,3 @@ ClassMethod Base64Encode(InStream As %Stream.Object, Output OutStream As %Stream
 }
 
 }
-

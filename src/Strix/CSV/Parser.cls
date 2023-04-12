@@ -285,4 +285,3 @@ Method GetRecord(Output Status As %Status) As %Boolean
 }
 
 }
-

@@ -384,4 +384,3 @@ ClassMethod GetExplorerCommand(Directory As %String, File As %String = "") As %S
 }
 
 }
-

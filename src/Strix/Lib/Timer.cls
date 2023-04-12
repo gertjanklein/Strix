@@ -68,4 +68,3 @@ Method ReportToTerminal(Mark As %String = "")
 }
 
 }
-

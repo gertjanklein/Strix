@@ -226,4 +226,3 @@ ClassMethod CreateClass(Properties As %String = "", Output ClassDef As %Dictiona
 }
 
 }
-

@@ -129,4 +129,3 @@ ClassMethod CSVGetInfo() As %List [ CodeMode = objectgenerator, Private ]
 }
 
 }
-

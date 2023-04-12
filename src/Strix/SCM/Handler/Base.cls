@@ -240,4 +240,3 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 }
 
 }
-

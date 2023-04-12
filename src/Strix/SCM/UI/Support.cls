@@ -93,4 +93,3 @@ ClassMethod CheckBox(Name As %String, ForceChecked As %Boolean = 0) As %String
 }
 
 }
-

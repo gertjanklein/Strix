@@ -84,4 +84,3 @@ ClassMethod GetNewContainer(SourceData As %Collection.AbstractList) As %Collecti
 }
 
 }
-

@@ -16,4 +16,3 @@ Method SetupSchemaReader(pPackage As %String, schemaReader As %XML.Utils.SchemaR
 }
 
 }
-

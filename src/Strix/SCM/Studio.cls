@@ -206,4 +206,3 @@ ClassMethod MenuItemsClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = M
 }
 
 }
-

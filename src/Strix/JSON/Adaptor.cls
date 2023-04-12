@@ -129,4 +129,3 @@ ClassMethod GetPropertyInfo(Output Info) As %Integer [ CodeMode = objectgenerato
 }
 
 }
-

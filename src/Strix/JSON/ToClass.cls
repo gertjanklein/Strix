@@ -294,4 +294,3 @@ ClassMethod AddProperty(ClassDef As %Dictionary.ClassDefinition, Name As %String
 }
 
 }
-

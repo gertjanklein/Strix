@@ -11,4 +11,3 @@ Parameter CsvColumnNr As INTEGER;
 Parameter CsvInclude As BOOLEAN = 1;
 
 }
-

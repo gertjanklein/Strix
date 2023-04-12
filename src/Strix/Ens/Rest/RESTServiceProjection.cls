@@ -214,4 +214,3 @@ ClassMethod BuildStatus(Message, Status, Parms...) As %Status
 }
 
 }
-

@@ -155,4 +155,3 @@ ClassMethod GetPropertyValue(Object As %RegisteredObject, Path As %String) As %S
 }
 
 }
-

@@ -59,4 +59,3 @@ ClassMethod ParseSOAPError(Fault As %SOAP.Fault = "", Status As %Status = {$Get(
 }
 
 }
-

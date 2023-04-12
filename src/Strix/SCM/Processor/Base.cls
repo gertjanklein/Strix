@@ -61,4 +61,3 @@ Method Write(Text As %String)
 }
 
 }
-

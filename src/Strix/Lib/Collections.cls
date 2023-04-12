@@ -101,4 +101,3 @@ ClassMethod GetCopy(Input As %Collection.AbstractIterator, CopyContents As %Bool
 }
 
 }
-

@@ -71,4 +71,3 @@ ClassMethod EnsureProductionDir(ReleaseDirectory As %String) As %Status
 }
 
 }
-

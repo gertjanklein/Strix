@@ -61,4 +61,3 @@ ClassMethod IsValid8(EAN8 As %String, Output Normalized As %String) As %Boolean
 }
 
 }
-

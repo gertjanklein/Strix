@@ -552,4 +552,3 @@ ClassMethod GetSystemText() As %String
 }
 
 }
-

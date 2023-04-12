@@ -24,4 +24,3 @@ ClassMethod RemoveLastLine(Stream As %Stream.Object) As %Status
 }
 
 }
-

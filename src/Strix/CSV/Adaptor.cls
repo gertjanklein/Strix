@@ -176,4 +176,3 @@ ClassMethod CheckCSVColumns(ByRef Columns As %String, Output Missing As %String,
 }
 
 }
-

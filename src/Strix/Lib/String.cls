@@ -244,4 +244,3 @@ ClassMethod RemoveFromList(Input As %String, Sep As %String = ",", LookFor As %S
 }
 
 }
-

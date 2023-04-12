@@ -99,4 +99,3 @@ ClassMethod FormatValue(Value As %String, Type As %String, Indent As %String) As
 }
 
 }
-

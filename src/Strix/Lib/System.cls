@@ -67,4 +67,3 @@ ClassMethod MemoryUsed() As %Integer [ CodeMode = expression ]
 }
 
 }
-

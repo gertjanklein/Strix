@@ -360,4 +360,3 @@ ClassMethod RenameClass(From As %String, To As %String, Clear As %Boolean = 0, C
 }
 
 }
-

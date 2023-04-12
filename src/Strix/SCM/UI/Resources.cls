@@ -281,4 +281,3 @@ ClassMethod ImageData(Name As %String, Output ContentType As %String) As %String
 }
 
 }
-

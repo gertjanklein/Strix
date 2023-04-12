@@ -34,4 +34,3 @@ Method CopyFrom(Other As %RegisteredObject) [ CodeMode = objectgenerator ]
 }
 
 }
-

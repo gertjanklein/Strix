@@ -112,4 +112,3 @@ ClassMethod CheckBSN(BSN As %String) As %Boolean
 }
 
 }
-

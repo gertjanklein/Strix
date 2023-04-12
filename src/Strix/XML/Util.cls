@@ -118,4 +118,3 @@ ClassMethod GetPropertyFromDoc(Document As %XML.Document, NodeId As %Integer, Pr
 }
 
 }
-

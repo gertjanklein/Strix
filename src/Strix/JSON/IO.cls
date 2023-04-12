@@ -389,4 +389,3 @@ ClassMethod ValueOut(Value As %String, Datatype As %String, Output JSONType As %
 }
 
 }
-

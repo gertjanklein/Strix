@@ -41,4 +41,3 @@ ClassMethod ZipDir(Directory As %String, Delete As %Boolean = 0) As %Status
 }
 
 }
-

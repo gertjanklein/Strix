@@ -85,4 +85,3 @@ ClassMethod PipeExitCode(Pipe As %String, Output Status As %Status) As %Integer
 }
 
 }
-

@@ -672,4 +672,3 @@ Method ProcessClassNode(Name As %String) As %Status [ Internal ]
 }
 
 }
-

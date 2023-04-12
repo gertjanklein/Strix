@@ -154,4 +154,3 @@ ClassMethod XDataToObjects(XDataId As %String, ElementName As %String = "", Clas
 }
 
 }
-

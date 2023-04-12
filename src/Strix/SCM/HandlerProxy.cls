@@ -153,4 +153,3 @@ Method %OnNew(Credentials As %List = "") As %Status [ Private, ServerOnly = 1 ]
 }
 
 }
-

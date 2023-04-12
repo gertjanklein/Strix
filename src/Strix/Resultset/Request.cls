@@ -17,4 +17,3 @@ Property PageNumber As %Integer;
 Property SessionKey As %String(XMLPROJECTION = "NONE");
 
 }
-

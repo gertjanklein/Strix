@@ -16,4 +16,3 @@ ROUTINE Strix.SCM [Type=INC]
 #define NormalizeType(%item) Set $$$ItemType(%item)=$ZConvert($$$ItemType(%item),"l")
 
 
-

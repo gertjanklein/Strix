@@ -121,4 +121,3 @@ Method %OnNew(Strategy As %String, MaxCount As %Integer = "") As %Status [ Priva
 }
 
 }
-
