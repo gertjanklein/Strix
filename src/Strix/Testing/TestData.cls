@@ -478,6 +478,8 @@ body {
 section {
   max-width: 50em;
   margin: 0 auto 0 auto;
+  padding-bottom: 0.8em;
+  border-radius: 8px;
   background-color: white;
 }
 h1 {
