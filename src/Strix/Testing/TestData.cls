@@ -160,6 +160,34 @@ ClassMethod CopyLUT(Tables As %String, ClassName As %String = "") As %String
 	Return ""
 }
 
+ClassMethod CopySystemDefaultSettings(ClassName As %String = "") As %String
+{
+	; Default classname if none provided
+	If ClassName = "" Set ClassName = "TestData.SDS"
+	
+	If '..GetClass(ClassName, .Class) Return ""
+	
+	#dim XData As %Dictionary.XDataDefinition
+	Set Name = "SDS"
+	Set XData = ..GetInCollection(Class.XDatas, Name, 1, .sc)
+	If 'sc Return ..HandleError("Error getting XData for {}/{}:", sc, ClassName, Name)
+	
+	; Clear stream in case it already existed
+	Set sc = XData.Data.Clear()
+	If 'sc Return ..HandleError("Error clearing existing XData {}/{}:", sc, ClassName, Name)
+	
+	; Export all settings, both deployable and not deployable
+	Set sc = ##class(Ens.Config.DefaultSettings).%Export(XData.Data)
+	If 'sc Return ..HandleError("Error exporting data to {}/{}:", sc, ClassName, Name)
+	
+	Set sc = Class.%Save()
+	If 'sc Return ..HandleError("Error saving updated dictionary for {}:", sc, ClassName)
+	
+	Do ..Report("Done.")
+	
+	Return ""
+}
+
 // ===== Internal helpers =====
 
 /// Opens or creates a class definition
@@ -272,6 +300,7 @@ ClassMethod OnPage() As %Status [ PublicList = (Stream, Msgs), ServerOnly = 1 ]
 	Set LUT = %request.Get("lut")
 	Set TakeRequests = ''%request.Get("requests", 1)
 	Set TakeResponses = ''%request.Get("responses", 1)
+	Set TakeSDS = ''%request.Get("sds")
 	
 	
 	&html<<!doctype html>
@@ -322,6 +351,10 @@ as well.
     <td><input type=text id="lut" name="lut" value="#(..EscapeHTML(LUT))#"></td>
   </tr>
   <tr>
+    <th><label for="sds">Store default settings</label></th>
+    <td><input type="checkbox" id="sds" name="sds" value="1" #($Select(TakeSDS:"checked",1:""))#></td>
+  </tr>
+  <tr>
     <td colspan="2"><input type="submit" value="Collect" title="Collect the requested data"></td>
   </tr>
 </table>
@@ -350,6 +383,7 @@ ClassMethod OnPreHTTP() As %Boolean [ PublicList = (Stream, Msgs) ]
 	Set LUT = $ZStrip(%request.Get("lut"), "<>WC")
 	Set TakeRequests = ''%request.Get("requests")
 	Set TakeResponses = ''%request.Get("responses")
+	Set TakeSDS = ''%request.Get("sds")
 	
 	; Some basic validity checks
 	If SessionId = "" {
@@ -372,12 +406,18 @@ ClassMethod OnPreHTTP() As %Boolean [ PublicList = (Stream, Msgs) ]
 	
 	; Create class with request/response data
 	Set Result = ..CopySession(SessionId, ClassName, TakeRequests, TakeResponses)
-	If Result = 0 Quit $$$OK
+	If Result = 0 Quit 1
 	
 	; Add lookup tables, if so requested
 	If LUT '= "" {
 		Set Result = ..CopyLUT(LUT, ClassName)
-		If Result = 0 Quit $$$OK
+		If Result = 0 Quit 1
+	}
+	
+	; Add system default settings, if so requested
+	If TakeSDS {
+		Set Result = ..CopySystemDefaultSettings(ClassName)
+		If Result = 0 Quit 1
 	}
 	
 	; Export the class as XML
