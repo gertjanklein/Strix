@@ -121,8 +121,16 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	Set SubMenuName = $Piece(MenuName, ",", 2)
 	Set DisplayName = $Case(SubMenuName,
 	  "LaunchUserInterface": "Open user interface",
-	  : SubMenuName
+	  : MenuName
 	)
+	
+	If DisplayName '= MenuName Quit $$$OK
+	
+	; Check for plugin
+	If ..PluginCheck(MenuName, .Plugin, .Index) {
+		Quit $ClassMethod(Plugin, "GetDisplayName", $this, Index, InternalName, SelectedText, .Enabled, .DisplayName)
+	}
+	
 	
 	Quit $$$OK
 }
@@ -145,6 +153,11 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	}
 	
 	
+	If ..PluginCheck(Name, .Plugin, .Index) {
+		Quit $ClassMethod(Plugin, "UserAction", $this, Index, InternalName, SelectedText, .Action, .Target, .Msg, .Reload)
+	}
+	
+	
 	Set Action = 6 ; Messagebox
 	Set Target = "Unimplemented menu: "_Name
 	
@@ -154,7 +167,19 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 
 Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
 {
+	If ..PluginCheck(Name, .Plugin, .Index) {
+		Quit $ClassMethod(Plugin, "AfterUserAction", $this, Index, InternalName, Answer, Msg, .Reload)
+	}
+	
 	Quit $$$OK
+}
+
+ClassMethod PluginCheck(MenuName As %String, Output ClassName As %String, Output Index As %Integer) As %Boolean
+{
+	Set Check = $Piece(MenuName, ",", 2)
+	Set ClassName = $Piece(Check, ":", 1), Index = $Piece(Check, ":", 2)
+	If ##class(%Dictionary.ClassDefinition).%ExistsId(ClassName) Quit 1
+	Quit 0
 }
 
 // ===== Studio callbacks

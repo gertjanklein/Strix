@@ -181,8 +181,17 @@ ClassMethod MenuItemsExecute(ByRef qHandle As %Binary, ClassName As %String, Men
 	#dim Handler As Strix.SCM.Handler.Base
 	Set Status = ##class(Strix.SCM.Project).GetHandler(InternalName, .Handler)
 	If 'Status Quit Status
-	Set qHandle = $lb(0, Handler.GetMenuItems(MenuName, InternalName, SelectedText, .Status))
+	Set Menus = Handler.GetMenuItems(MenuName, InternalName, SelectedText, .Status)
 	If 'Status Quit Status
+	
+	; Check for and include add-on menus
+	
+	Set AddOnMenus = ##class(Strix.SCM.Plugin.Base).GetPluginMenus(Handler, InternalName, SelectedText, .sc)
+	If 'sc Quit sc
+	
+	Set Menus = Menus_AddOnMenus
+	Set qHandle = $lb(0, Menus)
+	
 	Quit $$$OK
 }
 

@@ -133,6 +133,13 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 	;Studio-generated action (as opposed to menu item)
 	If Type = 1 Quit $$$OK
 	
+	; First check for plugin; it may want to handle answer 0/2
+	If ..PluginCheck(Name, .Plugin, .Index) {
+		Quit $ClassMethod(Plugin, "AfterUserAction", $this, Index, InternalName, Answer, Msg, .Reload)
+	}
+	
+	;=====
+	
 	;User says no
 	If Answer = 0 Quit $$$OK  ; No
 	If Answer = 2 Quit $$$OK  ; Cancel
