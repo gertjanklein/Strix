@@ -206,16 +206,12 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	  "ExportProject":       "Save project to disk",
 	  "ImportProject":       "Load project from disk",
 	  "OpenFolder":          "Open working copy folder",
-	  "LaunchUserInterface": "Open user interface",
-	  : MenuName
+	  : ""
 	)
 	
-	;===== Menus that don't depend on a known item
+	;If we didn't handle this item, fall back to super
+	If DisplayName = "" Quit ##super(MenuName, InternalName, SelectedText, .Enabled, .DisplayName)
 	
-	If ItemName = "LaunchUserInterface" {
-		Set Enabled = 1
-		Quit $$$OK
-	}
 	
 	;===== Menus that depend on a known item
 	
