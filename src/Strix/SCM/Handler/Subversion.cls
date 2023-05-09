@@ -276,7 +276,7 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	  ;$lb("Status", 1, 1, 0),
 	  $lb("ShowLog", 1, 0, 0),
 	  $lb("Checkin", 1, 1, 0),
-	  $lb("MakeRelease", 1, 1, 0),
+	  $lb("MakeRelease", 1, 1, 0)
 	)
 	
 	Quit Items
