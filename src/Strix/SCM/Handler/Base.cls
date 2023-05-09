@@ -121,7 +121,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	Set SubMenuName = $Piece(MenuName, ",", 2)
 	Set DisplayName = $Case(SubMenuName,
 	  "LaunchUserInterface": "Open user interface",
-	  : MenuName
+	  : SubMenuName
 	)
 	
 	Quit $$$OK
