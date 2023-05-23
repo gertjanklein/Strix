@@ -92,6 +92,8 @@ ClassMethod GetPlugins(Output Plugins As %ListOfDataTypes) As %Status
 Method %OnNew(Handler As Strix.SCM.Handler.Base = "", InternalName As %String = "", SelectedText As %String = "") As %Status
 {
 	Set ..Handler = Handler
+	Set ..InternalName = InternalName
+	Set ..SelectedText = SelectedText
 	Quit $$$OK
 }
 
