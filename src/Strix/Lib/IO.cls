@@ -7,7 +7,7 @@ Class Strix.Lib.IO Extends %RegisteredObject
 /// or reading the pipe, a message is placed in output parameter ErrorMsg.
 /// If Strip is true, leading and trailing whitespace is removed from the
 /// result.
-ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Directory As %String = "", Output ErrorMsg As %String) As %String
+ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Directory As %String = "", Output ErrorMsg As %String, Timeout As %Float = 30) As %String
 {
 	Set $ZTrap = "Error"
 	
@@ -29,7 +29,7 @@ ClassMethod GetCommandOutput(Command As %String, Strip As %Boolean = 1, Director
 		
 		; Get the pipe data
 		Use Pipe
-		Read Output#$$$MaxStringLength:30
+		Read Output#$$$MaxStringLength:Timeout
 		If $Test {
 			; Success; get exit code if available
 			Set ExitCode = ..PipeExitCode(Pipe, .sc)
