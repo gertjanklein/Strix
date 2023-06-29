@@ -313,7 +313,7 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
 	
 	If Project.%Id() '= "" {
 		&html<<input type=submit name=Copy value="Copy">>
-		&html<<input type=submit name=Export value="Export">>
+		;&html<<input type=submit name=Export value="Export">>
 		;&html<<input type=button name=Import value="Import" onclick="document.location='#(..%ClassName(1))#.cls?Page=Import&amp;Project=#(Project.%Id())#'">>
 		&html<<input type=submit name=Delete value="Delete" onclick="return Ays();">>
 	}
