@@ -176,10 +176,9 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	Set Name = $Case(ItemName,
 	  "Checkin": "Open checkin dialog",
 	  "ShowLog": "View repository log",
-	  "ShowItemLog": "View log ",
-	  "ShowDiff": "View diff",
-#;	  "MakeRelease": "Make release",
-#;	  "CreateTag": "Create tag",
+	  "ShowItemLog": "View item log ",
+	  "ShowDiff": "View item diff",
+	  "CreateTag": "Create tag",
 	  : ""
 	)
 	
@@ -222,7 +221,8 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	  $lb("ShowItemLog", 1, 1, 0),
 	  $lb("", 1, 0, 1),
 	  $lb("ShowLog", 1, 0, 0),
-	  $lb("Checkin", 1, 1, 0)
+	  $lb("Checkin", 1, 1, 0),
+	  $lb("CreateTag", 1, 1, 0)
 	)
 	
 	Quit Items
