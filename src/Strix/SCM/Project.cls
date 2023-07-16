@@ -26,6 +26,10 @@ Property Name As %String [ Required ];
 /// exported classes etc.; can be empty for same directory as that of config file.
 Property ProjectPath As %String(MAXLEN = 1024);
 
+/// The absolute path where releases are created. This setting is optional
+/// and can be used by a release plugin.
+Property ReleasePath As %String(MAXLEN = 1024);
+
 /// The members of this project, defined as a list of 'patterns' supporting
 /// wildcards. Examples:
 /// Strix.*.cls (all classes in the Strix package)
@@ -557,6 +561,9 @@ Storage Default
 </Value>
 <Value name="10">
 <Value>ExportVersion</Value>
+</Value>
+<Value name="11">
+<Value>ReleasePath</Value>
 </Value>
 </Data>
 <DataLocation>^Strix.SCM.ProjectD</DataLocation>

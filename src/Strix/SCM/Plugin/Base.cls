@@ -6,6 +6,9 @@ Class Strix.SCM.Plugin.Base Extends %RegisteredObject
 /// The current handler, if any
 Property Handler As Strix.SCM.Handler.Base;
 
+/// The current project, if any
+Property Project As Strix.SCM.Project;
+
 /// The internal name of the current item in Studio, if any
 Property InternalName As %String;
 
@@ -17,6 +20,11 @@ Property SelectedText As %String;
 /// Get a list of all menu items for all plugins that define them
 ClassMethod GetPluginMenus(Handler As Strix.SCM.Handler.Base, InternalName As %String, SelectedText As %String, Output Status As %Status) As %List
 {
+	; Get project for this item (if any)
+	#dim Project As Strix.SCM.Project
+	Do ##class(Strix.SCM.Project).CheckItem(.InternalName, .Project)
+	
+	; Get plugins
 	#dim Plugins As %ListOfDataTypes
 	Set Status = ..GetPlugins(.Plugins)
 	If 'Status Quit ""
@@ -26,7 +34,7 @@ ClassMethod GetPluginMenus(Handler As Strix.SCM.Handler.Base, InternalName As %S
 		Set Name = Plugins.GetAt(i)
 		
 		#dim Plugin As Strix.SCM.Plugin.Base
-		Set Plugin = $ClassMethod(Name, "%New", Handler, InternalName, SelectedText)
+		Set Plugin = $ClassMethod(Name, "%New", Handler, Project, InternalName, SelectedText)
 		If 'Plugin {
 			Set Status = $$$BuildStatus("Error instantiating plugin {}:", %objlasterror, Name)
 			Return ""
@@ -89,9 +97,10 @@ ClassMethod GetPlugins(Output Plugins As %ListOfDataTypes) As %Status
 	Quit $$$OK
 }
 
-Method %OnNew(Handler As Strix.SCM.Handler.Base = "", InternalName As %String = "", SelectedText As %String = "") As %Status
+Method %OnNew(Handler As Strix.SCM.Handler.Base = "", Project As Strix.SCM.Project, InternalName As %String = "", SelectedText As %String = "") As %Status
 {
 	Set ..Handler = Handler
+	Set ..Project = Project
 	Set ..InternalName = InternalName
 	Set ..SelectedText = SelectedText
 	Quit $$$OK

@@ -222,6 +222,13 @@ ClassMethod Project(Config As Strix.SCM.Config, Project As Strix.SCM.Project, Me
   </td>
 </tr>
 <tr>
+  <th>Release path:</th>
+  <td>
+    #(..TextInput("ReleasePath", 80))#
+    <p class=Explain>The release directory for this project. Optional, to be used by release plugin(s).</p>
+  </td>
+</tr>
+<tr>
   <th>Package subdirectories:</th>
   <td>
     #(..CheckBox("PackageSubdirs"))#
@@ -375,6 +382,7 @@ ClassMethod ProjectToRequest(Project As Strix.SCM.Project)
 {
 	Do %request.Set("Name", Project.Name)
 	Do %request.Set("ProjectPath", Project.ProjectPath)
+	Do %request.Set("ReleasePath", Project.ReleasePath)
 	Do %request.Set("ConfigFilePath", Project.ConfigFilePath)
 	Do %request.Set("Handler", Project.Handler)
 	If Project.PackageSubdirs Do %request.Set("PackageSubdirs", 1)
@@ -408,6 +416,7 @@ ClassMethod SaveProject(Config As Strix.SCM.Config, Project As Strix.SCM.Project
 	Set Project.Handler = %request.Get("Handler")
 	Set Project.ConfigFilePath = %request.Get("ConfigFilePath")
 	Set Project.ProjectPath = %request.Get("ProjectPath")
+	Set Project.ReleasePath = %request.Get("ReleasePath")
 	Set Project.PackageSubdirs = ''%request.IsDefined("PackageSubdirs")
 	Set Project.ExportUDL = ''%request.IsDefined("ExportUDL")
 	Set Project.ExportVersion = %request.Get("ExportVersion")
