@@ -106,6 +106,16 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	}
 	
 	
+	;== Open Sync dialog
+	
+	If Name = "Source control,OpenSyncDlg" {
+		Set Target = ..GetGUICommand("/command:sync /path:"""_Project.GetProjectPath()_"""", .ErrorMsg)
+		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
+		Set Action = 3 ; Run executable
+		Quit $$$OK
+	}
+	
+	
 	;== Make release
 	
 	If Name = "Source control,MakeRelease" {
@@ -179,6 +189,7 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 	  "ShowItemLog": "View item log ",
 	  "ShowDiff": "View item diff",
 	  "CreateTag": "Create tag",
+	  "OpenSyncDlg": "Open Sync dialog",
 	  : ""
 	)
 	
@@ -222,7 +233,8 @@ Method GetMenuItems(MenuName As %String, InternalName As %String, SelectedText A
 	  $lb("", 1, 0, 1),
 	  $lb("ShowLog", 1, 0, 0),
 	  $lb("Checkin", 1, 1, 0),
-	  $lb("CreateTag", 1, 1, 0)
+	  $lb("CreateTag", 1, 1, 0),
+	  $lb("OpenSyncDlg", 1, 1, 0)
 	)
 	
 	Quit Items
