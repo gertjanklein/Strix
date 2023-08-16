@@ -484,11 +484,6 @@ Method ReduceDatatypeClasses() As %Status
 /// for each of them
 Method PostprocessLoop(Type As %String = "") As %Status [ Internal ]
 {
-	
-	w "Loop: "_Type,!
-	
-	
-	
 	; If no classes are present, sc will not be set below
 	Set sc = $$$OK
 	
