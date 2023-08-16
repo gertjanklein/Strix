@@ -363,27 +363,35 @@ Method RunWSDLReader(Reader As Strix.XML.WSDLReader, Location As %String, Packag
 	Set sc = ..UpdateTimes(Package, .Times)
 	If 'sc Quit ..ShowError("Error updating class creation times:", sc)
 	
-	; Merge list of all classes:
-	Merge ..Classes = Reader.TypeClassList
-	Merge ..Classes = Reader.ClientClassList
-	Merge ..Classes = Reader.BOClassList
 	; Remove meaningless reader internal data
-	Set k = "" For  Set k = $Order(..Classes(k)) Quit:k=""  Set ..Classes(k) = ""
+	#define KillData Set k = "" For  Set k = $Order(..Classes(k)) Quit:k=""  Set ..Classes(k) = ""
+	
 	
 	; Postprocessing the generated type classes.
-	Kill Classes Merge Classes = Reader.TypeClassList
+	Kill ..Classes Merge ..Classes = Reader.TypeClassList
+	$$$KillData
 	Set sc = ..PostprocessLoop("type")
 	If 'sc Quit sc
 	
 	; Postprocessing the generated client classes.
-	Kill Classes Merge Classes = Reader.ClientClassList
+	Kill ..Classes Merge ..Classes = Reader.ClientClassList
+	$$$KillData
 	Set sc = ..PostprocessLoop("client")
 	If 'sc Quit sc
 	
 	; Postprocessing the generated business operation classes.
-	Kill Classes Merge Classes = Reader.BOClassList
+	Kill ..Classes Merge ..Classes = Reader.BOClassList
+	$$$KillData
 	Set sc = ..PostprocessLoop("operation")
 	If 'sc Quit sc
+	
+	
+	; Merge list of all classes for external use
+	Merge ..Classes = Reader.TypeClassList
+	Merge ..Classes = Reader.ClientClassList
+	Merge ..Classes = Reader.BOClassList
+	$$$KillData
+	
 	
 	Quit $$$OK
 }
@@ -476,6 +484,11 @@ Method ReduceDatatypeClasses() As %Status
 /// for each of them
 Method PostprocessLoop(Type As %String = "") As %Status [ Internal ]
 {
+	
+	w "Loop: "_Type,!
+	
+	
+	
 	; If no classes are present, sc will not be set below
 	Set sc = $$$OK
 	
