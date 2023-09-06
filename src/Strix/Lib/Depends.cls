@@ -43,9 +43,9 @@ ClassMethod Check(Items As %String)
 	Write "Dependencies detected:",!
 	Set Name = ""
 	For  {
-		Set Name = $Order(Me.Dependencies(Name))
+		Set Name = $Order(Me.Dependencies(Name), 1, Of)
 		If Name = "" Quit
-		Write Name,!
+		Write Name_" ("_Of_")",!
 	}
 	
 	Return
