@@ -65,7 +65,9 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	;== Show log
 	
 	If Name = "Source control,ShowLog" {
-		Set Target = ..GetGUICommand("/command:log /path:"""_Project.GetProjectPath()_"""", .ErrorMsg)
+		Set Path = ..RepositoryDir
+		If Path = "" Set Path = Project.GetProjectPath()
+		Set Target = ..GetGUICommand("/command:log /path:"""_Path_"""", .ErrorMsg)
 		If ErrorMsg '= "" Write ErrorMsg,! Quit $$$OK
 		Set Action = 3 ; Run executable
 		Quit $$$OK
