@@ -3,7 +3,14 @@ name: Tests
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'ci/**'
+      - '**.md'
+      - 'LICENSE'
+  
   workflow_dispatch:
+
 
 jobs:
   test:
@@ -11,9 +18,9 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
-    - run: docker run --detach --rm --name testiris containers.intersystems.com/intersystems/iris-community:2022.1.0.209.0 --check-caps false --up false
+    - run: docker run --detach --rm --name testiris containers.intersystems.com/intersystems/iris-community:2023.1.1.380.0 --check-caps false --up false
     
     - run: docker cp ci/merge.cpf testiris:/home/irisowner/merge.cpf
     - run: docker cp ci/test.script testiris:/home/irisowner/test.script
