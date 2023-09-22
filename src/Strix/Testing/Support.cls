@@ -153,4 +153,35 @@ ClassMethod XDataToObjects(XDataId As %String, ElementName As %String = "", Clas
 	Quit $$$OK
 }
 
+/// Returns the contents of an XData block in a temporary stream.
+/// XDataId is expected in the form [ClassName]||[XDataName]. If
+/// parameter Strip is true, the first and last non-empy lines
+/// are removed. This is so arbitrary content can be placed in the
+/// XData block by wrapping it in an XML root element.
+ClassMethod GetXData(XDataId As %String, Strip As %Boolean = 0, Output Status As %Status) As %Stream.Object
+{
+	Set Stream = ##class(%Stream.TmpCharacter).%New()
+	
+	Set XData = ##class(%Dictionary.XDataDefinition).%OpenId(XDataId, , .Status)
+	If 'Status Set Status = $$$BuildStatus("Error opening {}:", Status, XDataId) Quit ""
+	
+	If Strip {
+		For LineNr = 1:1 {
+			If XData.Data.AtEnd Quit
+			
+			Set Line = XData.Data.ReadLine()
+			If LineNr = 1 Continue
+			If XData.Data.AtEnd Quit
+			
+			Do Stream.WriteLine(Line)
+		}
+		
+	} Else {
+		Do Stream.CopyFrom(XData.Data)
+		
+	}
+	
+	Quit Stream
+}
+
 }
