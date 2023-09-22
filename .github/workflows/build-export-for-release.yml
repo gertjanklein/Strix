@@ -5,70 +5,100 @@ on:
     types:
       - published
 
+env:
+  BASENAME: Strix-${{ github.ref_name }}
+
 jobs:
   build-release-asset:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout Strix
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    
     
     - name: Checkout iris-export-builder
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: gertjanklein/iris-export-builder
-        path: './ieb'
+        path: '../ieb'
     
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+    
+    - name: Checkout iris-export-extractor
+      uses: actions/checkout@v4
       with:
-        python-version: 3.9
+        repository: gertjanklein/iris-export-extractor
+        path: '../iee'
     
-    - name: Install export builder dependencies
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    
+    - name: Install export builder/extractor dependencies
       run: |
         python -m pip install --upgrade pip wheel
-        pip install -r ieb/requirements.txt
+        pip install -r ../ieb/requirements.txt
+        pip install -r ../iee/requirements.txt
+    
     
     - name: Prepare IRIS
       run: |
-        docker run --detach --rm -p 52773:52773 --name testiris containers.intersystems.com/intersystems/iris-community:2022.1.0.209.0 --check-caps false --up false
+        docker run --detach --rm -p 52773:52773 --name testiris containers.intersystems.com/intersystems/iris-community:2023.1.1.380.0 --check-caps false --up false
         docker cp ci/build.script testiris:/tmp/build.script
         docker exec testiris sh -c "iris start iris quietly && iris session iris < /tmp/build.script"
     
-    - name: Build and zip the export
+    - name: Build the full export
       run: |
-        python ieb/src/build-export.py ci/build-export.toml
-        mv ci/export.xml "Strix-${{ github.ref_name }}.xml"
-        zip --junk-paths "Strix-${{ github.ref_name }}.zip" "Strix-${{ github.ref_name }}.xml"
+        python ../ieb/src/build-export.py ci/build-export.toml
+        mv ci/export.xml "$BASENAME-with-tests.xml"
+        zip --junk-paths "$BASENAME-with-tests.zip" "$BASENAME-with-tests.xml"
     
-    - name: Create separate export for testing
-      run: |
-        docker cp "Strix-${{ github.ref_name }}.xml" testiris:/tmp/Strix.xml
-        docker cp ci/extract.script testiris:/tmp/extract.script
-        docker exec testiris sh -c "iris session iris < /tmp/extract.script"
-        docker cp testiris:/tmp/Strix.Testing.xml "Strix.Testing-${{ github.ref_name }}.xml"
-        zip --junk-paths "Strix.Testing-${{ github.ref_name }}.zip" "Strix.Testing-${{ github.ref_name }}.xml"
     
     - name: Shutdown IRIS
       run: docker stop testiris
     
-    - name: Upload release zip
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: Strix-${{ github.ref_name }}.zip
-        asset_name: Strix-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
     
-    - name: Upload testing release zip
-      uses: actions/upload-release-asset@v1
+    - name: Create export without tests
+      run: |
+        python ../iee/src/extract.py -- "$BASENAME-with-tests.xml" "$BASENAME.xml" '*' '-Strix.Tests.*'
+        zip --junk-paths "$BASENAME.zip" "$BASENAME.xml"
+    
+    
+    - name: Create export for testing component
+      run: |
+        python ../iee/src/extract.py "$BASENAME-with-tests.xml" "$BASENAME-testing.xml" @ci/Strix.Testing.deps.txt
+        zip --junk-paths "$BASENAME-testing.zip" "$BASENAME-testing.xml"
+    
+    
+    - name: Create export for XML component
+      run: |
+        python ../iee/src/extract.py "$BASENAME-with-tests.xml" "$BASENAME-XML.xml" @ci/Strix.XML.deps.txt
+        zip --junk-paths "$BASENAME-XML.zip" "$BASENAME-XML.xml"
+    
+    
+    - name: Upload as release assets
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: Strix.Testing-${{ github.ref_name }}.zip
-        asset_name: Strix.Testing-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release upload ${{ github.ref_name }} \
+          "$BASENAME.zip" "$BASENAME-with-tests.zip" "$BASENAME-testing.zip" "$BASENAME-XML.zip"
+    
+    
+    - name: Update release notes
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release view ${{ github.ref_name }} --json body --jq .body > relnotes.md
+        perl -pi -e 's/\n+$//' relnotes.md
+        [ -s relnotes.md ] && echo -ne "\n\n" >> relnotes.md
+        echo "The following assets are available for this release:" >> relnotes.md
+        echo "- $BASENAME.zip: full release, excluding internal tests" >> relnotes.md
+        echo "- $BASENAME-with-tests.zip: full release, including internal tests" >> relnotes.md
+        echo "- $BASENAME-testing.zip: standalone testing component" >> relnotes.md
+        echo "- $BASENAME-XML.zip: standalone XML component" >> relnotes.md
+        gh release edit ${{ github.ref_name }} --notes-file relnotes.md
+    
     

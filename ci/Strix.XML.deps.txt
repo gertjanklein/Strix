@@ -1,0 +1,11 @@
+Strix.Generator.Utilities.cls
+Strix.Lib.Collections.cls
+Strix.Lib.Sorting.cls
+Strix.Lib.Status.cls
+Strix.Lib.String.cls
+Strix.XML.SchemaReader.cls
+Strix.XML.SchemaReaderCallback.cls
+Strix.XML.ToClass.cls
+Strix.XML.Util.cls
+Strix.XML.WSDLReader.cls
+Strix.inc
