@@ -6,3 +6,11 @@ path = '../'
 [Local]
 outfile = 'export.xml'
 export_version = 25
+sort=true
+timestamps = 'clear'
+deployment = false
+[Server]
+host="www.gklein.org"
+port=443
+https=true
+user="apiconsumer"
